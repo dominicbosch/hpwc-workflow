@@ -17,7 +17,9 @@
   },
   "homepage": "https://github.com/dominicbosch/hpwc-workflow",
   "dependencies": {
+    "body-parser": "^1.10.2",
     "express": "^4.11.1",
-    "express-session": "^1.10.1"
+    "express-session": "^1.10.1",
+    "swig": "^1.4.2"
   }
 }

@@ -1,3 +1,6 @@
 server = require( './index' );
 
-server.init( 8080 );
+server.init({
+	port: 8080,
+	productive: false
+});
