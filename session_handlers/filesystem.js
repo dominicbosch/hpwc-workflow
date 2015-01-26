@@ -4,8 +4,6 @@ var router = require( 'express' ).Router(),
 	pathToFile = path.resolve( __dirname, '..', 'config', 'users.json' ),
 	oUsers = JSON.parse( fs.readFileSync( pathToFile ) );
 
-console.log(oUsers);
-
 router.post( '/login', function( req, res ) {
 	res.send( 'login user' );
 });
