@@ -1,0 +1,23 @@
+{
+  "name": "hpwc-workflow",
+  "version": "0.1.0",
+  "description": "A server architecture to allow users to manage high performance experiments on a super computer via SSH",
+  "main": "index.js",
+  "scripts": {
+    "start": "node run-hpwc-server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dominicbosch/hpwc-workflow.git"
+  },
+  "author": "Dominic Bosch",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dominicbosch/hpwc-workflow/issues"
+  },
+  "homepage": "https://github.com/dominicbosch/hpwc-workflow",
+  "dependencies": {
+    "express": "^4.11.1",
+    "express-session": "^1.10.1"
+  }
+}
