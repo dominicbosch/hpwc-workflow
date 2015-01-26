@@ -5,17 +5,37 @@ var router = require( 'express' ).Router(),
 	oUsers = JSON.parse( fs.readFileSync( pathToFile ) );
 
 router.post( '/login', function( req, res ) {
-	res.send( 'login user' );
+	var username = req.body.username;
+
+	if( oUsers[ username ] && oUsers[ username ].password === req.body.password ) {
+		req.session.user = oUsers[ username ].user;
+		res.send( 'Login successful!' );
+	} else {
+		res.status( 401 );
+		res.send( 'Login failed!' );
+	}
 });
 
 router.post( '/logout', function( req, res ) {
-	res.send( 'logout user' );
+	delete req.session.user;
+	res.send( 'Goodbye!' );
 });
 
 router.post( '/register', function( req, res ) {
-	res.send( 'register user' );
-	oUsers[ 'username' ] = 'test';
-	fs.writeFileSync( pathToFile, JSON.stringify( oUsers, null, 2 ) );
+	var username = req.body.username;
+	if( oUsers[ username ] ) {
+		res.status( 409 );
+		res.send( 'User already existing!' );
+	} else {
+		oUsers[ username ] = {
+			user: {
+				name: username
+			},
+			password: req.body.password
+		};
+		fs.writeFileSync( pathToFile, JSON.stringify( oUsers, null, 2 ) );
+		res.send( 'New User ' + username + ' registered!' );
+	}
 });
 
 module.exports = router;

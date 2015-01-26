@@ -1,0 +1,11 @@
+#registerform td.threecol {
+	text-align: center;
+}
+
+#info.wrong {
+	color: darkred;
+}
+
+#info.right {
+	color: darkgreen;
+}

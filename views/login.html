@@ -1,11 +1,58 @@
 {% extends 'layout.html' %}
 
-{% block title %}Login{% endblock %}
+{% block title %}Register{% endblock %}
 
 {% block head %}
+	<link rel="stylesheet" href="../css/register.css">
+	<script type="text/javascript" src="../js/sha3.js"></script>
 	<script type="text/javascript">
-		$.post( '../session/login', function( answ ) {
-			console.log( answ );
-		});
+		var setInfo = function( text, fail ) {
+			$( '#info' )
+				.addClass( fail ? 'wrong' : 'right' )
+				.removeClass( fail ? 'right' : 'wrong' )
+				.text( text );
+		};
+		var doLogin = function() {
+			var hp = CryptoJS.SHA3( $( '#pass' ).val(), {
+					outputLength: 512
+				}),
+				oBody = {
+					username: $( '#username' ).val(),
+					password: hp.toString()
+				};
+			if(  $( '#username' ).val() ===  '' || $( '#pass' ).val() ===  '' ) {
+				alert( 'Please provide username and password!' );
+				return;
+			}
+			$.post( '../session/login', oBody, function( answ ) {
+				window.location.href = 'index';
+			})
+			.fail( function( req ) {
+				setInfo( 'Login failed!', true );
+			});
+		};
 	</script>
+{% endblock %}
+
+
+{% block content_left %}
+	<table id="registerform">
+		<tr>
+			<td>Username</td>
+			<td> : </td>
+			<td><input type="text" id="username" autofocus></td>
+		</tr>
+		<tr>
+			<td>Password</td>
+			<td> : </td>
+			<td><input type="password" id="pass"></td>
+		</tr>
+		<tr>
+			<td colspan="3" class="threecol"><button onclick="doLogin()">Register</button></td>
+		</tr>
+	</table>
+{% endblock %}
+
+{% block content_right %}
+	<p id="info"></p>
 {% endblock %}

@@ -4,10 +4,14 @@
 
 {% block head %}
 	<script type="text/javascript">
-		$.post( '../session/logout' );
+		$.post( '../session/logout', function() {
+			setTimeout( function() {
+				window.location.href = 'index';
+			}, 1000 );
+		});
 	</script>
 {% endblock %}
 
 {% block content_left %}
-	Goodbye!
+	<h1>Goodbye!</h1>
 {% endblock %}

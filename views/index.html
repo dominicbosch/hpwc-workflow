@@ -1,3 +1,13 @@
 {% extends 'layout.html' %}
 
 {% block title %}Welcome{% endblock %}
+
+{% block content_left %}
+	<h1>
+	{% if user %}
+		Welcome {{ user.name }}!
+	{% else %}
+		Welcome! Please register first or login!
+	{% endif %}
+</h1>
+{% endblock %}
