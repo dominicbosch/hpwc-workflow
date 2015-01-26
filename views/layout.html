@@ -2,20 +2,31 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<title>{% block title %}HPWC Workflow{% endblock %}</title>
-
-	{% block head %}
-		<link rel="stylesheet" href="../main.css">
-	{% endblock %}
+	<title>HPWC Workflow - {% block title %}{% endblock %}</title>
+	<script type="text/javascript" src="../js/jquery-1.11.2.min.js"></script>
+	<link rel="stylesheet" href="../layout.css">
+	{% block head %}{% endblock %}
 </head>
 <body>
 	<header>
-		wow
+		<img src="../img/unilogo_HPWC_small.png">
+		<div></div>
 	</header>
 	<nav>
+		<a href="/views/project">Project</a>
+		<a href="/views/method">Method</a>
+		<a href="/views/experiment">Experiment</a>
+		<a href="/views/visualization">Visualization</a>
+		{% if user %}
+			<a href="/views/logout">Logout</a>
+		{% else %}
+			<a href="/views/login">Login</a>
+			<a href="/views/register">Register</a>
+		{% endif %}
 	</nav>
 	<section>
-		{% block content %}{% endblock %}
+		<div class="left">{% block content_left %}{% endblock %}</div>
+		<div class="right">{% block content_right %}{% endblock %}</div>
 	</section>
 	<footer>
 	</footer>

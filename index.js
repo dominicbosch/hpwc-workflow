@@ -1,13 +1,17 @@
-var express = require( 'express' ),
+var config, express = require( 'express' ),
 	session = require( 'express-session' ),
 	bodyParser = require( 'body-parser' ),
 	path = require( 'path' ),
 	swig = require( 'swig' ),
 	fs = require( 'fs' ),
 	app = express();
-	
+
+// Load the configuration file.
+// This will throw an error if the configuration file is invalid.
+config = JSON.parse( fs.readFileSync( __dirname + '/config/system.json' ) );
+
 exports.init = function( args ) {
-	var servicePath, fileName,
+	var servicePath, fileName, renderingObject,
 		arrServices = fs.readdirSync( __dirname + '/services' );
 
 	// We disable caching for development environments
@@ -21,7 +25,7 @@ exports.init = function( args ) {
 	app.set( 'views', __dirname + '/views' );
 
 	app.use(session({
-		secret: 'keyboard cat',
+		secret: config.session.secret,
 		resave: false,
 		saveUninitialized: true
 	}));
@@ -30,10 +34,18 @@ exports.init = function( args ) {
 	app.use( bodyParser.urlencoded({ extended: true }) );
 	app.use( express.static( path.join( __dirname, 'public' ) ) );
 
+	// Load the session handler as defined in the configuration file.
+	app.use( '/session', require( './session_handlers/' + config.session.method ) );
+
+	// Redirect the views that will be loaded by the swig templating engine
 	app.get( '/views/*', function ( req, res ) {
-		res.render( req.params[ 0 ], req.session.user );
+		renderingObject = {
+			user: req.session.user
+		};
+		res.render( req.params[ 0 ], renderingObject );
 	});
 
+	// Dynamically load all services from the services folder
 	console.log( 'LOADING SERVICES: ' );
 	for( var i = 0; i < arrServices.length; i++ ) {
 		fileName = arrServices[ i ];
@@ -42,6 +54,7 @@ exports.init = function( args ) {
 		app.use( servicePath, require( '.' + servicePath ) );
 	}
 
+	// Start the server
 	var server = app.listen( parseInt( args.port ) || 3000, function() {
 		var addr = server.address(),
 			mode = args.productive ? 'ON' : 'OFF',

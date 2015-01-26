@@ -1,0 +1,11 @@
+{% extends 'layout.html' %}
+
+{% block title %}Login{% endblock %}
+
+{% block head %}
+	<script type="text/javascript">
+		$.post( '../session/login', function( answ ) {
+			console.log( answ );
+		});
+	</script>
+{% endblock %}

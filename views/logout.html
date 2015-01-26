@@ -1,0 +1,13 @@
+{% extends 'layout.html' %}
+
+{% block title %}Logout{% endblock %}
+
+{% block head %}
+	<script type="text/javascript">
+		$.post( '../session/logout' );
+	</script>
+{% endblock %}
+
+{% block content_left %}
+	Goodbye!
+{% endblock %}
