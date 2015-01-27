@@ -29,7 +29,8 @@ router.post( '/register', function( req, res ) {
 	} else {
 		oUsers[ username ] = {
 			user: {
-				name: username
+				name: username,
+				console: 'Welcome to the HPWC Workflow Manager!\n\n'
 			},
 			password: req.body.password
 		};

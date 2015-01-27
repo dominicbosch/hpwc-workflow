@@ -1,4 +1,5 @@
-var config, express = require( 'express' ),
+var config, arrViews, isValidRequest,
+	express = require( 'express' ),
 	session = require( 'express-session' ),
 	bodyParser = require( 'body-parser' ),
 	path = require( 'path' ),
@@ -6,9 +7,28 @@ var config, express = require( 'express' ),
 	fs = require( 'fs' ),
 	app = express();
 
+process.on( 'uncaughtException', function( e ) {
+	console.log( 'This is a general exception catcher for Antonio\'s convenience but should really be omitted!' );
+	console.log( 'Error: ', e );
+});
+
 // Load the configuration file.
 // This will throw an error if the configuration file is invalid.
 config = JSON.parse( fs.readFileSync( __dirname + '/config/system.json' ) );
+arrViews = fs.readdirSync( __dirname + '/views' );;
+
+isValidRequest = function( req ) {
+	var name = req.params[ 0 ];
+
+	if( !req.session.user ) {
+		if( name === 'login' || name === 'register' ) {
+			return true;
+		} else return false;
+	}
+	for( var i = 0; i < arrViews.length; i++ ) {
+		if( arrViews[ i ] === name + '.html' ) return true;
+	}	
+};
 
 exports.init = function( args ) {
 	var servicePath, fileName, renderingObject,
@@ -39,10 +59,15 @@ exports.init = function( args ) {
 
 	// Redirect the views that will be loaded by the swig templating engine
 	app.get( '/views/*', function ( req, res ) {
+		var view = 'index';
+		
+		if( isValidRequest( req ) ) {
+			view = req.params[ 0 ];
+		}
 		renderingObject = {
 			user: req.session.user
 		};
-		res.render( req.params[ 0 ], renderingObject );
+		res.render( view, renderingObject );
 	});
 
 	// Dynamically load all services from the services folder
