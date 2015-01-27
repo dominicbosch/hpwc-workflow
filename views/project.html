@@ -2,7 +2,368 @@
 
 {% block title %}Project{% endblock %}
 
-{% block content %}
-Hello {{ name }} wow awesome Project
+{% block head %}
+<script type="text/javascript">
+	
+	"use strict";
+
+	$(document).ready(function() {
+		//function to manage tab view
+		$('.tabs .tab-links a').click(function(e) {
+			var currentAttrValue = $(this).attr('href');
+	 
+			// Show/Hide Tabs
+			$('.tabs ' + currentAttrValue).show().siblings().hide();
+	 
+			// Change/remove current tab to active
+			$(this).parent('li').addClass('active').siblings().removeClass('active');
+	 
+			e.preventDefault();
+		});
+		//Get the possible configuration and check for the current configuration reading the project
+		
+		$.get('/services/gen/getConfigs', function( data ) {
+
+			//put data inside "configs" element
+			var i = 1;
+			data.forEach(function(config) {
+				$('#configs').append($('<option>').attr('value', config).text('Configuration' + i));
+				i = i + 1;
+			});
+
+			
+			$.get('/services/gen/getSessionVar?name=conf', function( data ) {
+				
+				if (data !== "") {
+					$("#configs").val(data).change(); //change function
+					//getProjects to do
+
+				} 
+			});
+			
+		});
+
+		//create handler for changing of configuraton
+		$("#configs").change( function() {
+			var conf_file = $(this).val();
+			if (conf_file == "") {
+				$("#conf_table td[name='hostname']").html("--");
+				$("#conf_table td[name='host']").html("--");
+				$("#conf_table td[name='username']").html("--");
+				$("#conf_table td[name='workflow']").html("--");
+				$("#conf_table td[name='workspace']").html("--");
+
+				//clean project list
+				$("#projects").html("<option value=''>Choose A Project</option>");
+				$("#projects").change();
+
+				//close the connection
+				$.get('/services/gen/ssh/close', function( data ) {
+					alert( data );
+				});
+			} else {
+				$.get('/services/gen/getConfigs?conf=' + conf_file, function( data ) {
+					var obj = data;
+					$("#conf_table td[name='hostname']").html(obj.hostname);
+					$("#conf_table td[name='host']").html(obj.hosturl);
+					$("#conf_table td[name='username']").html(obj.username);
+					$("#conf_table td[name='workflow']").html(obj.workhome);
+					$("#conf_table td[name='workspace']").html(obj.workspace);
+
+					//when the configuration change, we read again the project
+					$.get('/services/project/getProjects', function( data ) {
+
+
+						var projects_string = '<option value="">Choose A Project</option>';
+						data.forEach(function(project) {
+							projects_string += '<option value="' + project + '">' + project + '</option>';
+						});
+
+						$('#projects').html(projects_string);
+
+	/*					
+						//remove old values except for the first
+						$('#projects option:not(:first-child)').remove();
+						//put data inside "projects" element
+						data.forEach(function(project) {
+	    					$('#projects').append($('<option>').attr('value', project).text(project));
+						});
+	*/					
+					});
+				});
+			}
+		});
+
+		//when the project selected change, we read the value of parameters
+		$("#projects").change( function() {
+			var project = $(this).val(),
+				method = "";
+
+			if (project == "") {
+				$("#edit_project input[name='par_list']").val("");
+				$("#edit_project input[name='par_val']").val("");
+				$("#edit_project input[name='nthreads']").val("");
+				$("#edit_project textarea[name='comment']").val("");
+			} else {
+				//getDescriptor
+				$.get('/services/project/getDescriptor?project=' + project + '&method=' + method, function( data ) {
+					var desc = data;
+					$("#edit_project input[name='par_list']").val(desc.parameters.list);
+					$("#edit_project input[name='par_val']").val(desc.parameters.default);
+					$("#edit_project input[name='nthreads']").val(desc.threads);
+					$("#edit_project textarea[name='comment']").val(desc.comment);
+				});
+			}
+		});
+	});
+	
+	function update_project() {
+		$("#resp_textarea").val("");
+		$("#projects").change();
+	}
+
+	function manage_project(action) {
+
+		var id = "",
+			obj = {
+				action: action
+			},
+			conf_file = $("#configs option:selected").val();
+
+		if (conf_file === "") {
+			alert("Select A Configuration");
+			return;
+		}
+
+		if (action == "delete") {
+			obj.project_name = $("#projects").val();
+		} else {
+			if (action == "create") {
+				id="new_project";
+				obj.project_name = $("#new_project input[name='project_name']").val();
+			} else if (action == "edit") {
+				id="edit_project";
+				obj.project_name = $("#projects").val();
+			}
+
+			obj.par_name = $("#"+id+" input[name='par_list']").val();
+			obj.par_val = $("#"+id+" input[name='par_val']").val();
+			obj.nthreads = $("#"+id+" input[name='nthreads']").val();
+			obj.comment = $("#"+id+" textarea[name='comment']").val();
+		}
+
+		$.post('/services/project/manage', obj, function( data ) {
+			$("#resp_textarea").val( data );
+			
+			//update project list
+			$.get('/services/project/getProjects', function( data ) {
+
+				var projects_string = '<option value="">Choose A Project</option>';
+				data.forEach(function(project) {
+					projects_string += '<option value="' + project + '">' + project + '</option>';
+				});
+
+				$('#projects').html(projects_string);
+
+				if ((obj.action === "create") || (obj.action == "delete")) {
+					$("#projects").val("").change();
+				} else if ((obj.action === "edit")) {
+					$("#projects").val(obj.project_name).change();
+				}
+
+				//update_project();
+			});
+		});
+	}
+	
+</script>
+
+<!-- CSS -->
+<link rel="stylesheet" type="text/css" href="../css/tab.css" />
+
+{% endblock %}
+
+{% block content_left %}
+Hello {{ user.name }} wow awesome Project
 <p>This is just an awesome page.</p>
+
+<h1 align="center">Project Configuration</h1>
+</br>
+<div class="tabs">
+	<ul class="tab-links">
+		<li class="active"><a href="#tab1">New Project</a></li>
+		<li><a href="#tab2">Edit Project</a></li>
+	</ul>
+	<div class="tab-content">
+		<div id="tab1" class="tab active">
+			<form action=''>
+				<table id="new_project">
+					<tr>
+						<td>Project Name</td>
+						<td><input name="project_name" type="text" size="30"></td>
+					</tr>
+					<tr>
+						<td>Parameters Name</td>
+						<td><input name="par_list" type="text" size="30"></td>
+					</tr>
+					<tr>
+						<td>Default parameters value</td>
+						<td><input name="par_val" type="text" size="30"></td>
+					</tr>
+					<tr>
+						<td>Default number of threads</td>
+						<td><input name="nthreads" type="number" style="text-align: center;width: 15%; margin-bottom: 4px;" min="1" value="2"></td>
+					</tr>
+					<tr>
+						<td>Comment</td>
+						<td><textarea name="comment" style="resize: none; width: 128px; font-size: 94%;"></textarea></td>
+					</tr>
+				</table>
+				<div class="center_div">
+					<input type="button" value="Create Project" onclick="manage_project('create');">
+				</div>
+			</form>
+		</div>
+
+		<div id="tab2" class="tab">
+			<form action=''>
+				<table id="edit_project">
+					<tr>
+						<td>Project Name</td>
+						<td>
+							<select id="projects" name="project_name">
+								<option value="">Choose A Project</option>
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<td>Parameters Name</td>
+						<td><input name="par_list" type="text" size="30"></td>
+					</tr>
+					<tr>
+						<td>Default parameters value</td>
+						<td><input name="par_val" type="text" size="30"></td>
+					</tr>
+					<tr>
+						<td>Default number of threads</td>
+						<td><input name="nthreads" type="number" style="text-align: center;width: 15%; margin-bottom: 4px;" min="1"></td>
+					</tr>
+					<tr>
+						<td>Comment</td>
+						<td><textarea name="comment" style="resize: none; width: 128px; font-size: 94%;"></textarea></td>
+					</tr>
+				</table>
+				<div class="center_div">
+					<input type="button" value="Edit Project" onclick="manage_project('edit');">
+					<input type="button" value="Delete Project" onclick="manage_project('delete');">
+				</div>
+			</form>
+		</div>
+	</div>
+</div>				
+{% endblock %}
+{% block content_right %}
+<table>
+<tr>
+	<td>
+		<div id="preview">
+			<div id="conf_title">
+				<label for="configs">Current connection settings</label>
+				<select id="configs" name="configs">
+					<option value="">Choose A Configuration</option>
+				</select>
+			</div>
+			<table id="conf_table">
+				<tr>
+					<th>
+						Hostname
+					</th>
+					<td name="hostname">
+						--
+						
+					</td>
+				</tr>
+				<tr>
+					<th>
+						Url
+					</th>
+					<td name="host">
+						--
+						<!--
+
+						<?php 
+							if (isset($_SESSION['host']))
+								echo $_SESSION['host'];
+							else
+								echo "--";
+						?>
+						-->
+					</td>
+				</tr>
+				<tr>
+					<th>
+						Username
+					</th>
+					<td name="username">
+						--
+						<!--
+						<?php 
+							if (isset($_SESSION['conn_user']))
+								echo $_SESSION['conn_user'];
+							else
+								echo "--";
+						?>
+						-->
+					</td>
+				</tr>
+				<tr>
+					<th>
+						Workflow path
+					</th>
+					<td name="workflow">
+						--
+						<!--
+						<?php 
+							if (isset($_SESSION['workflow_home']))
+								echo $_SESSION['workflow_home'];
+							else
+								echo "--";
+						?>
+						-->
+					</td>
+				</tr>
+				<tr>
+					<th>
+						Workspace path
+					</th>
+					<td name="workspace">
+						--
+						<!--
+						<?php 
+							if (isset($_SESSION['workspace']))
+								echo $_SESSION['workspace'];
+							else
+								echo "--";
+						?>
+						-->
+					</td>
+				</tr>
+			</table>
+		</div>
+	</td>
+</tr>
+<tr>
+	<td>
+		</br>
+	</td>
+</tr>
+<tr>
+	<td>
+		<div id="cmd_response">
+			<h3>Command Response</h3>
+			<textarea id="resp_textarea" readonly></textarea>
+		</div>
+	</td>
+</tr>
+</table>
 {% endblock %}

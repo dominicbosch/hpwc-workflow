@@ -15,12 +15,12 @@ process.on( 'uncaughtException', function( e ) {
 // Load the configuration file.
 // This will throw an error if the configuration file is invalid.
 config = JSON.parse( fs.readFileSync( __dirname + '/config/system.json' ) );
-arrViews = fs.readdirSync( __dirname + '/views' );;
+arrViews = fs.readdirSync( __dirname + '/views' );
 
 isValidRequest = function( req ) {
 	var name = req.params[ 0 ];
 
-	if( !req.session.user ) {
+	if( !req.session.public ) {
 		if( name === 'login' || name === 'register' ) {
 			return true;
 		} else return false;
@@ -33,6 +33,7 @@ isValidRequest = function( req ) {
 exports.init = function( args ) {
 	var servicePath, fileName, renderingObject,
 		arrServices = fs.readdirSync( __dirname + '/services' );
+		arrServices = arrServices.filter( function(d){ return d.substring(d.length-3)==='.js'})
 
 	// We disable caching for development environments
 	if( !args.productive ) {
@@ -64,10 +65,8 @@ exports.init = function( args ) {
 		if( isValidRequest( req ) ) {
 			view = req.params[ 0 ];
 		}
-		renderingObject = {
-			user: req.session.user
-		};
-		res.render( view, renderingObject );
+		
+		res.render( view, req.session.public );
 	});
 
 	// Dynamically load all services from the services folder

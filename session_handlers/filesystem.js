@@ -8,7 +8,9 @@ router.post( '/login', function( req, res ) {
 	var username = req.body.username;
 
 	if( oUsers[ username ] && oUsers[ username ].password === req.body.password ) {
-		req.session.user = oUsers[ username ].user;
+		req.session.public = {
+			user : oUsers[ username ].user
+		};
 		res.send( 'Login successful!' );
 	} else {
 		res.status( 401 );
@@ -17,7 +19,7 @@ router.post( '/login', function( req, res ) {
 });
 
 router.post( '/logout', function( req, res ) {
-	delete req.session.user;
+	delete req.session.public;
 	res.send( 'Goodbye!' );
 });
 
