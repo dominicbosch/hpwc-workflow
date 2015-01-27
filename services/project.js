@@ -32,9 +32,9 @@ router.get('/get', function(req, res) {
 // GET projects list. 
 router.get('/getProjectsOld', function(req, res) {
 	
-	req.session.username = 'guerrera';
+	var user = req.session.public.user;
 
-	ssh.getProjectsList( req.session.username, function(data) {
+	ssh.getProjectsList( user.name, function(data) {
 		console.log( 'ANSWER FROM SSH: ' + data );
 		var list = "";
 		var pos = data.indexOf(':');
@@ -48,10 +48,9 @@ router.get('/getProjectsOld', function(req, res) {
 // GET projects list. 
 router.get('/getProjects', function(req, res) {
 
-	req.session.username = 'guerrera';
 	var command = 'workflow project -l';
 		
-	ssh.execWorkComm( req, command, function(data) {
+	ssh.execWorkComm( req.session.public, command, function(data) {
 		console.log( 'ANSWER FROM SSH: ' + data );
 		var list = "";
 		var pos = data.indexOf(':');
@@ -66,7 +65,9 @@ router.get('/getProjects', function(req, res) {
 // GET descriptor. 
 router.get('/getDescriptor', function(req, res) {
 	
-	req.session.username = 'guerrera';
+	var user = req.session.public.user;
+	var connection = req.session.public.connection;
+
 	var project = req.query.project;
 	var method = req.query.method;
 	var descriptor = "";
@@ -79,13 +80,13 @@ router.get('/getDescriptor', function(req, res) {
 
 		if (method == "") {
 			desc_name = '.project';
-			filename = path.join(req.session.workspace, project, desc_name);
+			filename = path.join(connection.workspace, project, desc_name);
 		} else {
 			desc_name = '.module';
-			filename = path.join(req.session.workspace, project, method, desc_name);
+			filename = path.join(connection.workspace, project, method, desc_name);
 		}
 
-		ssh.getRemoteFile( req.session.username, filename, function(data) {
+		ssh.getRemoteFile( user.name, filename, function(data) {
 
 			console.log( 'ANSWER FROM SSH: ' + data );
 			descriptor = JSON.parse(data);
@@ -97,8 +98,6 @@ router.get('/getDescriptor', function(req, res) {
 // Manage project. 
 router.post('/manage', function(req, res) {
 	
-	req.session.username = 'guerrera';
-
 	var opt = '';
 	var project = req.body;
 
@@ -112,12 +111,12 @@ router.post('/manage', function(req, res) {
 			opt="m";
 		}
 
-		command = "workflow project -" + opt + " -p " + project.project_name + 
-			" --params " + project.par_name + " --values " + project.par_val + 
+		command = "workflow project -" + opt + " -p \"" + project.project_name + 
+			"\" --params " + project.par_name + " --values " + project.par_val + 
 			" --threads " + project.nthreads + " --comment \"" + project.comment + "\"";
 	}
 
-	ssh.execWorkComm( req, command, function( data ) {
+	ssh.execWorkComm( req.session.public, command, function( data ) {
 		console.log( 'ANSWER FROM SSH: ' + data );
 		res.send( data );
 	});

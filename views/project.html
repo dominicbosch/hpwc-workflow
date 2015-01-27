@@ -31,16 +31,22 @@
 				i = i + 1;
 			});
 
-			
-			$.get('/services/gen/getSessionVar?name=conf', function( data ) {
+			//retrieve project list if old connection is set
+			$.get('/services/gen/getCurrentConf', function( data ) {
 				
 				if (data !== "") {
-					$("#configs").val(data).change(); //change function
-					//getProjects to do
+					$("#configs").val(data);
+					$.get('/services/project/getProjects', function( data ) {
 
-				} 
+						var projects_string = '<option value="">Choose A Project</option>';
+						data.forEach(function(project) {
+							projects_string += '<option value="' + project + '">' + project + '</option>';
+						});
+
+						$('#projects').html(projects_string);
+					});
+				}
 			});
-			
 		});
 
 		//create handler for changing of configuraton
@@ -94,32 +100,31 @@
 			}
 		});
 
-		//when the project selected change, we read the value of parameters
+		//when the project selected change, we read the value of parameters (user change)
 		$("#projects").change( function() {
-			var project = $(this).val(),
-				method = "";
-
-			if (project == "") {
-				$("#edit_project input[name='par_list']").val("");
-				$("#edit_project input[name='par_val']").val("");
-				$("#edit_project input[name='nthreads']").val("");
-				$("#edit_project textarea[name='comment']").val("");
-			} else {
-				//getDescriptor
-				$.get('/services/project/getDescriptor?project=' + project + '&method=' + method, function( data ) {
-					var desc = data;
-					$("#edit_project input[name='par_list']").val(desc.parameters.list);
-					$("#edit_project input[name='par_val']").val(desc.parameters.default);
-					$("#edit_project input[name='nthreads']").val(desc.threads);
-					$("#edit_project textarea[name='comment']").val(desc.comment);
-				});
-			}
+			var project = $(this).val();
+			$("#resp_textarea").val("");
+			update_project( project );
 		});
 	});
 	
-	function update_project() {
-		$("#resp_textarea").val("");
-		$("#projects").change();
+	function update_project( project ) {
+		var method = "";
+		if (project == "") {
+			$("#edit_project input[name='par_list']").val("");
+			$("#edit_project input[name='par_val']").val("");
+			$("#edit_project input[name='nthreads']").val("");
+			$("#edit_project textarea[name='comment']").val("");
+		} else {
+			//getDescriptor
+			$.get('/services/project/getDescriptor?project=' + project + '&method=' + method, function( data ) {
+				var desc = data;
+				$("#edit_project input[name='par_list']").val(desc.parameters.list);
+				$("#edit_project input[name='par_val']").val(desc.parameters.default);
+				$("#edit_project input[name='nthreads']").val(desc.threads);
+				$("#edit_project textarea[name='comment']").val(desc.comment);
+			});
+		}
 	}
 
 	function manage_project(action) {
@@ -158,18 +163,29 @@
 			//update project list
 			$.get('/services/project/getProjects', function( data ) {
 
-				var projects_string = '<option value="">Choose A Project</option>';
+				var projects_string = '<option value="">Choose A Project</option>',
+					project_val = "";
 				data.forEach(function(project) {
 					projects_string += '<option value="' + project + '">' + project + '</option>';
 				});
 
 				$('#projects').html(projects_string);
-
-				if ((obj.action === "create") || (obj.action == "delete")) {
-					$("#projects").val("").change();
-				} else if ((obj.action === "edit")) {
-					$("#projects").val(obj.project_name).change();
+				
+				//if edit, select again the project
+				if ((obj.action === "edit")) {
+					project_val = obj.project_name;
+				} else if ((obj.action === "create")) {
+					//clean creation form
+					$("#new_project input[name='project_name']").val("");
+					$("#new_project input[name='par_list']").val("");
+					$("#new_project input[name='par_val']").val("");
+					$("#new_project input[name='nthreads']").val("");
+					$("#new_project textarea[name='comment']").val("");
 				}
+
+				$("#projects").val(project_val);
+
+				update_project($("#projects").val());
 
 				//update_project();
 			});
@@ -184,9 +200,6 @@
 {% endblock %}
 
 {% block content_left %}
-Hello {{ user.name }} wow awesome Project
-<p>This is just an awesome page.</p>
-
 <h1 align="center">Project Configuration</h1>
 </br>
 <div class="tabs">
@@ -279,8 +292,11 @@ Hello {{ user.name }} wow awesome Project
 						Hostname
 					</th>
 					<td name="hostname">
-						--
-						
+						{% if connection %}
+							{{ connection.hostname }}
+						{% else %}
+							--
+						{% endif %}
 					</td>
 				</tr>
 				<tr>
@@ -288,16 +304,11 @@ Hello {{ user.name }} wow awesome Project
 						Url
 					</th>
 					<td name="host">
-						--
-						<!--
-
-						<?php 
-							if (isset($_SESSION['host']))
-								echo $_SESSION['host'];
-							else
-								echo "--";
-						?>
-						-->
+						{% if connection %}
+							{{ connection.url }}
+						{% else %}
+							--
+						{% endif %}
 					</td>
 				</tr>
 				<tr>
@@ -305,15 +316,11 @@ Hello {{ user.name }} wow awesome Project
 						Username
 					</th>
 					<td name="username">
-						--
-						<!--
-						<?php 
-							if (isset($_SESSION['conn_user']))
-								echo $_SESSION['conn_user'];
-							else
-								echo "--";
-						?>
-						-->
+						{% if connection %}
+							{{ connection.username }}
+						{% else %}
+							--
+						{% endif %}
 					</td>
 				</tr>
 				<tr>
@@ -321,15 +328,11 @@ Hello {{ user.name }} wow awesome Project
 						Workflow path
 					</th>
 					<td name="workflow">
-						--
-						<!--
-						<?php 
-							if (isset($_SESSION['workflow_home']))
-								echo $_SESSION['workflow_home'];
-							else
-								echo "--";
-						?>
-						-->
+						{% if connection %}
+							{{ connection.workhome }}
+						{% else %}
+							--
+						{% endif %}
 					</td>
 				</tr>
 				<tr>
@@ -337,15 +340,11 @@ Hello {{ user.name }} wow awesome Project
 						Workspace path
 					</th>
 					<td name="workspace">
-						--
-						<!--
-						<?php 
-							if (isset($_SESSION['workspace']))
-								echo $_SESSION['workspace'];
-							else
-								echo "--";
-						?>
-						-->
+						{% if connection %}
+							{{ connection.workspace }}
+						{% else %}
+							--
+						{% endif %}
 					</td>
 				</tr>
 			</table>

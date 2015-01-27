@@ -99,18 +99,22 @@ executeCommand = function( username, command, cb ) {
 	}
 };
 
-execWorkComm = function( req, command, cb ) {
+execWorkComm = function( session, command, cb ) {
 
-	var oConn = oUserConnections[ req.session.username ];
+	var user = session.user;
+	var connection = session.connection;
+
+	var oConn = oUserConnections[ user.name ];
 	//console.log("UTIL: " + util.inspect(oConn, {showHidden: false, depth: null}));
-	var sourceWork = 'source ' + path.join(req.session.workhome, 'util', 'SetupEnv.sh') + ' ' + req.session.workspace + '; ';
-//	executeCommand( req.session.username, sourceWork + command, cb );
+	var sourceWork = 'source ' + path.join(connection.workhome, 'util', 'SetupEnv.sh') + 
+		' ' + connection.workspace + '; ';
+//	executeCommand( user.name, sourceWork + command, cb );
 
 	command = sourceWork + command;
 
-	console.log( 'Processing user "' + req.session.username + '" request: ',  command );
+	console.log( 'Processing user "' + user.name + '" request: ',  command );
 
-//	var oConn = oUserConnections[ req.session.username ];
+//	var oConn = oUserConnections[ user.name ];
 	
 	var alldata = '';
 	//console.log(util.inspect(oConn, {showHidden: false, depth: null}));
@@ -156,29 +160,6 @@ exports.getRemoteFile = function( username, filename, cb ) {
 	
 	command = 'cat ' + filename;
 	executeCommand( username, command, cb );
-
-};
-
-exports.manageProject = function( username, req, cb ) {
-	
-	var opt = '';
-	var obj = req.body;
-	if (obj.action === "delete") {
-		opt="d";
-		cmd = "workflow project -" + opt + " -p " + obj.project_name;
-	} else {
-		if (obj.action === "create") {
-			opt="c";
-		} else if (obj.action === "edit") {
-			opt="m";
-		}
-
-		cmd = "workflow project -" + opt + " -p " + project_name + 
-			" --params " + par_name + " --values " + par_val + 
-			" --threads " + nthreads + " --comment \"" + comment + "\"";
-	}
-
-	execWorkComm( username, command, cb );
 
 };
 
