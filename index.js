@@ -8,7 +8,7 @@ var config, arrViews, isValidRequest,
 	app = express();
 
 process.on( 'uncaughtException', function( e ) {
-	console.log( 'This is a general exception catcher for Antonio\'s convenience but should really be omitted!' );
+	console.log( 'This is a general exception catcher, but should really be removed in the future!' );
 	console.log( 'Error: ', e );
 });
 
@@ -16,6 +16,7 @@ process.on( 'uncaughtException', function( e ) {
 // This will throw an error if the configuration file is invalid.
 config = JSON.parse( fs.readFileSync( __dirname + '/config/system.json' ) );
 arrViews = fs.readdirSync( __dirname + '/views' );
+global.persistence = require( './persistence_handlers/' + config.session.method );
 
 isValidRequest = function( req ) {
 	var name = req.params[ 0 ];
@@ -32,11 +33,12 @@ isValidRequest = function( req ) {
 
 exports.init = function( args ) {
 	var servicePath, fileName, renderingObject,
-		arrServices = fs.readdirSync( __dirname + '/services' );
-		arrServices = arrServices.filter( function(d){ return d.substring(d.length-3)==='.js'})
+		arrServices = fs.readdirSync( __dirname + '/services' ).filter(function( d ) {
+			return ( d.substring( d.length - 3 ) === '.js' );
+		});
 
 	// We disable caching for development environments
-	if( !args.productive ) {
+	if( args.development ) {
 		app.set( 'view cache', false );
 		swig.setDefaults({ cache: false });
 	}
@@ -55,22 +57,17 @@ exports.init = function( args ) {
 	app.use( bodyParser.urlencoded({ extended: true }) );
 	app.use( express.static( path.join( __dirname, 'public' ) ) );
 
-	// Load the session handler as defined in the configuration file.
-	app.use( '/session', require( './session_handlers/' + config.session.method ) );
-
 	// Redirect the views that will be loaded by the swig templating engine
 	app.get( '/views/*', function ( req, res ) {
 		var view = 'index';
 		
-		if( isValidRequest( req ) ) {
-			view = req.params[ 0 ];
-		}
+		if( isValidRequest( req ) ) view = req.params[ 0 ];
 		
 		res.render( view, req.session.public );
 	});
 	
 	// Dynamically load all services from the services folder
-	console.log( 'LOADING SERVICES: ' );
+	console.log( 'LOADING WEB SERVICES: ' );
 	for( var i = 0; i < arrServices.length; i++ ) {
 		fileName = arrServices[ i ];
 		console.log( '  -> ' + fileName );
@@ -79,12 +76,12 @@ exports.init = function( args ) {
 	}
 
 	// Redirect if no routing applied so far
-	app.use( function ( req, res ) { res.redirect( 'views/index' ) });
+	if( !args.development ) app.use( function ( req, res ) { res.render( 'index' ) });
 
 	// Start the server
 	var server = app.listen( parseInt( args.port ) || 3000, function() {
 		var addr = server.address(),
-			mode = args.productive ? 'ON' : 'OFF',
+			mode = args.development ? 'OFF' : 'ON',
 			str = 'HPWC SSH Interface Server listening at "http://%s:%s" with CACHING %s';
 		console.log( str, addr.address, addr.port, mode.toUpperCase() );
 	});

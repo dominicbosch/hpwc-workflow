@@ -28,7 +28,7 @@
 				alert( 'Passwords do not match!' );
 				return;	
 			}
-			$.post( '../session/register', oBody, function( answ ) {
+			$.post( '/services/users/create', oBody, function( answ ) {
 				setInfo( answ );
 				setTimeout( function() {
 					window.location.href = 'login';
