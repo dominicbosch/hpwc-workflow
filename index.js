@@ -68,7 +68,7 @@ exports.init = function( args ) {
 		
 		res.render( view, req.session.public );
 	});
-
+	
 	// Dynamically load all services from the services folder
 	console.log( 'LOADING SERVICES: ' );
 	for( var i = 0; i < arrServices.length; i++ ) {
@@ -77,6 +77,9 @@ exports.init = function( args ) {
 		servicePath = '/services/' + fileName.substring( 0, fileName.length - 3 );
 		app.use( servicePath, require( '.' + servicePath ) );
 	}
+
+	// Redirect if no routing applied so far
+	app.use( function ( req, res ) { res.redirect( 'views/index' ) });
 
 	// Start the server
 	var server = app.listen( parseInt( args.port ) || 3000, function() {
