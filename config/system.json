@@ -1,0 +1,6 @@
+{
+	"session": {
+		"secret": "[TODO] Change in production environment",
+		"method": "filesystem"
+	}
+}
