@@ -5,6 +5,7 @@
 	<title>HPWC Workflow - {% block title %}{% endblock %}</title>
 	<script type="text/javascript" src="../js/jquery-1.11.2.min.js"></script>
 	<link rel="stylesheet" href="../css/layout.css">
+	{% if user %}
 	<script type="text/javascript">
 	
 		"use strict";
@@ -63,7 +64,7 @@
 			});
 		});		
 	</script>
-
+	{% endif %}
 	{% block head %}{% endblock %}
 
 </head>
