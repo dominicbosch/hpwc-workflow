@@ -4,18 +4,10 @@ var express = require('express'),
 	fs = require('fs'),
 	router = express.Router();
 
-cleanProject = function( req, res ) {
-	delete req.session.public.connection.project;
-	res.send("");
-};
-
-//cleanProject
-router.get('/cleanProject', cleanProject);
-
 // GET projects list. 
-router.get('/getProjects', function(req, res) {
+router.get('/getMethods', function(req, res) {
 
-	var command = 'workflow project -l';
+	var command = 'workflow project_module -l -p ' + req.session.public.connection.project.name;
 		
 	ssh.execWorkComm( req.session.public, command, function(data) {
 		console.log( 'ANSWER FROM SSH: ' + data );
@@ -35,14 +27,22 @@ router.get('/getDescriptor', function(req, res) {
 	var user = req.session.public.user;
 	var connection = req.session.public.connection;
 
-	var project = req.query.project;
+	var method = req.query.method;
 	var descriptor = "";
 
 	if (project == "") {
 		res.send(descriptor);
 	} else {
-		var desc_name = '.project';
-		var filename = path.join(connection.workspace, project, desc_name);
+		var desc_name = '';
+		var filename = '';
+
+		if (method == "") {
+			desc_name = '.project';
+			filename = path.join(connection.workspace, project, desc_name);
+		} else {
+			desc_name = '.module';
+			filename = path.join(connection.workspace, project, method, desc_name);
+		}
 
 		ssh.getRemoteFile( user.name, filename, function(data) {
 

@@ -1,7 +1,7 @@
 "use strict";
 
 $(document).ready(function() {
-		
+
 	//create handler for changing of configuraton
 	$("#configs").change( function() {
 		var conf_file = $(this).val();
@@ -40,54 +40,69 @@ $(document).ready(function() {
 
 					$('#projects').html(projects_string);
 
-/*					
-					//remove old values except for the first
-					$('#projects option:not(:first-child)').remove();
-					//put data inside "projects" element
-					data.forEach(function(project) {
-    					$('#projects').append($('<option>').attr('value', project).text(project));
-					});
-*/					
 				});
 			});
 		}
 	});
 
-	//when the project selected change, we read the value of parameters (user change)
-	$("#projects").change( function() {
-		var project = $(this).val();
+	//get method
+	$("#methods").change( function() {
+
+		var method = $(this).val();
 		$("#resp_textarea").val("");
-		update_project( project );
+		update_method( method );
 	});
+
+	//when the project selected change, we read the modules implemented
+	$("#projects").change( function() {
+		var conf_file = $("#configs").val();
+		if (conf_file == "") {
+			alert("Select A Configuration");
+			return;
+		}
+		var project = $(this).val();
+
+		if (project == "") {
+			$.get('/services/project/cleanProject', function( data ) {
+				$("#methods").html("<option value=''>Choose A Method</option>");
+				$("#methods").change();
+			});
+		} else {
+			$.get('/services/project/getDescriptor?project=' + project, function( ) {
+				$.get('/services/method/getMethods', function( data ) {
+					var methods_string = '<option value="">Choose A Method</option>';
+					data.forEach(function(method) {
+						methods_string += '<option value="' + method + '">' + method + '</option>';
+					});
+					$('#methods').html(methods_string);
+				});
+			});
+		}
+	});
+
 });
 
-function update_project( project ) {
-	if (project == "") {
-		$.get('/services/project/cleanProject', function( data ) {
-			$("#edit_project input[name='par_list']").val(data);
-			$("#edit_project input[name='par_val']").val(data);
-			$("#edit_project input[name='nthreads']").val(data);
-			$("#edit_project textarea[name='comment']").val(data);
-		});
+function update_method( method ) {
+	if (method == "") {
+		$("#edit_method input[name='method_type']").val("");
+		$("#edit_method textarea[name='comment']").val("");
 	} else {
 		//getDescriptor
-		$.get('/services/project/getDescriptor?project=' + project, function( data ) {
+		$.get('/services/project/getDescriptor?&method=' + method, function( data ) {
 			var desc = data;
-			$("#edit_project input[name='par_list']").val(desc.parameters.list);
-			$("#edit_project input[name='par_val']").val(desc.parameters.default);
-			$("#edit_project input[name='nthreads']").val(desc.threads);
+			$("#edit_method input[name='method_type']").val(desc.type);
 			$("#edit_project textarea[name='comment']").val(desc.comment);
 		});
 	}
 }
 
-function manage_project(action) {
+function manage_method( action ) {
 
-	var id = "";
-	var	obj = {
+	var id = "",
+		obj = {
 			action: action
-		};
-	var conf_file = $("#configs").val();
+		},
+		conf_file = $("#configs option:selected").val();
 
 	if (conf_file === "") {
 		alert("Select A Configuration");

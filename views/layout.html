@@ -49,6 +49,8 @@
 					//set current project, change event is not raised because the project details are read from the session
 					$("#projects").val(currentProject);
 
+					{% block method %}{% endblock %}
+
 					{% else %}
 
 					//Current project empty
