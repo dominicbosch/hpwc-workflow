@@ -3,52 +3,14 @@
 {% block title %}Project{% endblock %}
 
 {% block head %}
+<script type="text/javascript" src="../js/tab.js"></script>
+<script type="text/javascript" src="../js/project.js"></script>
 <script type="text/javascript">
 	
 	"use strict";
 
 	$(document).ready(function() {
-		//function to manage tab view
-		$('.tabs .tab-links a').click(function(e) {
-			var currentAttrValue = $(this).attr('href');
-	 
-			// Show/Hide Tabs
-			$('.tabs ' + currentAttrValue).show().siblings().hide();
-	 
-			// Change/remove current tab to active
-			$(this).parent('li').addClass('active').siblings().removeClass('active');
-	 
-			e.preventDefault();
-		});
-		//Get the possible configuration and check for the current configuration reading the project
 		
-		$.get('/services/gen/getConfigs', function( data ) {
-
-			//put data inside "configs" element
-			var i = 1;
-			data.forEach(function(config) {
-				$('#configs').append($('<option>').attr('value', config).text('Configuration' + i));
-				i = i + 1;
-			});
-
-			//retrieve project list if old connection is set
-			$.get('/services/gen/getCurrentConf', function( data ) {
-				
-				if (data !== "") {
-					$("#configs").val(data);
-					$.get('/services/project/getProjects', function( data ) {
-
-						var projects_string = '<option value="">Choose A Project</option>';
-						data.forEach(function(project) {
-							projects_string += '<option value="' + project + '">' + project + '</option>';
-						});
-
-						$('#projects').html(projects_string);
-					});
-				}
-			});
-		});
-
 		//create handler for changing of configuraton
 		$("#configs").change( function() {
 			var conf_file = $(this).val();
@@ -71,7 +33,7 @@
 				$.get('/services/gen/getConfigs?conf=' + conf_file, function( data ) {
 					var obj = data;
 					$("#conf_table td[name='hostname']").html(obj.hostname);
-					$("#conf_table td[name='host']").html(obj.hosturl);
+					$("#conf_table td[name='host']").html(obj.url);
 					$("#conf_table td[name='username']").html(obj.username);
 					$("#conf_table td[name='workflow']").html(obj.workhome);
 					$("#conf_table td[name='workspace']").html(obj.workspace);
@@ -107,90 +69,6 @@
 			update_project( project );
 		});
 	});
-	
-	function update_project( project ) {
-		var method = "";
-		if (project == "") {
-			$("#edit_project input[name='par_list']").val("");
-			$("#edit_project input[name='par_val']").val("");
-			$("#edit_project input[name='nthreads']").val("");
-			$("#edit_project textarea[name='comment']").val("");
-		} else {
-			//getDescriptor
-			$.get('/services/project/getDescriptor?project=' + project + '&method=' + method, function( data ) {
-				var desc = data;
-				$("#edit_project input[name='par_list']").val(desc.parameters.list);
-				$("#edit_project input[name='par_val']").val(desc.parameters.default);
-				$("#edit_project input[name='nthreads']").val(desc.threads);
-				$("#edit_project textarea[name='comment']").val(desc.comment);
-			});
-		}
-	}
-
-	function manage_project(action) {
-
-		var id = "",
-			obj = {
-				action: action
-			},
-			conf_file = $("#configs option:selected").val();
-
-		if (conf_file === "") {
-			alert("Select A Configuration");
-			return;
-		}
-
-		if (action == "delete") {
-			obj.project_name = $("#projects").val();
-		} else {
-			if (action == "create") {
-				id="new_project";
-				obj.project_name = $("#new_project input[name='project_name']").val();
-			} else if (action == "edit") {
-				id="edit_project";
-				obj.project_name = $("#projects").val();
-			}
-
-			obj.par_name = $("#"+id+" input[name='par_list']").val();
-			obj.par_val = $("#"+id+" input[name='par_val']").val();
-			obj.nthreads = $("#"+id+" input[name='nthreads']").val();
-			obj.comment = $("#"+id+" textarea[name='comment']").val();
-		}
-
-		$.post('/services/project/manage', obj, function( data ) {
-			$("#resp_textarea").val( data );
-			
-			//update project list
-			$.get('/services/project/getProjects', function( data ) {
-
-				var projects_string = '<option value="">Choose A Project</option>',
-					project_val = "";
-				data.forEach(function(project) {
-					projects_string += '<option value="' + project + '">' + project + '</option>';
-				});
-
-				$('#projects').html(projects_string);
-				
-				//if edit, select again the project
-				if ((obj.action === "edit")) {
-					project_val = obj.project_name;
-				} else if ((obj.action === "create")) {
-					//clean creation form
-					$("#new_project input[name='project_name']").val("");
-					$("#new_project input[name='par_list']").val("");
-					$("#new_project input[name='par_val']").val("");
-					$("#new_project input[name='nthreads']").val("");
-					$("#new_project textarea[name='comment']").val("");
-				}
-
-				$("#projects").val(project_val);
-
-				update_project($("#projects").val());
-
-				//update_project();
-			});
-		});
-	}
 	
 </script>
 
@@ -251,19 +129,27 @@
 					</tr>
 					<tr>
 						<td>Parameters Name</td>
-						<td><input name="par_list" type="text" size="30"></td>
+						<td>
+							<input name="par_list" type="text" size="30" value="{{ connection.project.parameters.list }}">
+						</td>
 					</tr>
 					<tr>
 						<td>Default parameters value</td>
-						<td><input name="par_val" type="text" size="30"></td>
+						<td>
+							<input name="par_val" type="text" size="30" value="{{ connection.project.parameters.default }}">
+						</td>
 					</tr>
 					<tr>
 						<td>Default number of threads</td>
-						<td><input name="nthreads" type="number" style="text-align: center;width: 15%; margin-bottom: 4px;" min="1"></td>
+						<td>
+							<input name="nthreads" type="number" style="text-align: center;width: 15%; margin-bottom: 4px;" min="1" value="{{ connection.project.threads }}">
+						</td>
 					</tr>
 					<tr>
 						<td>Comment</td>
-						<td><textarea name="comment" style="resize: none; width: 128px; font-size: 94%;"></textarea></td>
+						<td>
+							<textarea name="comment" style="resize: none; width: 128px; font-size: 94%;">{{ connection.project.comment }}</textarea>
+						</td>
 					</tr>
 				</table>
 				<div class="center_div">

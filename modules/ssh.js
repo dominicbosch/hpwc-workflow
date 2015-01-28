@@ -25,13 +25,40 @@ exports.connectToHost = function( connObj, username, cb ) {
 		}
 		//console.log( 'CLOSE CONN: ' + oConn[ '_state' ]);
 	}).connect({
-		host: connObj.hosturl,
+		host: connObj.url,
+		port: connObj.port,
+		username: connObj.username,
+		privateKey: fs.readFileSync( path.join("users", username, ".ssh", "id_rsa"))
+	});
+};
+
+exports.connectToHost = function( connObj, username, cb ) {
+
+	var oConn = oUserConnections[  username ];
+		
+	if ( oConn && oConn[ '_state' ] !== 'closed' ) {
+		oConn.end();
+	} 
+	
+	oConn = new Connection();
+	oConn.on( 'ready', function() {
+		console.log( 'New SSH connection established for user ' +  username );
+		oUserConnections[  username ] = oConn;
+		cb(null, 'New SSH connection established for user ' +  username);
+		//console.log( 'UTIL: ' + util.inspect(oConn, {showHidden: false, depth: null}));
+	}).on( 'close', function() {
+		if ( oConn[ '_state' ] !== 'closed' ) {
+			oConn.destroy();
+		}
+		//console.log( 'CLOSE CONN: ' + oConn[ '_state' ]);
+	}).connect({
+		host: connObj.url,
 		port: connObj.port,
 		username: connObj.username,
 		privateKey: fs.readFileSync( path.join("users", username, ".ssh", "id_rsa"))
 	});
 
-//		oMyConn.conf = connObj.filename;
+//		oMyConn.conf = connObj.name;
 //		oMyConn.hostname = connObj.hostname;
 //		oMyConn.workhome = connObj.workhome;
 //		oMyConn.workspace = connObj.workspace;

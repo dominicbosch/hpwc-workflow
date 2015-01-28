@@ -20,15 +20,7 @@ router.get('/getConfigs', function(req, res) {
 				console.log( 'ANSWER FROM CONNECTION: ' + data );
 
 				//save if connection ok
-				req.session.public.connection = {
-					name : connObj.filename,
-					hostname : connObj.hostname,
-					url : connObj.hosturl,
-					port : connObj.port,
-					username : connObj.username,
-					workhome : connObj.workhome,
-					workspace : connObj.workspace
-				}
+				req.session.public.connection = connObj;
 
 				res.send(connObj);
 			});

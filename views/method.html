@@ -2,8 +2,265 @@
 
 {% block title %}Method{% endblock %}
 
+{% block head %}
+<script type="text/javascript" src="../js/tab.js"></script>
+<script type="text/javascript" src="../js/src-noconflict/ace.js" charset="utf-8"></script>
+
+<script type="text/javascript">
+	
+	"use strict";
+
+	$(document).ready(function() {
+
+		//function to manage tab view
+		$('.tabs .tab-links a').click(function(e) {
+			var currentAttrValue = $(this).attr('href');
+	 
+			// Show/Hide Tabs
+			$('.tabs ' + currentAttrValue).show().siblings().hide();
+	 
+			// Change/remove current tab to active
+			$(this).parent('li').addClass('active').siblings().removeClass('active');
+	 
+			e.preventDefault();
+		});
+
+		//editor
+		$("#edit_button").click(function( event ){
+			event.preventDefault();
+	    	$(".overlay").fadeToggle("fast");
+	  	});
+		
+		$(".close").click(function(){
+			$(".overlay").fadeToggle("fast");
+		});
+		
+		$(document).keyup(function(e) {
+			if(e.keyCode == 27 && $(".overlay").css("display") != "none" ) {
+				$(".overlay").fadeToggle("fast");
+			}
+		});
+
+		{% if connection %}
+			//Current configuration not empty
+
+			var currentConf = "{{ connection.name}}";
+			//set current configuration, change event is not raised because the configuration details are read from the session
+			$("#configs").val(currentConf);
+
+			//retrieve project list if old connection is set
+			$.get('/services/project/getProjects', function( data ) {
+
+				var projects_string = '<option value="">Choose A Project</option>';
+				data.forEach(function(project) {
+					projects_string += '<option value="' + project + '">' + project + '</option>';
+				});
+
+				$('#projects').html(projects_string);
+
+				{% if project %}
+					//Current project not empty
+
+					var currentProject = "{{ project.name}}";
+					//set current project, change event is not raised because the project details are read from the session
+					$("#projects").val(currentConf);
+
+
+					//TO DO
+
+
+					
+					//retrieve project list if old connection is set
+					$.get('/services/project/getProjects', function( data ) {
+
+						var projects_string = '<option value="">Choose A Project</option>';
+						data.forEach(function(project) {
+							projects_string += '<option value="' + project + '">' + project + '</option>';
+						});
+
+						$('#projects').html(projects_string);
+					});
+				{% else %}
+					//Current project empty
+				{% endif %}
+			});
+		{% else %}
+			//Current configuration empty
+		{% endif %}
+	}
+	
+</script>
+
+<!-- CSS -->
+<link rel="stylesheet" type="text/css" href="../css/tab.css" />
+<link rel="stylesheet" type="text/css" href="../css/method.css" />
+
+{% endblock %}
+
 {% block content_left %}
-	<h1>Method Configuration</h1>
-	Hello {{ name }} wow awesome Method
-	<p>This is just an awesome page.</p>
+<h1 align="center">Project Configuration</h1>
+</br>
+<div class="tabs">
+	<ul class="tab-links">
+		<li class="active"><a href="#tab1">New Project</a></li>
+		<li><a href="#tab2">Edit Project</a></li>
+	</ul>
+	<div class="tab-content">
+		<div id="tab1" class="tab active">
+			<form action=''>
+				<table id="new_project">
+					<tr>
+						<td>Project Name</td>
+						<td><input name="project_name" type="text" size="30"></td>
+					</tr>
+					<tr>
+						<td>Parameters Name</td>
+						<td><input name="par_list" type="text" size="30"></td>
+					</tr>
+					<tr>
+						<td>Default parameters value</td>
+						<td><input name="par_val" type="text" size="30"></td>
+					</tr>
+					<tr>
+						<td>Default number of threads</td>
+						<td><input name="nthreads" type="number" style="text-align: center;width: 15%; margin-bottom: 4px;" min="1" value="2"></td>
+					</tr>
+					<tr>
+						<td>Comment</td>
+						<td><textarea name="comment" style="resize: none; width: 128px; font-size: 94%;"></textarea></td>
+					</tr>
+				</table>
+				<div class="center_div">
+					<input type="button" value="Create Project" onclick="manage_project('create');">
+				</div>
+			</form>
+		</div>
+
+		<div id="tab2" class="tab">
+			<form action=''>
+				<table id="edit_project">
+					<tr>
+						<td>Project Name</td>
+						<td>
+							<select id="projects" name="project_name">
+								<option value="">Choose A Project</option>
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<td>Parameters Name</td>
+						<td><input name="par_list" type="text" size="30"></td>
+					</tr>
+					<tr>
+						<td>Default parameters value</td>
+						<td><input name="par_val" type="text" size="30"></td>
+					</tr>
+					<tr>
+						<td>Default number of threads</td>
+						<td><input name="nthreads" type="number" style="text-align: center;width: 15%; margin-bottom: 4px;" min="1"></td>
+					</tr>
+					<tr>
+						<td>Comment</td>
+						<td><textarea name="comment" style="resize: none; width: 128px; font-size: 94%;"></textarea></td>
+					</tr>
+				</table>
+				<div class="center_div">
+					<input type="button" value="Edit Project" onclick="manage_project('edit');">
+					<input type="button" value="Delete Project" onclick="manage_project('delete');">
+				</div>
+			</form>
+		</div>
+	</div>
+</div>				
+{% endblock %}
+{% block content_right %}
+<table>
+<tr>
+	<td>
+		<div id="preview">
+			<div id="conf_title">
+				<label for="configs">Current connection settings</label>
+				<select id="configs" name="configs">
+					<option value="">Choose A Configuration</option>
+				</select>
+			</div>
+			<table id="conf_table">
+				<tr>
+					<th>
+						Hostname
+					</th>
+					<td name="hostname">
+						{% if connection %}
+							{{ connection.hostname }}
+						{% else %}
+							--
+						{% endif %}
+					</td>
+				</tr>
+				<tr>
+					<th>
+						Url
+					</th>
+					<td name="host">
+						{% if connection %}
+							{{ connection.url }}
+						{% else %}
+							--
+						{% endif %}
+					</td>
+				</tr>
+				<tr>
+					<th>
+						Username
+					</th>
+					<td name="username">
+						{% if connection %}
+							{{ connection.username }}
+						{% else %}
+							--
+						{% endif %}
+					</td>
+				</tr>
+				<tr>
+					<th>
+						Workflow path
+					</th>
+					<td name="workflow">
+						{% if connection %}
+							{{ connection.workhome }}
+						{% else %}
+							--
+						{% endif %}
+					</td>
+				</tr>
+				<tr>
+					<th>
+						Workspace path
+					</th>
+					<td name="workspace">
+						{% if connection %}
+							{{ connection.workspace }}
+						{% else %}
+							--
+						{% endif %}
+					</td>
+				</tr>
+			</table>
+		</div>
+	</td>
+</tr>
+<tr>
+	<td>
+		</br>
+	</td>
+</tr>
+<tr>
+	<td>
+		<div id="cmd_response">
+			<h3>Command Response</h3>
+			<textarea id="resp_textarea" readonly></textarea>
+		</div>
+	</td>
+</tr>
+</table>
 {% endblock %}

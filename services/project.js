@@ -4,47 +4,6 @@ var express = require('express'),
 	fs = require('fs'),
 	router = express.Router();
 
-
-//ssh.createConnection('guerrera');
-
-//var conf_file = "host1.json",		
-//	conf_file_path = path.join("users", "guerrera", "conf"),
-//	conf_file_json = JSON.parse(fs.readFileSync(path.join(conf_file_path, conf_file))); 
-//
-//ssh.connectToHost(conf_file_json, "guerrera");
-
-// GET users listing. 
-router.get('/get', function(req, res) {
-	var conf_file = "host1.json",		
-	conf_file_path = path.join("users", "guerrera", "conf"),
-	conf_file_json = JSON.parse(fs.readFileSync(path.join(conf_file_path, conf_file))); 
-
-	ssh.connectToHost(conf_file_json, "guerrera", function(data) {
-		req.session.username = 'guerrera';
-		ssh.executeCommand( req.session.username, 'ls', function(data) {
-			//console.log( 'ANSWER FROM SSH: ' + data );
-			//send data to response
-			res.send(data);
-		});
-	});
-});
-
-// GET projects list. 
-router.get('/getProjectsOld', function(req, res) {
-	
-	var user = req.session.public.user;
-
-	ssh.getProjectsList( user.name, function(data) {
-		console.log( 'ANSWER FROM SSH: ' + data );
-		var list = "";
-		var pos = data.indexOf(':');
-		if (pos != -1) {
-			var list = data.substring(pos + 1).trim().split(" ");
-		} 
-		res.send(list);
-	});
-});
-
 // GET projects list. 
 router.get('/getProjects', function(req, res) {
 
@@ -90,6 +49,10 @@ router.get('/getDescriptor', function(req, res) {
 
 			console.log( 'ANSWER FROM SSH: ' + data );
 			descriptor = JSON.parse(data);
+
+			//store data in session
+			req.session.public.connection.project = descriptor;
+
 			res.send(descriptor);
 		});
 	}

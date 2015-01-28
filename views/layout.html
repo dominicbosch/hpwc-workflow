@@ -4,11 +4,68 @@
 	<meta charset="utf-8">
 	<title>HPWC Workflow - {% block title %}{% endblock %}</title>
 	<script type="text/javascript" src="../js/jquery-1.11.2.min.js"></script>
-	<script type="text/javascript">
-		"use strict";
-	</script>
 	<link rel="stylesheet" href="../css/layout.css">
+	<script type="text/javascript">
+	
+		"use strict";
+
+		$(document).ready(function() {
+
+			//Get the possible configuration and check for the current configuration reading the project
+			$.get('/services/gen/getConfigs', function( data ) {
+
+				//put data inside "configs" element
+				var i = 1;
+				data.forEach(function(config) {
+					$('#configs').append($('<option>').attr('value', config).text('Configuration' + i));
+					i = i + 1;
+				});
+
+				
+				{% if connection %}
+
+				//Current configuration not empty
+				var currentConf = "{{ connection.name}}";
+
+				//set current configuration, change event is not raised because the configuration details are read from the session
+				$("#configs").val(currentConf);
+
+				//retrieve project list if old connection is set
+				$.get('/services/project/getProjects', function( data ) {
+
+					var projects_string = '<option value="">Choose A Project</option>';
+					data.forEach(function(project) {
+						projects_string += '<option value="' + project + '">' + project + '</option>';
+					});
+
+					$('#projects').html(projects_string);
+
+					{% if connection.project %}
+
+					//Current project not empty
+					var currentProject = "{{ connection.project.name }}";
+					
+					//set current project, change event is not raised because the project details are read from the session
+					$("#projects").val(currentProject);
+
+					{% else %}
+
+					//Current project empty
+
+					{% endif %}
+				});
+
+				{% else %}
+
+				//Current configuration empty
+
+				{% endif %}
+			});
+		});		
+	</script>
+
 	{% block head %}{% endblock %}
+
 </head>
 <body>
 	<header>
@@ -29,7 +86,9 @@
 	</nav>
 	<section>
 		<div class="left">{% block content_left %}{% endblock %}</div>
-		<div class="right">{% block content_right %}{% endblock %}</div>
+		<div class="right">
+			{% block content_right %}{% endblock %}
+		</div>
 	</section>
 	<footer>
 	</footer>

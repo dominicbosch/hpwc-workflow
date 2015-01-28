@@ -1,0 +1,54 @@
+/*
+*	EDIT BOX
+*/
+div.overlay {
+	background-color: rgba(0,0,0,.25);
+	bottom: 0;
+	display: flex;
+	justify-content: center;
+	left: 0;
+	position: fixed;
+	top: 0;
+	width: 100%;
+}
+
+	div.overlay > div.edit-wrapper {
+		align-self: center;
+		background-color: rgba(0,0,0,.25);
+		border-radius: 2px;
+		padding: 6px;
+		width: 70%;
+	}
+	
+		div.overlay > div.edit-wrapper > div.edit-content {
+			background-color: rgb(255,255,255);
+			border-radius: 2px;
+			padding: 24px;	
+			position: relative;
+		}
+
+a.close {
+	background-color: rgb(204,204,204);
+	/*border-radius: 50%;*/
+	color: rgb(255,255,255);
+	display: block;
+	font-family: 'Varela Round', sans-serif;
+	font-size: .8em;
+	padding: .2em .5em;
+	position: absolute;
+	top: 1.25rem;
+	transition: all 400ms ease;
+	right: 1.25rem;
+}
+	
+	a.close:hover {
+		background-color: #1bc5b3;
+		cursor: pointer;
+	}
+	
+#src_editor {
+	position: relative;
+	height: 400px;
+	text-align: left;
+	font-size: 60%;
+}
