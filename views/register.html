@@ -30,6 +30,9 @@
 			}
 			$.post( '../session/register', oBody, function( answ ) {
 				setInfo( answ );
+				setTimeout( function() {
+					window.location.href = 'login';
+				}, 2000 );
 			})
 			.fail( function( req ) {
 				if( req.status === 409 ) {
