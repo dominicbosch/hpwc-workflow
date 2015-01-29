@@ -4,6 +4,12 @@ $(document).ready(function() {
 		
 	//create handler for changing of configuraton
 	$("#configs").change( function() {
+
+		//clean project list
+		$("#projects").html("<option value=''>Choose A Project</option>");
+
+		cleanProjectForm();
+
 		var conf_file = $(this).val();
 		if (conf_file == "") {
 			$("#conf_table td[name='hostname']").html("--");
@@ -11,10 +17,6 @@ $(document).ready(function() {
 			$("#conf_table td[name='username']").html("--");
 			$("#conf_table td[name='workflow']").html("--");
 			$("#conf_table td[name='workspace']").html("--");
-
-			//clean project list
-			$("#projects").html("<option value=''>Choose A Project</option>");
-			$("#projects").change();
 
 			//close the connection
 			$.get('/services/gen/ssh/close', function( data ) {
@@ -32,21 +34,24 @@ $(document).ready(function() {
 				//when the configuration change, we read again the project
 				$.get('/services/project/getProjects', function( data ) {
 
-
 					var projects_string = '<option value="">Choose A Project</option>';
-					data.forEach(function(project) {
-						projects_string += '<option value="' + project + '">' + project + '</option>';
-					});
+					
+					if (data !== "") {
+						data.forEach(function(project) {
+							projects_string += '<option value="' + project + '">' + project + '</option>';
+						});
+					}
 
 					$('#projects').html(projects_string);
-
 /*					
 					//remove old values except for the first
 					$('#projects option:not(:first-child)').remove();
 					//put data inside "projects" element
-					data.forEach(function(project) {
-    					$('#projects').append($('<option>').attr('value', project).text(project));
-					});
+					if (data !== "") {
+						data.forEach(function(project) {
+	    					$('#projects').append($('<option>').attr('value', project).text(project));
+						});
+					}
 */					
 				});
 			});
@@ -61,13 +66,17 @@ $(document).ready(function() {
 	});
 });
 
+function cleanProjectForm() {
+	$("#edit_project input[name='par_list']").val("");
+	$("#edit_project input[name='par_val']").val("");
+	$("#edit_project input[name='nthreads']").val("");
+	$("#edit_project textarea[name='comment']").val("");
+}
+
 function update_project( project ) {
 	if (project == "") {
 		$.get('/services/project/cleanProject', function( data ) {
-			$("#edit_project input[name='par_list']").val(data);
-			$("#edit_project input[name='par_val']").val(data);
-			$("#edit_project input[name='nthreads']").val(data);
-			$("#edit_project textarea[name='comment']").val(data);
+			cleanProjectForm();
 		});
 	} else {
 		//getDescriptor
@@ -84,7 +93,7 @@ function update_project( project ) {
 function manage_project(action) {
 
 	var id = "";
-	var	obj = {
+	var	project = {
 			action: action
 		};
 	var conf_file = $("#configs").val();
@@ -95,40 +104,43 @@ function manage_project(action) {
 	}
 
 	if (action == "delete") {
-		obj.project_name = $("#projects").val();
+		project.name = $("#projects").val();
 	} else {
 		if (action == "create") {
 			id="new_project";
-			obj.project_name = $("#new_project input[name='project_name']").val();
+			project.name = $("#new_project input[name='project_name']").val();
 		} else if (action == "edit") {
 			id="edit_project";
-			obj.project_name = $("#projects").val();
+			project.name = $("#projects").val();
 		}
 
-		obj.par_name = $("#"+id+" input[name='par_list']").val();
-		obj.par_val = $("#"+id+" input[name='par_val']").val();
-		obj.nthreads = $("#"+id+" input[name='nthreads']").val();
-		obj.comment = $("#"+id+" textarea[name='comment']").val();
+		project.par_name = $("#"+id+" input[name='par_list']").val();
+		project.par_val = $("#"+id+" input[name='par_val']").val();
+		project.nthreads = $("#"+id+" input[name='nthreads']").val();
+		project.comment = $("#"+id+" textarea[name='comment']").val();
 	}
 
-	$.post('/services/project/manage', obj, function( data ) {
+	$.post('/services/project/manage', project, function( data ) {
 		$("#resp_textarea").val( data );
 		
 		//update project list
 		$.get('/services/project/getProjects', function( data ) {
 
 			var projects_string = '<option value="">Choose A Project</option>',
-				project_val = "";
-			data.forEach(function(project) {
-				projects_string += '<option value="' + project + '">' + project + '</option>';
-			});
+			var	project_val = "";
+			
+			if (data !== "") {
+				data.forEach(function(project) {
+					projects_string += '<option value="' + project + '">' + project + '</option>';
+				});
+			}
 
 			$('#projects').html(projects_string);
 			
 			//if edit, select again the project
-			if ((obj.action === "edit")) {
-				project_val = obj.project_name;
-			} else if ((obj.action === "create")) {
+			if ((project.action === "edit")) {
+				project_val = project.name;
+			} else if ((project.action === "create")) {
 				//clean creation form
 				$("#new_project input[name='project_name']").val("");
 				$("#new_project input[name='par_list']").val("");
@@ -139,9 +151,7 @@ function manage_project(action) {
 
 			$("#projects").val(project_val);
 
-			update_project($("#projects").val());
-
-			//update_project();
+			update_project(project_val);
 		});
 	});
 }

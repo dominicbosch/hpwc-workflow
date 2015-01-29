@@ -4,14 +4,26 @@
 
 {% block method %}
 //retrieve method list if current project is set
-$.get('/services/method/getMethods', function( data ) {
-
+$.get('/services/method/get', function( data ) {
 	var methods_string = '<option value="">Choose A Method</option>';
-	data.forEach(function(method) {
-		methods_string += '<option value="' + method + '">' + method + '</option>';
-	});
-
+	if (data !== "") {
+		data.forEach(function(method) {
+			methods_string += '<option value="' + method + '">' + method + '</option>';
+		});
+	}
 	$('#methods').html(methods_string);
+});
+{% endblock %}
+
+{% block methodtypes %}
+$.get('/services/method/getInstalled', function( data ) {
+	var types_string = '<option value="">Choose A Method Type</option>';
+	if (data !== "") {
+		data.forEach(function(type) {
+			types_string += '<option value="' + type + '">' + type + '</option>';
+		});
+	}
+	$('#method_types').html(types_string);
 });
 {% endblock %}
 
@@ -58,7 +70,7 @@ $.get('/services/method/getMethods', function( data ) {
 					<tr>
 						<td>Comment</td>
 						<td>
-							<textarea></textarea>
+							<textarea name="comment"></textarea>
 						</td>
 					</tr>
 				</table>
@@ -88,12 +100,12 @@ $.get('/services/method/getMethods', function( data ) {
 					<tr>
 						<td>Comment</td>
 						<td>
-							<textarea></textarea>
+							<textarea name="comment"></textarea>
 						</td>
 					</tr>
 				</table>
 				<div class="center_div">
-					<input type="button" id="edit_button" value="Edit Method">
+					<input type="button" value="Edit Method" onclick="manage_method('edit');">
 					<input type="button" value="Delete Method" onclick="manage_method('delete');">
 				</div>
 			</form>

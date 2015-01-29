@@ -65,7 +65,7 @@ router.post('/manage', function(req, res) {
 
 	if (project.action === "delete") {
 		opt="d";
-		command = "workflow project -" + opt + " -p " + project.project_name;
+		command = "workflow project -" + opt + " -p " + project.name;
 	} else {
 		if (project.action === "create") {
 			opt="c";
@@ -73,7 +73,7 @@ router.post('/manage', function(req, res) {
 			opt="m";
 		}
 
-		command = "workflow project -" + opt + " -p \"" + project.project_name + 
+		command = "workflow project -" + opt + " -p \"" + project.name + 
 			"\" --params " + project.par_name + " --values " + project.par_val + 
 			" --threads " + project.nthreads + " --comment \"" + project.comment + "\"";
 	}

@@ -15,54 +15,62 @@
 			//Get the possible configuration and check for the current configuration reading the project
 			$.get('/services/gen/getConfigs', function( data ) {
 
-				//put data inside "configs" element
-				var i = 1;
-				data.forEach(function(config) {
-					$('#configs').append($('<option>').attr('value', config).text('Configuration' + i));
-					i = i + 1;
-				});
+				if (data !== "") {
 
-				
-				{% if connection %}
+					//put data inside "configs" element
+					var i = 1;
 
-				//Current configuration not empty
-				var currentConf = "{{ connection.name}}";
-
-				//set current configuration, change event is not raised because the configuration details are read from the session
-				$("#configs").val(currentConf);
-
-				//retrieve project list if old connection is set
-				$.get('/services/project/getProjects', function( data ) {
-
-					var projects_string = '<option value="">Choose A Project</option>';
-					data.forEach(function(project) {
-						projects_string += '<option value="' + project + '">' + project + '</option>';
+					data.forEach(function(config) {
+						$('#configs').append($('<option>').attr('value', config).text('Configuration' + i));
+						i = i + 1;
 					});
 
-					$('#projects').html(projects_string);
+					{% if connection %}
 
-					{% if connection.project %}
+					//Current configuration not empty
+					var currentConf = "{{ connection.name}}";
 
-					//Current project not empty
-					var currentProject = "{{ connection.project.name }}";
-					
-					//set current project, change event is not raised because the project details are read from the session
-					$("#projects").val(currentProject);
+					//set current configuration, change event is not raised because the configuration details are read from the session
+					$("#configs").val(currentConf);
 
-					{% block method %}{% endblock %}
+					//retrieve project list if old connection is set
+					$.get('/services/project/getProjects', function( data ) {
+
+						var projects_string = '<option value="">Choose A Project</option>';
+
+						if (data !== "") {
+							data.forEach(function(project) {
+								projects_string += '<option value="' + project + '">' + project + '</option>';
+							});
+						}
+
+						$('#projects').html(projects_string);
+
+						{% if connection.project %}
+
+						//Current project not empty
+						var currentProject = "{{ connection.project.name }}";
+						
+						//set current project, change event is not raised because the project details are read from the session
+						$("#projects").val(currentProject);
+
+						{% block method %}{% endblock %}
+
+						{% else %}
+
+						//Current project empty
+
+						{% endif %}
+					});
+
+					{% block methodtypes %}{% endblock %}
 
 					{% else %}
 
-					//Current project empty
+					//Current configuration empty
 
 					{% endif %}
-				});
-
-				{% else %}
-
-				//Current configuration empty
-
-				{% endif %}
+				}
 			});
 		});		
 	</script>

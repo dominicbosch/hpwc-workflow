@@ -4,10 +4,27 @@ var express = require('express'),
 	fs = require('fs'),
 	router = express.Router();
 
-// GET projects list. 
-router.get('/getMethods', function(req, res) {
+// GET methods list. 
+router.get('/get', function(req, res) {
 
 	var command = 'workflow project_module -l -p ' + req.session.public.connection.project.name;
+		
+	ssh.execWorkComm( req.session.public, command, function(data) {
+		console.log( 'ANSWER FROM SSH: ' + data );
+		var list = "";
+		var pos = data.indexOf(':');
+		if (pos != -1) {
+			var list = data.substring(pos + 1).trim().split(" ");
+		} 
+		console.log("LIST: " + list);
+		res.send(list);
+	});
+});
+
+// GET installed module. 
+router.get('/getInstalled', function(req, res) {
+
+	var command = 'workflow project_module -s inst';
 		
 	ssh.execWorkComm( req.session.public, command, function(data) {
 		console.log( 'ANSWER FROM SSH: ' + data );
@@ -27,55 +44,47 @@ router.get('/getDescriptor', function(req, res) {
 	var user = req.session.public.user;
 	var connection = req.session.public.connection;
 
+	var project = req.session.public.connection.project;
 	var method = req.query.method;
 	var descriptor = "";
 
-	if (project == "") {
+	if (method == "") {
 		res.send(descriptor);
 	} else {
-		var desc_name = '';
-		var filename = '';
-
-		if (method == "") {
-			desc_name = '.project';
-			filename = path.join(connection.workspace, project, desc_name);
-		} else {
-			desc_name = '.module';
-			filename = path.join(connection.workspace, project, method, desc_name);
-		}
+		var desc_name = '.module';
+		var filename  = path.join(connection.workspace, project.name, method, desc_name);
 
 		ssh.getRemoteFile( user.name, filename, function(data) {
 
 			console.log( 'ANSWER FROM SSH: ' + data );
 			descriptor = JSON.parse(data);
 
-			//store data in session
-			req.session.public.connection.project = descriptor;
-
 			res.send(descriptor);
 		});
 	}
 });
 
-// Manage project. 
+// Manage method. 
 router.post('/manage', function(req, res) {
 	
 	var opt = '';
-	var project = req.body;
+	var method = req.body;
+	var project = req.session.public.connection.project;
 
-	if (project.action === "delete") {
+	if (method.action === "delete") {
 		opt="d";
-		command = "workflow project -" + opt + " -p " + project.project_name;
+		command = "workflow project_module -" + opt + " -p \"" + project.name + 
+			"\" -n \"" + method.name + "\"";
 	} else {
-		if (project.action === "create") {
+		if (method.action === "create") {
 			opt="c";
-		} else if (project.action === "edit") {
+		} else if (method.action === "edit") {
 			opt="m";
 		}
 
-		command = "workflow project -" + opt + " -p \"" + project.project_name + 
-			"\" --params " + project.par_name + " --values " + project.par_val + 
-			" --threads " + project.nthreads + " --comment \"" + project.comment + "\"";
+		command = "workflow project_module -" + opt + " -p \"" + project.name + 
+			"\" -m " + method.type + " -n \"" + method.name + "\" --comment \"" + 
+			method.comment + "\"";
 	}
 
 	ssh.execWorkComm( req.session.public, command, function( data ) {
