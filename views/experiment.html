@@ -2,12 +2,36 @@
 
 {% block title %}Experiment{% endblock %}
 
+{% block head %}
+<script type="text/javascript" src="../js/experiment.js"></script>
+
+
+<!-- CSS -->
+
+
+{% endblock %}
+
+
+{% block ifprojectextra %}
+//retrieve experiment output list if current project is set
+$.get('/services/output/getList', function( data ) {
+	var methods_string = '<option value="">Choose A Method</option>';
+	if (data !== "") {
+		data.forEach(function(method) {
+			methods_string += '<option value="' + method + '">' + method + '</option>';
+		});
+	}
+	$('#methods').html(methods_string);
+});
+{% endblock %}
+
 {% block content_left %}
-Hello {{ name }} wow awesome Experiment
-<p>This is just an awesome page.</p>
+
 {% endblock %}
 
 {% block content_right %}
-Hello {{ name }} wow awesome Experiment
-<p>This is just an awesome page.</p>
+<div id="cmd_response">
+	<h3>Command Response</h3>
+	<textarea id="resp_textarea" readonly></textarea>
+</div>
 {% endblock %}

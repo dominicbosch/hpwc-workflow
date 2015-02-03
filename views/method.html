@@ -2,7 +2,7 @@
 
 {% block title %}Method{% endblock %}
 
-{% block method %}
+{% block ifprojectextra %}
 //retrieve method list if current project is set
 $.get('/services/method/get', function( data ) {
 	var methods_string = '<option value="">Choose A Method</option>';
@@ -15,7 +15,7 @@ $.get('/services/method/get', function( data ) {
 });
 {% endblock %}
 
-{% block methodtypes %}
+{% block ifconnectionextra %}
 $.get('/services/method/getInstalled', function( data ) {
 	var types_string = '<option value="">Choose A Method Type</option>';
 	if (data !== "") {
@@ -114,13 +114,8 @@ $.get('/services/method/getInstalled', function( data ) {
 </div>		
 {% endblock %}
 {% block content_right %}
-<tr>
-	<td>
-		<div id="cmd_response">
-			<h3>Command Response</h3>
-			<textarea id="resp_textarea" readonly></textarea>
-		</div>
-	</td>
-</tr>
-</table>
+<div id="cmd_response">
+	<h3>Command Response</h3>
+	<textarea id="resp_textarea" readonly></textarea>
+</div>
 {% endblock %}

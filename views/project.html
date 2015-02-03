@@ -52,7 +52,7 @@
 
 		<div id="tab2" class="tab">
 			<form action=''>
-				<table id="edit_project">
+				<table id="project_details">
 					<tr>
 						<td>Project Name</td>
 						<td>
@@ -96,13 +96,8 @@
 </div>				
 {% endblock %}
 {% block content_right %}
-<tr>
-	<td>
-		<div id="cmd_response">
-			<h3>Command Response</h3>
-			<textarea id="resp_textarea" readonly></textarea>
-		</div>
-	</td>
-</tr>
-</table>
+<div id="cmd_response">
+	<h3>Command Response</h3>
+	<textarea id="resp_textarea" readonly></textarea>
+</div>
 {% endblock %}

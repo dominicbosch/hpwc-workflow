@@ -67,10 +67,10 @@ $(document).ready(function() {
 });
 
 function cleanProjectForm() {
-	$("#edit_project input[name='par_list']").val("");
-	$("#edit_project input[name='par_val']").val("");
-	$("#edit_project input[name='nthreads']").val("");
-	$("#edit_project textarea[name='comment']").val("");
+	$("#project_details input[name='par_list']").val("");
+	$("#project_details input[name='par_val']").val("");
+	$("#project_details input[name='nthreads']").val("");
+	$("#project_details textarea[name='comment']").val("");
 }
 
 function update_project( project ) {
@@ -82,10 +82,10 @@ function update_project( project ) {
 		//getDescriptor
 		$.get('/services/project/getDescriptor?project=' + project, function( data ) {
 			var desc = data;
-			$("#edit_project input[name='par_list']").val(desc.parameters.list);
-			$("#edit_project input[name='par_val']").val(desc.parameters.default);
-			$("#edit_project input[name='nthreads']").val(desc.threads);
-			$("#edit_project textarea[name='comment']").val(desc.comment);
+			$("#project_details input[name='par_list']").val(desc.parameters.list);
+			$("#project_details input[name='par_val']").val(desc.parameters.default);
+			$("#project_details input[name='nthreads']").val(desc.threads);
+			$("#project_details textarea[name='comment']").val(desc.comment);
 		});
 	}
 }
@@ -110,7 +110,7 @@ function manage_project(action) {
 			id="new_project";
 			project.name = $("#new_project input[name='project_name']").val();
 		} else if (action == "edit") {
-			id="edit_project";
+			id="project_details";
 			project.name = $("#projects").val();
 		}
 
@@ -126,7 +126,7 @@ function manage_project(action) {
 		//update project list
 		$.get('/services/project/getProjects', function( data ) {
 
-			var projects_string = '<option value="">Choose A Project</option>',
+			var projects_string = '<option value="">Choose A Project</option>';
 			var	project_val = "";
 			
 			if (data !== "") {
