@@ -1,12 +1,25 @@
-var persist,
+var persist, strFile,
 	fs = require( 'fs' ),
 	path = require( 'path' ),
-	pathToFile = path.resolve( __dirname, '..', 'config', 'users.json' ),
-	oUsers = JSON.parse( fs.readFileSync( pathToFile ) );
+	pathToFile = path.resolve( __dirname, 'users.json' );
 
 persist = function() {
-	fs.writeFile( pathToFile, JSON.stringify( oUsers, null, 2 ) );
+	try {
+		fs.writeFile( pathToFile, JSON.stringify( oUsers, null, 2 ) );
+	} catch( e ) {
+		console.error( 'Persisting failed! Your user object will not be stored!' );
+		console.error( e );
+	}
 };
+
+try {
+	strFile = fs.readFileSync( pathToFile );
+	oUsers = JSON.parse( strFile );
+} catch( e ) {
+	console.log( 'Users object not existing, creating new one!' );
+	oUsers = {};
+	persist();
+}
 
 exports.getUser = function( name ) {
 	return oUsers[ name ];
