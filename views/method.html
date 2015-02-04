@@ -53,62 +53,58 @@ $.get('/services/method/getInstalled', function( data ) {
 	</ul>
 	<div class="tab-content">
 		<div id="tab1" class="tab active">
-			<form action=''>
-				<table id="new_method">
-					<tr>
-						<td>Method Name</td>
-						<td><input name="method_name" type="text" size="30"></td>
-					</tr>
-					<tr>
-						<td>Method Type</td>
-						<td>
-							<select id="method_types" name="method_type">
-								<option value="">Choose A Method Type</option>
-							</select>
-						</td>
-					</tr>
-					<tr>
-						<td>Comment</td>
-						<td>
-							<textarea name="comment"></textarea>
-						</td>
-					</tr>
-				</table>
-				<div class="center_div">
-					<input type="button" value="Create Method" onclick="manage_method('create');">
-				</div>
-			</form>
+			<table id="new_method">
+				<tr>
+					<td>Method Name</td>
+					<td><input name="method_name" type="text" size="30"></td>
+				</tr>
+				<tr>
+					<td>Method Type</td>
+					<td>
+						<select id="method_types" name="method_type">
+							<option value="">Choose A Method Type</option>
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<td>Comment</td>
+					<td>
+						<textarea name="comment"></textarea>
+					</td>
+				</tr>
+			</table>
+			<div>
+				<input type="button" value="Create Method" onclick="manage_method('create');">
+			</div>
 		</div>
 
 		<div id="tab2" class="tab">
-			<form action=''>
-				<table id="edit_method">
-					<tr>
-						<td>Method Name</td>
-						<td>
-							<select id="methods" name="method_name">
-								<option value="">Choose A Method</option>
-							</select>
-						</td>
-					</tr>
-					<tr>
-						<td>Method Type</td>
-						<td>
-							<input name="method_type" type="text" size="30" readonly>
-						</td>
-					</tr>
-					<tr>
-						<td>Comment</td>
-						<td>
-							<textarea name="comment"></textarea>
-						</td>
-					</tr>
-				</table>
-				<div class="center_div">
-					<input type="button" value="Edit Method" onclick="manage_method('edit');">
-					<input type="button" value="Delete Method" onclick="manage_method('delete');">
-				</div>
-			</form>
+			<table id="edit_method">
+				<tr>
+					<td>Method Name</td>
+					<td>
+						<select id="methods" name="method_name">
+							<option value="">Choose A Method</option>
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<td>Method Type</td>
+					<td>
+						<input name="method_type" type="text" size="30" readonly>
+					</td>
+				</tr>
+				<tr>
+					<td>Comment</td>
+					<td>
+						<textarea name="comment"></textarea>
+					</td>
+				</tr>
+			</table>
+			<div>
+				<input type="button" value="Edit Method" onclick="manage_method('edit');">
+				<input type="button" value="Delete Method" onclick="manage_method('delete');">
+			</div>
 		</div>
 	</div>
 </div>		

@@ -21,76 +21,72 @@
 	</ul>
 	<div class="tab-content">
 		<div id="tab1" class="tab active">
-			<form action=''>
-				<table id="new_project">
-					<tr>
-						<td>Project Name</td>
-						<td><input name="project_name" type="text" size="30"></td>
-					</tr>
-					<tr>
-						<td>Parameters Name</td>
-						<td><input name="par_list" type="text" size="30"></td>
-					</tr>
-					<tr>
-						<td>Default parameters value</td>
-						<td><input name="par_val" type="text" size="30"></td>
-					</tr>
-					<tr>
-						<td>Default number of threads</td>
-						<td><input name="nthreads" type="number" min="1" value="2"></td>
-					</tr>
-					<tr>
-						<td>Comment</td>
-						<td><textarea name="comment"></textarea></td>
-					</tr>
-				</table>
-				<div class="center_div">
-					<input type="button" value="Create Project" onclick="manage_project('create');">
-				</div>
-			</form>
+			<table id="new_project">
+				<tr>
+					<td>Project Name</td>
+					<td><input name="project_name" type="text" size="30"></td>
+				</tr>
+				<tr>
+					<td>Parameters Name</td>
+					<td><input name="par_list" type="text" size="30"></td>
+				</tr>
+				<tr>
+					<td>Default parameters value</td>
+					<td><input name="par_val" type="text" size="30"></td>
+				</tr>
+				<tr>
+					<td>Default number of threads</td>
+					<td><input name="nthreads" type="number" min="1" value="2"></td>
+				</tr>
+				<tr>
+					<td>Comment</td>
+					<td><textarea name="comment"></textarea></td>
+				</tr>
+			</table>
+			<div>
+				<input type="button" value="Create Project" onclick="manage_project('create');">
+			</div>
 		</div>
 
 		<div id="tab2" class="tab">
-			<form action=''>
-				<table id="project_details">
-					<tr>
-						<td>Project Name</td>
-						<td>
-							<select id="projects" name="project_name">
-								<option value="">Choose A Project</option>
-							</select>
-						</td>
-					</tr>
-					<tr>
-						<td>Parameters Name</td>
-						<td>
-							<input name="par_list" type="text" size="30" value="{{ connection.project.parameters.list }}">
-						</td>
-					</tr>
-					<tr>
-						<td>Default parameters value</td>
-						<td>
-							<input name="par_val" type="text" size="30" value="{{ connection.project.parameters.default }}">
-						</td>
-					</tr>
-					<tr>
-						<td>Default number of threads</td>
-						<td>
-							<input name="nthreads" type="number" min="1" value="{{ connection.project.threads }}">
-						</td>
-					</tr>
-					<tr>
-						<td>Comment</td>
-						<td>
-							<textarea name="comment">{{ connection.project.comment }}</textarea>
-						</td>
-					</tr>
-				</table>
-				<div class="center_div">
-					<input type="button" value="Edit Project" onclick="manage_project('edit');">
-					<input type="button" value="Delete Project" onclick="manage_project('delete');">
-				</div>
-			</form>
+			<table id="project_details">
+				<tr>
+					<td>Project Name</td>
+					<td>
+						<select id="projects" name="project_name">
+							<option value="">Choose A Project</option>
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<td>Parameters Name</td>
+					<td>
+						<input name="par_list" type="text" size="30" value="{{ connection.project.parameters.list }}">
+					</td>
+				</tr>
+				<tr>
+					<td>Default parameters value</td>
+					<td>
+						<input name="par_val" type="text" size="30" value="{{ connection.project.parameters.default }}">
+					</td>
+				</tr>
+				<tr>
+					<td>Default number of threads</td>
+					<td>
+						<input name="nthreads" type="number" min="1" value="{{ connection.project.threads }}">
+					</td>
+				</tr>
+				<tr>
+					<td>Comment</td>
+					<td>
+						<textarea name="comment">{{ connection.project.comment }}</textarea>
+					</td>
+				</tr>
+			</table>
+			<div>
+				<input type="button" value="Edit Project" onclick="manage_project('edit');">
+				<input type="button" value="Delete Project" onclick="manage_project('delete');">
+			</div>
 		</div>
 	</div>
 </div>				
