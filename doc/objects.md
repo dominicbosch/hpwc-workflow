@@ -7,17 +7,41 @@ Users Object:
 
     {
       "dominic": {
-        "public": {
-          "name": "dominic",
+        "pub": {
+          "username": "dominic",
           "configurations": {
-            "mint-conf1": {
-              "host": "",
-              "url": ""
+            "austin-1": {
+              "url": "dmi-austin.dmi.unibas.ch",
+              "port": "22",
+              "workspace": "",
+              "workhome": ""
             }
           },
           "console": "Welcome to the HPWC Workflow Manager!\n\n"
         },
-        "password": "[SHA-3 hashed password]"
+        "password": "[SHA-3 hashed password]",
+        "configurationKeys": {
+          "austin-1": "[privateKey-Austin-1]"
+        }
       }
     }
 
+
+Session Object:
+
+    "pub": {
+      [... user.pub: properties from Users Object above ...]
+      "selectedConnection": {
+        "name": "austin-1",
+        "project": {
+          "name": "prova",
+          "parameters": {
+            "list":"a b c",
+            "default":"10 10 10"
+          },
+          "threads":"4",
+          "comment":"test22"
+        }
+      },
+      "listConnections": [ "austin-1" ]
+    }

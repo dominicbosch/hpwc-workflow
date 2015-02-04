@@ -21,15 +21,16 @@ try {
 	persist();
 }
 
-exports.getUser = function( name ) {
-	return oUsers[ name ];
+exports.getUser = function( username ) {
+	return oUsers[ username ];
 };
 
-exports.storeUser = function( name, password ) {
-	oUsers[ name ] = {
-		user: {
-			name: name,
-			console: 'Welcome to the HPWC Workflow Manager!\n\n'
+exports.storeUser = function( username, password ) {
+	oUsers[ username ] = {
+		pub: {
+			username: username,
+			console: 'Welcome to the HPWC Workflow Manager!\n\n',
+			configurations: {}
 		},
 		password: password
 	};

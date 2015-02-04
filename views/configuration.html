@@ -1,0 +1,171 @@
+{% extends 'layout.html' %}
+
+{% block title %}Configurations{% endblock %}
+
+{% block head %}
+	<script type="text/javascript" src="../js/tab.js"></script>
+	<link rel="stylesheet" type="text/css" href="../css/tab.css" />
+	<script type="text/javascript">
+		var fetchInputValues = function( arr ) {
+			var obj = {};
+			for( var i = 0; i < arr.length; i++) {
+				obj[ arr[ i ] ] = $( 'input[name=' + arr[ i ] + ']' ).val();
+			}
+			return obj;
+		};
+
+		var setInfo = function( text, fail ) {
+			$( '#info' )
+				.addClass( fail ? 'wrong' : 'right' )
+				.removeClass( fail ? 'right' : 'wrong' )
+				.text( text );
+		};
+		
+		var initConfiguration = function() {
+			var oValues, isValid = true,
+				arrInputs = [
+					'name',
+					'url',
+					'port',
+					'username',
+					'password',
+					'workspace',
+					'workhome',
+					'sshpassword1',
+					'sshpassword2'
+				];
+	
+			setInfo( '' );
+			oValues = fetchInputValues( arrInputs );
+			console.log( oValues );
+			for( var el in oValues ) {
+				if( oValues[ el ] === '' ) isValid = false;
+			}
+			if( !isValid ) {
+				alert( 'You need to fill all input fields!' );
+			} else {
+				if( oValues.sshpassword1 !== oValues.sshpassword2 ) {
+					alert( 'SSH Passwords need to match!' );
+				} else {
+					$.post( '/services/configuration/create', oValues, function( answ ) {
+						setInfo( answ );
+					})
+					.fail( function( req ) {
+						setInfo( req.statusText, true );
+					});
+				}
+			}
+		};
+		$( document ).ready( function() {
+			$( ':password' ).on( 'input', function() {
+				if( $( 'input[name=sshpassword1]' ).val() ===  $( 'input[name=sshpassword2]' ).val() ) {
+					setInfo( '* Passwords match!' );
+				} else {
+					setInfo( '* Passwords do not match!', true );
+				}
+			});
+		});
+	</script>
+{% endblock %}
+
+
+{% block content_left %}
+<h1>Configuration</h1>
+<div class="tabs">
+	<ul class="tab-links">
+		<li class="active"><a href="#tab1">New Configuration</a></li>
+		<!-- <li><a href="#tab2">Edit Configuration</a></li> -->
+	</ul>
+	<div class="tab-content">
+		<div id="tab1" class="tab active">
+			<table id="new_project">
+				<tr>
+					<td>Configuration Name</td>
+					<td><input name="name" type="text"></td>
+				</tr>
+				<tr>
+					<td>Host Url</td>
+					<td><input name="url" type="text"></td>
+				</tr>
+				<tr>
+					<td>Host Port</td>
+					<td><input name="port" type="text"></td>
+				</tr>
+				<tr>
+					<td>Host Username</td>
+					<td><input name="username" type="text"></td>
+				</tr>
+				<tr>
+					<td>Host Password</td>
+					<td><input name="password" type="password"></td>
+				</tr>
+				<tr>
+					<td>Workspace</td>
+					<td><input name="workspace" type="text"></td>
+				</tr>
+				<tr>
+					<td>Workhome</td>
+					<td><input name="workhome" type="text"></td>
+				</tr>
+				<tr>
+					<td>SSH Key Password</td>
+					<td><input name="sshpassword1" type="password"></td>
+				</tr>
+				<tr>
+					<td>Verify SSH Key Password</td>
+					<td><input name="sshpassword2" type="password"></td>
+				</tr>
+			</table>
+			<div class="center_div">
+				<input type="button" value="Init Configuration" onclick="initConfiguration();">
+			</div>
+		</div>
+<!-- 
+		<div id="tab2" class="tab">
+			<table id="project_details">
+				<tr>
+					<td>Project Name</td>
+					<td>
+						<select id="projects" name="project_name">
+							<option value="">Choose A Project</option>
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<td>Parameters Name</td>
+					<td>
+						<input name="par_list" type="text" size="30" value="{{ connection.project.parameters.list }}">
+					</td>
+				</tr>
+				<tr>
+					<td>Default parameters value</td>
+					<td>
+						<input name="par_val" type="text" size="30" value="{{ connection.project.parameters.default }}">
+					</td>
+				</tr>
+				<tr>
+					<td>Default number of threads</td>
+					<td>
+						<input name="nthreads" type="number" min="1" value="{{ connection.project.threads }}">
+					</td>
+				</tr>
+				<tr>
+					<td>Comment</td>
+					<td>
+						<textarea name="comment">{{ connection.project.comment }}</textarea>
+					</td>
+				</tr>
+			</table>
+			<div class="center_div">
+				<input type="button" value="Edit Project" onclick="manage_project('edit');">
+				<input type="button" value="Delete Project" onclick="manage_project('delete');">
+			</div>
+		</div> -->
+	</div>
+</div>		
+
+{% endblock %}
+
+{% block content_right %}
+	<p id="info"></p>
+{% endblock %}

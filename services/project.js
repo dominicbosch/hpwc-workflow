@@ -1,86 +1,65 @@
-var express = require('express'),
-	ssh = require('../modules/ssh'),
-	path = require('path'),
-	fs = require('fs'),
+'use strict';
+
+var express = require( 'express' ),
+	ssh = require( '../modules/ssh' ),
+	path = require( 'path' ),
+	fs = require( 'fs' ),
 	router = express.Router();
 
-cleanProject = function( req, res ) {
-	delete req.session.public.connection.project;
-	res.send("");
-};
-
-//cleanProject
-router.get('/cleanProject', cleanProject);
-
 // GET projects list. 
-router.get('/getProjects', function(req, res) {
-
+router.get( '/get/:connection', function( req, res ) {
 	var command = 'workflow project -l';
-		
-	ssh.execWorkComm( req.session.public, command, function(data) {
-		console.log( 'ANSWER FROM SSH: ' + data );
-		var list = "";
-		var pos = data.indexOf(':');
-		if (pos != -1) {
-			var list = data.substring(pos + 1).trim().split(" ");
-		} 
-		console.log("LIST: " + list);
-		res.send(list);
+	ssh.getAndSendRemoteList( req, res, req.params.connection, command );
+});
+
+// TODO Should this be moved into the session service?
+// GET descriptor. 
+router.get( '/getDescriptor/:connection/:project', function( req, res ) {
+	var oConn = req.session.pub.configurations[ connection ],
+		filename = path.join( oConn.workspace, req.query.project, '.project' );
+
+	ssh.getRemoteJSON( req, res, req.params.connection, filename, function( err, json ) {
+		if( !err ) {
+			res.send( json );
+			//store data in session
+			// FIXME Really store in session?
+			req.session.pub.selectedConnection.project = json;
+		}
 	});
 });
 
-// GET descriptor. 
-router.get('/getDescriptor', function(req, res) {
-	
-	var user = req.session.public.user;
-	var connection = req.session.public.connection;
+// Manage project 
+router.post( '/manage/:connection', function( req, res ) {
+	var arrCommand, opt = '',
+		conn = req.params.connection,
+		oBody = req.body;
 
-	var project = req.query.project;
-	var descriptor = "";
-
-	if (project == "") {
-		res.send(descriptor);
+	if( oBody.action === 'delete' ) {
+		arrCommand = [
+			'workflow', 'project', '-d',
+			'-p', '"' + oBody.name + '"'
+		];
 	} else {
-		var desc_name = '.project';
-		var filename = path.join(connection.workspace, project, desc_name);
-
-		ssh.getRemoteFile( user.name, filename, function(data) {
-
-			console.log( 'ANSWER FROM SSH: ' + data );
-			descriptor = JSON.parse(data);
-
-			//store data in session
-			req.session.public.connection.project = descriptor;
-
-			res.send(descriptor);
-		});
-	}
-});
-
-// Manage project. 
-router.post('/manage', function(req, res) {
-	
-	var opt = '';
-	var project = req.body;
-
-	if (project.action === "delete") {
-		opt="d";
-		command = "workflow project -" + opt + " -p " + project.name;
-	} else {
-		if (project.action === "create") {
-			opt="c";
-		} else if (project.action === "edit") {
-			opt="m";
+		if ( oBody.action === 'create' ) {
+			opt = '-c';
+		} else if ( oBody.action === 'edit' ) {
+			opt = '-m';
 		}
-
-		command = "workflow project -" + opt + " -p \"" + project.name + 
-			"\" --params " + project.par_name + " --values " + project.par_val + 
-			" --threads " + project.nthreads + " --comment \"" + project.comment + "\"";
+		arrCommand = [
+			'workflow', 'project', opt,
+			'-p', '"' + oBody.name + '"',
+			'--params', oBody.par_name,
+			'--values', oBody.par_val,
+			'--threads', oBody.nthreads,
+			'--comment', '"' + oBody.comment + '"'
+		];
 	}
 
-	ssh.execWorkComm( req.session.public, command, function( data ) {
-		console.log( 'ANSWER FROM SSH: ' + data );
-		res.send( data );
+	ssh.execWorkComm( req, res, conn, arrCommand.join(), function( err, data ) {
+		if( !err ) {
+			console.log( 'Project manage command (' + arrCommand.join() + ') got data: ' + data );
+			res.send( data );
+		}
 	});
 });
 

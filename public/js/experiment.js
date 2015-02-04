@@ -88,7 +88,7 @@ $(document).ready(function() {
 		var project = $(this).val();
 
 		if (project == "") {
-			$.get('/services/project/cleanProject', function( data ) {
+			$.get('/services/session/cleanProject', function( data ) {
 				
 			});
 		} else {

@@ -13,7 +13,7 @@
 		$(document).ready(function() {
 
 			//Get the possible configuration and check for the current configuration reading the project
-			$.get('/services/gen/getConfigs', function( data ) {
+			$.get( '/services/configuration/get', function( data ) {
 
 				if (data !== "") {
 
@@ -71,6 +71,9 @@
 
 					{% endif %}
 				}
+			})
+			.fail( function( xhr ) {
+				console.log(' Request failed: (' + xhr.status + ') ' + xhr.statusText );
 			});
 		});		
 	</script>

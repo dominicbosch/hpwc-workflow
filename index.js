@@ -1,3 +1,5 @@
+'use strict';
+
 var config, arrViews, isValidRequest,
 	express = require( 'express' ),
 	session = require( 'express-session' ),
@@ -5,6 +7,7 @@ var config, arrViews, isValidRequest,
 	path = require( 'path' ),
 	swig = require( 'swig' ),
 	fs = require( 'fs' ),
+	ssh = require( './modules/ssh' ),
 	app = express();
 
 process.on( 'uncaughtException', function( e ) {
@@ -21,7 +24,7 @@ global.persistence = require( './persistence_handlers/' + config.session.method 
 isValidRequest = function( req ) {
 	var name = req.params[ 0 ];
 
-	if( !req.session.public ) {
+	if( !req.session.pub ) {
 		if( name === 'login' || name === 'register' ) {
 			return true;
 		} else return false;
@@ -62,8 +65,10 @@ exports.init = function( args ) {
 		var view = 'index';
 		
 		if( isValidRequest( req ) ) view = req.params[ 0 ];
-		
-		res.render( view, req.session.public );
+		if( req.session.pub ) {
+			req.session.pub.listConnections = ssh.getOpenConnections();
+		}
+		res.render( view, req.session.pub );
 	});
 	
 	// Dynamically load all services from the services folder

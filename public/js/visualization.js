@@ -192,7 +192,7 @@ function cleanProjectForm() {
 
 function update_project( project ) {
 	if (project == "") {
-		$.get('/services/project/cleanProject', function( data ) {
+		$.get('/services/session/cleanProject', function( data ) {
 			cleanProjectForm();
 		});
 	} else {
