@@ -1,4 +1,6 @@
-var config, arrViews, isValidRequest,
+'use strict';
+
+var config, arrViews, isValidRequest, ssh,
 	express = require( 'express' ),
 	session = require( 'express-session' ),
 	bodyParser = require( 'body-parser' ),
@@ -7,21 +9,18 @@ var config, arrViews, isValidRequest,
 	fs = require( 'fs' ),
 	app = express();
 
-process.on( 'uncaughtException', function( e ) {
-	console.log( 'This is a general exception catcher, but should really be removed in the future!' );
-	console.log( 'Error: ', e );
-});
 
 // Load the configuration file.
 // This will throw an error if the configuration file is invalid.
 config = JSON.parse( fs.readFileSync( __dirname + '/config/system.json' ) );
 arrViews = fs.readdirSync( __dirname + '/views' );
-global.persistence = require( './persistence_handlers/' + config.session.method );
+global.persistence = require( './persistence_handlers/' + config.persistence.method );
+ssh = require( './modules/ssh' ); // We need to load this after setting the persistence handler
 
 isValidRequest = function( req ) {
 	var name = req.params[ 0 ];
 
-	if( !req.session.public ) {
+	if( !req.session.pub ) {
 		if( name === 'login' || name === 'register' ) {
 			return true;
 		} else return false;
@@ -41,6 +40,11 @@ exports.init = function( args ) {
 	if( args.development ) {
 		app.set( 'view cache', false );
 		swig.setDefaults({ cache: false });
+	} else {
+		process.on( 'uncaughtException', function( e ) {
+			console.log( 'This is a general exception catcher, but should really be removed in the future!' );
+			console.log( 'Error: ', e );
+		});
 	}
 
 	app.engine( 'html', swig.renderFile );
@@ -62,8 +66,10 @@ exports.init = function( args ) {
 		var view = 'index';
 		
 		if( isValidRequest( req ) ) view = req.params[ 0 ];
-		
-		res.render( view, req.session.public );
+		if( req.session.pub ) {
+			req.session.pub.listConnections = ssh.getOpenConnections();
+		}
+		res.render( view, req.session.pub );
 	});
 	
 	// Dynamically load all services from the services folder

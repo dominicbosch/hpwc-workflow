@@ -1,4 +1,6 @@
-var persist, strFile,
+'use strict';
+
+var persist, strFile, oUsers,
 	fs = require( 'fs' ),
 	path = require( 'path' ),
 	pathToFile = path.resolve( __dirname, 'users.json' );
@@ -21,18 +23,34 @@ try {
 	persist();
 }
 
-exports.getUser = function( name ) {
-	return oUsers[ name ];
+exports.getUser = function( username ) {
+	return oUsers[ username ];
 };
 
-exports.storeUser = function( name, password ) {
-	oUsers[ name ] = {
-		user: {
-			name: name,
-			console: 'Welcome to the HPWC Workflow Manager!\n\n'
+exports.storeUser = function( username, password, privKey, pubKey ) {
+	oUsers[ username ] = {
+		pub: {
+			username: username,
+			console: 'Welcome to the HPWC Workflow Manager!\n\n',
+			configurations: {}
 		},
-		password: password
+		password: password,
+		privateKey: privKey,
+		publicKey: pubKey
 	};
+	console.log( 'User "' + username + '" registered' );
 	persist();
 };
 
+exports.getConfiguration = function( username, confname ) {
+	var oUser = exports.getUser( username );
+	return oUser.pub.configurations[ confname ];
+}
+
+exports.storeConfiguration = function( username, args ) {
+	var oUser = exports.getUser( username );
+	delete args.password;
+	oUser.pub.configurations[ args.name ] = args;
+	console.log( 'Configuration "' + args.name + '" for user "' + username + '" stored' );
+	persist();
+}

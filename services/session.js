@@ -1,3 +1,5 @@
+'use strict';
+
 var express = require( 'express' ),
 	router = express.Router(),
 	persistence = global.persistence;
@@ -6,9 +8,7 @@ router.post( '/login', function( req, res ) {
 	var oUser = persistence.getUser( req.body.username );
 
 	if( oUser && oUser.password === req.body.password ) {
-		req.session.public = {
-			user : oUser.user
-		};
+		req.session.pub = oUser.pub;
 		res.send( 'Login successful!' );
 	} else {
 		res.status( 401 );
@@ -17,8 +17,13 @@ router.post( '/login', function( req, res ) {
 });
 
 router.post( '/logout', function( req, res ) {
-	delete req.session.public;
+	delete req.session.pub;
 	res.send( 'Goodbye!' );
+});
+
+router.get( '/cleanProject', function( req, res ) {
+	delete req.session.pub.selectedConnection.project;
+	res.send( 'Project cleaned from session' );
 });
 
 module.exports = router;

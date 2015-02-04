@@ -64,6 +64,18 @@ table {
 	margin: 0 auto;
 }
 
+td.threecol {
+	text-align: center;
+}
+
+#info.wrong {
+	color: darkred;
+}
+
+#info.right {
+	color: darkgreen;
+}
+
 @media (max-width: 820px) {
 	section > div.left {
 		width: 100%;
