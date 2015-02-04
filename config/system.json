@@ -1,6 +1,8 @@
 {
 	"session": {
-		"secret": "[TODO] Change in production environment",
+		"secret": "[TODO] Change in production environment"
+	},
+	"persistence": {
 		"method": "filesystem"
 	}
 }
