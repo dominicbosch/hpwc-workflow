@@ -15,15 +15,12 @@
 			//Get the possible configuration and check for the current configuration reading the project
 			$.get( '/services/configuration/get', function( data ) {
 
-				if (data !== "") {
+				if ( data ) {
 
 					//put data inside "configs" element
-					var i = 1;
-
-					data.forEach(function(config) {
-						$('#configs').append($('<option>').attr('value', config).text('Configuration' + i));
-						i = i + 1;
-					});
+					for ( var config in data ) {
+						$('#configs').append($('<option>').attr('value', config).text(config));
+					}
 
 					{% if connection %}
 
@@ -99,9 +96,11 @@
 		{% endif %}
 	</nav>
 	<section>
-		<div class="left">{% block content_left %}{% endblock %}</div>
+		<div class="left">
+			{% block content_left %}{% endblock %}
+		</div>
 		<div class="right">
-		{% if user %}
+		{% if username %}
 		{% block shared_content_right %}
 			<div id="preview">
 				<div id="conf_title">

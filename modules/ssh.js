@@ -27,7 +27,7 @@ exports.createConfiguration = function( username, args, cb ) {
 			oUser = persistence.getUser( username );
 			cmd = 'mkdir -p ~/.ssh && echo "' + oUser.publicKey + '" >> ~/.ssh/authorized_keys && echo "OK!"';
 			oConn.exec( cmd, function( err, stream ) {
-				var data = '';
+				var oConf, data = '';
 				if ( err ) {
 					console.error( err );
 					cb( err );
@@ -36,8 +36,8 @@ exports.createConfiguration = function( username, args, cb ) {
 						.on( 'end', function() {
 							oConn.end();
 							if( data === 'OK!\n' ) {
-								persistence.storeConfiguration( username, args );
-								cb( null );
+								oConf = persistence.storeConfiguration( username, args );
+								cb( null, oConf );
 							} else {
 								cb( new Error( data ) );
 							}

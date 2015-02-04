@@ -53,4 +53,5 @@ exports.storeConfiguration = function( username, args ) {
 	oUser.pub.configurations[ args.name ] = args;
 	console.log( 'Configuration "' + args.name + '" for user "' + username + '" stored' );
 	persist();
+	return args;
 }

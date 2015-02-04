@@ -31,12 +31,13 @@ router.post( '/create', function( req, res ) {
 		res.status( 400 );
 		res.send( 'Missing Parameters!' );
 	} else {
-		ssh.createConfiguration( req.session.pub.username, oBody, function( err ) {
+		ssh.createConfiguration( req.session.pub.username, oBody, function( err, oConf ) {
 			if( err ) {
 				console.error( err );
 				res.status( 400 );
 				res.send( 'Connection initialization failed: ' + err.message );
 			} else {
+				req.session.pub.configurations[ oConf.name ] = oConf;
 				res.send( 'Connection initialization successful!' );
 			}
 		});
@@ -92,7 +93,8 @@ router.get( '/connect', function( req, res ) {
 });
 
 router.get( '/get', function( req, res ) {
-	res.send( req.session.pub.configurations );
+	var pub = (req.session.pub || {} );
+	res.send( pub.configurations );
 });
 
 module.exports = router;
