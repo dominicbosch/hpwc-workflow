@@ -71,11 +71,16 @@ $(document).ready(function() {
 		update_project( project );
 	});
 
-
+	
 	$("#fix_par").on( "change", function() {
 		if ($(this).is(":checked")) {
-
-			$("#exp_details td[name='parameters'] input").prop('disabled', true);
+			var n = $( "#exp_details td[name='parameters'] input:checked" ).length;
+			if ( n > 1) {
+				$(this).prop('checked', false);
+				alert("To fix a property, only 1 correspondent value has to be selected");
+			} else {
+				$("#exp_details td[name='parameters'] input").prop('disabled', true);
+			}
 		} else {
 			if ($("#fix_met").is(":checked") || $("#fix_thr").is(":checked")) {
 				$("#exp_details td[name='parameters'] input").prop('disabled', false);
@@ -87,8 +92,13 @@ $(document).ready(function() {
 	});
 	$("#fix_met").on( "change", function() {
 		if ($(this).is(":checked")) {
-
-			$("#exp_details td[name='methods'] input").prop('disabled', true);
+			var n = $( "#exp_details td[name='methods'] input:checked" ).length;
+			if ( n > 1) {
+				$(this).prop('checked', false);
+				alert("To fix a property, only 1 correspondent value has to be selected");
+			} else {
+				$("#exp_details td[name='methods'] input").prop('disabled', true);
+			}
 		} else {
 			if ($("#fix_par").is(":checked") || $("#fix_thr").is(":checked")) {
 				$("#exp_details td[name='methods'] input").prop('disabled', false);
@@ -100,8 +110,13 @@ $(document).ready(function() {
 	});
 	$("#fix_thr").on( "change", function() {
 		if ($(this).is(":checked")) {
-
-			$("#exp_details td[name='nthreads'] input").prop('disabled', true);
+			var n = $( "#exp_details td[name='nthreads'] input:checked" ).length;
+			if ( n > 1) {
+				$(this).prop('checked', false);
+				alert("To fix a property, only 1 correspondent value has to be selected");
+			} else {
+				$("#exp_details td[name='nthreads'] input").prop('disabled', true);
+			}
 		} else {
 			if ($("#fix_par").is(":checked") || $("#fix_met").is(":checked")) {
 				$("#exp_details td[name='nthreads'] input").prop('disabled', false);
@@ -168,19 +183,6 @@ function update_output( output ) {
 			$("#exp_details td[name='nthreads']").html(thr_html);
 		//	$("#exp_details td[name='nthreads'] input").prop('disabled', true);
 			$("#exp_details td[name='nexecs']").html(data.executions);
-			$("input.smallselector").on( 'click', function( evt ) {
-				if ($(this).is(":checked")) {
-
-				//	$( this ).closest( 'td' ).prop( 'disabled', false );
-				} else {
-					
-				}
-
-				console.log($( this ));
-				console.log($( this ).closest( 'td' ).attr('name'));
-				
-			//	$( this ).prop( 'checked', false );
-			});
 		});
 	}
 }
