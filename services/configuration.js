@@ -27,7 +27,7 @@ router.post( '/create', function( req, res ) {
 		oBody = req.body;
 
 	if( !oBody.name || !oBody.url || !oBody.port || !oBody.workspace || !oBody.workhome
-			|| !oBody.username || !oBody.hostpassword  || !oBody.keypassword ) {
+			|| !oBody.username || !oBody.password ) {
 		res.status( 400 );
 		res.send( 'Missing Parameters!' );
 	} else {
@@ -35,7 +35,7 @@ router.post( '/create', function( req, res ) {
 			if( err ) {
 				console.error( err );
 				res.status( 400 );
-				res.send( 'Connection initialization failed!' );
+				res.send( 'Connection initialization failed: ' + err.message );
 			} else {
 				res.send( 'Connection initialization successful!' );
 			}

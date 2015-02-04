@@ -43,7 +43,7 @@ router.post( '/manage/:connection', function( req, res ) {
 		if ( oBody.action === 'create' ) {
 			opt = '-c';
 		} else if ( oBody.action === 'edit' ) {
-			opt = '-m';
+			opt = '-e';
 		}
 		arrCommand = [
 			'workflow', 'project', opt,

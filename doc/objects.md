@@ -11,18 +11,19 @@ Users Object:
           "username": "dominic",
           "configurations": {
             "austin-1": {
+              "name": "austin-1",
               "url": "dmi-austin.dmi.unibas.ch",
               "port": "22",
-              "workspace": "",
-              "workhome": ""
+              "username": "user1"
+              "workspace": "~/workspace",
+              "workhome": "~/workhome"
             }
           },
           "console": "Welcome to the HPWC Workflow Manager!\n\n"
         },
         "password": "[SHA-3 hashed password]",
-        "configurationKeys": {
-          "austin-1": "[privateKey-Austin-1]"
-        }
+        "privateKey": "[privateKey]",
+        "publicKey": "[publicKey]"
       }
     }
 

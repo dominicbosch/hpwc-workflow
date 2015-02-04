@@ -30,41 +30,25 @@
 					'username',
 					'password',
 					'workspace',
-					'workhome',
-					'sshpassword1',
-					'sshpassword2'
+					'workhome'
 				];
 	
 			setInfo( '' );
 			oValues = fetchInputValues( arrInputs );
-			console.log( oValues );
 			for( var el in oValues ) {
 				if( oValues[ el ] === '' ) isValid = false;
 			}
 			if( !isValid ) {
 				alert( 'You need to fill all input fields!' );
 			} else {
-				if( oValues.sshpassword1 !== oValues.sshpassword2 ) {
-					alert( 'SSH Passwords need to match!' );
-				} else {
-					$.post( '/services/configuration/create', oValues, function( answ ) {
-						setInfo( answ );
-					})
-					.fail( function( req ) {
-						setInfo( req.statusText, true );
-					});
-				}
+				$.post( '/services/configuration/create', oValues, function( answ ) {
+					setInfo( answ );
+				})
+				.fail( function( xhr ) {
+					setInfo( xhr.responseText, true );
+				});
 			}
 		};
-		$( document ).ready( function() {
-			$( ':password' ).on( 'input', function() {
-				if( $( 'input[name=sshpassword1]' ).val() ===  $( 'input[name=sshpassword2]' ).val() ) {
-					setInfo( '* Passwords match!' );
-				} else {
-					setInfo( '* Passwords do not match!', true );
-				}
-			});
-		});
 	</script>
 {% endblock %}
 
@@ -106,14 +90,6 @@
 				<tr>
 					<td>Workhome</td>
 					<td><input name="workhome" type="text"></td>
-				</tr>
-				<tr>
-					<td>SSH Key Password</td>
-					<td><input name="sshpassword1" type="password"></td>
-				</tr>
-				<tr>
-					<td>Verify SSH Key Password</td>
-					<td><input name="sshpassword2" type="password"></td>
 				</tr>
 			</table>
 			<div class="center_div">

@@ -5,7 +5,7 @@ var express = require( 'express' ),
 	router = express.Router();
 
 // GET methods list. 
-router.get( '/get/:connection/:project', function( req, res ) {
+router.get( '/getAll/:connection/:project', function( req, res ) {
 	var command = 'workflow project_module -l -p ' + req.params.project;
 	ssh.getAndSendRemoteList( req, res, req.params.connection, command );
 });
@@ -17,7 +17,7 @@ router.get( '/getInstalled/:connection', function( req, res ) {
 });
 
 // GET descriptor. 
-router.get( '/getDescriptor/:connection/:project/:method', function( req, res ) {	
+router.get( '/get/:connection/:project/:method', function( req, res ) {	
 	var connection = req.params.connection,
 		project = req.params.project,
 		method = req.params.method,
@@ -46,9 +46,8 @@ router.post( '/manage/:connection/:project', function( req, res ) {
 		if( oBody.action === 'create' ) {
 			opt = '-c';
 		} else if ( oBody.action === 'edit' ) {
-			opt = '-m';
+			opt = '-e';
 		}
-		// FIXME if oBody.action === 'edit' then there is twice the -m flag in the command??
 		arrCommand = [
 			'workflow', 'project_module', opt,
 			'-p', '"' + project + '"',

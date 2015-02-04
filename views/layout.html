@@ -5,7 +5,7 @@
 	<title>HPWC Workflow - {% block title %}{% endblock %}</title>
 	<script type="text/javascript" src="../js/jquery-1.11.2.min.js"></script>
 	<link rel="stylesheet" href="../css/layout.css">
-	{% if user %}
+	{% if username %}
 	<script type="text/javascript">
 	
 		"use strict";
@@ -91,7 +91,7 @@
 		<a href="/views/method">Method</a>
 		<a href="/views/experiment">Experiment</a>
 		<a href="/views/visualization">Visualization</a>
-		{% if user %}
+		{% if username %}
 			<a href="/views/logout">Logout</a>
 		{% else %}
 			<a href="/views/login">Login</a>
