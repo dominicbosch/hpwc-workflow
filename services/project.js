@@ -7,14 +7,18 @@ var express = require( 'express' ),
 	router = express.Router();
 
 // GET projects list. 
-router.get( '/get/:connection', function( req, res ) {
+router.get( '/getAll/:connection', function( req, res ) {
 	var command = 'workflow project -l';
-	ssh.getAndSendRemoteList( req, res, req.params.connection, command );
+//	if (ssh.isConnOpen ( req.session.pub.username, req.params.connection )) {
+		ssh.getAndSendRemoteList( req, res, req.params.connection, command );
+//	} else {
+//		res.send("");
+//	}
 });
 
 // TODO Should this be moved into the session service?
 // GET descriptor. 
-router.get( '/getDescriptor/:connection/:project', function( req, res ) {
+router.get( '/get/:connection/:project', function( req, res ) {
 	var oConn = req.session.pub.configurations[ connection ],
 		filename = path.join( oConn.workspace, req.query.project, '.project' );
 

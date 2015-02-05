@@ -53,6 +53,9 @@ router.get( '/connect/:name', function( req, res ) {
 			res.status( 400 );
 			res.send("Connection failed!");
 		} else {
+			if (req.session.pub.selectedConnection) {
+				req.session.pub.selectedConnection.status = true;
+			}
 			res.send("Connection Created!");
 		}
 	});
@@ -60,6 +63,9 @@ router.get( '/connect/:name', function( req, res ) {
 
 router.get( '/disconnect/:name', function( req, res ) {
 	if ( ssh.closeConnection( req.session.pub.username, req.params.name ) ) {
+		if (req.session.pub.selectedConnection) {
+			req.session.pub.selectedConnection.status = false;
+		}
 		res.send("Connection Closed!");
 	} else {
 		res.status( 404 );
@@ -67,34 +73,36 @@ router.get( '/disconnect/:name', function( req, res ) {
 	}
 });
 
-router.get( '/connect', function( req, res ) {
-	var user = req.session.pub;
-
-	var conf_file = req.query.conf;
-	var	conf_file_path = path.join("users", user.name, "conf");
-
-	if (conf_file) { //read specific file
-		var connObj = JSON.parse(fs.readFileSync(path.join(conf_file_path, conf_file)));
-		console.log("reading conf file");
-		if (connObj) {
-			ssh.connectToHost( connObj, user.name, function(err, data) {
-				console.log( 'ANSWER FROM CONNECTION: ' + data );
-
-				//save if connection ok
-				req.session.pub.connections[ connObj.name ] = connObj;
-
-				res.send(connObj);
-			});
-		}
-	} else { //read all configurations
-		var arr = fs.readdirSync(conf_file_path);
-		res.send(arr.filter( function(d){ return d.substring(d.length-5)==='.json'}));
-	}
-});
-
-router.get( '/get', function( req, res ) {
+router.get( '/getAll', function( req, res ) {
 	var pub = (req.session.pub || {} );
 	res.send( pub.configurations );
+});
+
+router.get( '/get/:name', function( req, res ) {
+	var pub = req.session.pub;
+	if ( pub ) {
+		//requesting a connection set also the connection and the status in session
+		ssh.isConnOpen ( pub.username, req.params.name, function ( isOpen ) {
+			pub.selectedConnection = {
+									name : req.params.name,
+									status : isOpen
+								};
+			res.send( pub.configurations[ req.params.name ] );
+		});
+	} else {
+		res.send( {} );
+	}
+	
+});
+
+router.get( '/getStatus/:name', function( req, res ) {
+	if (ssh.isConnOpen ( req.session.pub.username, req.params.connection )) {
+		res.send(true);
+		//res.send( "open" );
+	} else {
+		res.send(false);
+		//res.send("closed");
+	}
 });
 
 module.exports = router;

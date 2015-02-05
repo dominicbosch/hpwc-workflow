@@ -1,71 +1,5 @@
 "use strict";
 
-$(document).ready(function() {
-		
-	//create handler for changing of configuraton
-	$("#configs").change( function() {
-
-		//clean project list
-		$("#projects").html("<option value=''>Choose A Project</option>");
-
-		cleanProjectForm();
-
-		var conf_file = $(this).val();
-		if (conf_file == "") {
-			$("#conf_table td[name='hostname']").html("--");
-			$("#conf_table td[name='host']").html("--");
-			$("#conf_table td[name='username']").html("--");
-			$("#conf_table td[name='workflow']").html("--");
-			$("#conf_table td[name='workspace']").html("--");
-
-			//close the connection
-			$.get('/services/gen/ssh/close', function( data ) {
-				alert( data );
-			});
-		} else {
-			$.get('/services/gen/getConfigs?conf=' + conf_file, function( data ) {
-				var obj = data;
-				$("#conf_table td[name='hostname']").html(obj.hostname);
-				$("#conf_table td[name='host']").html(obj.url);
-				$("#conf_table td[name='username']").html(obj.username);
-				$("#conf_table td[name='workflow']").html(obj.workhome);
-				$("#conf_table td[name='workspace']").html(obj.workspace);
-
-				//when the configuration change, we read again the project
-				$.get('/services/project/getProjects', function( data ) {
-
-					var projects_string = '<option value="">Choose A Project</option>';
-					
-					if (data !== "") {
-						data.forEach(function(project) {
-							projects_string += '<option value="' + project + '">' + project + '</option>';
-						});
-					}
-
-					$('#projects').html(projects_string);
-/*					
-					//remove old values except for the first
-					$('#projects option:not(:first-child)').remove();
-					//put data inside "projects" element
-					if (data !== "") {
-						data.forEach(function(project) {
-	    					$('#projects').append($('<option>').attr('value', project).text(project));
-						});
-					}
-*/					
-				});
-			});
-		}
-	});
-
-	//when the project selected change, we read the value of parameters (user change)
-	$("#projects").change( function() {
-		var project = $(this).val();
-		$("#resp_textarea").val("");
-		update_project( project );
-	});
-});
-
 function cleanProjectForm() {
 	$("#project_details input[name='par_list']").val("");
 	$("#project_details input[name='par_val']").val("");
@@ -96,9 +30,9 @@ function manage_project(action) {
 	var	project = {
 			action: action
 		};
-	var conf_file = $("#configs").val();
+	var config_name = $("#configs").val();
 
-	if (conf_file === "") {
+	if (config_name === "") {
 		alert("Select A Configuration");
 		return;
 	}
@@ -155,3 +89,75 @@ function manage_project(action) {
 		});
 	});
 }
+
+$(document).ready(function() {
+		
+	//create handler for changing of configuraton
+	$("#configs").change( function() {
+
+		//clean project list
+		$("#projects").html("<option value=''>Choose A Project</option>");
+
+		cleanProjectForm();
+
+		var config_name = $(this).val();
+		if (config_name == "") {
+
+			$('#connButton').prop('hidden', false);
+			$('#disconnectButton').prop('hidden', true);
+
+			//remove the connection from the session
+			$.get('/services/session/cleanConnection', function( data ) {
+				cleanConnectionForm();
+			});
+
+		} else {
+			//fill configuration form
+			$.get('/services/configuration/get/' + config_name, function( config ) {
+
+				if ( config ) {
+					setConnectionForm( config );
+					$.get('/services/session/getSelectedConnStatus/', function( status ) {
+						if (status) {
+							$('#connButton').prop('hidden', true);
+							$('#disconnectButton').prop('hidden', false);
+							getAndSetProjects( config.name );
+						}
+					});
+				} else {
+					alert ("Configuration not found");
+				}
+				/*
+				if ( data ) {
+					var config = data[ 0 ];
+					var config_status = data[ 1 ];
+					//set connection in session
+					var selectedConnection = JSON.stringify({
+						name : config.name,
+						status : config_status
+					});
+
+					$.get('/services/session/setConnection/' + selectedConnection, function( data ) {
+						setConnectionForm( config );
+						if (config_status) {
+							$('#connButton').prop('hidden', true);
+							$('#disconnectButton').prop('hidden', false);
+							getAndSetProjects( config.name );
+						}
+					});
+				} else {
+					alert ("Configuration not found");
+				}
+				*/
+			});
+		}
+	});
+
+	//when the project selected change, we read the value of parameters (user change)
+	$("#projects").change( function() {
+		var project = $(this).val();
+		$("#resp_textarea").val("");
+		update_project( project );
+	});
+
+});

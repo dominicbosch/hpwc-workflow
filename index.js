@@ -67,7 +67,7 @@ exports.init = function( args ) {
 		
 		if( isValidRequest( req ) ) view = req.params[ 0 ];
 		if( req.session.pub ) {
-			req.session.pub.listConnections = ssh.getOpenConnections();
+			req.session.pub.listConnections = ssh.getOpenConnections( req.session.pub.username );
 		}
 		res.render( view, req.session.pub );
 	});

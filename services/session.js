@@ -26,4 +26,22 @@ router.get( '/cleanProject', function( req, res ) {
 	res.send( 'Project cleaned from session' );
 });
 
+router.get( '/cleanConnection', function( req, res ) {
+	delete req.session.pub.selectedConnection;
+	res.send( 'Connection cleaned from session' );
+});
+
+router.get( '/getSelectedConnStatus', function( req, res ) {
+	res.send(req.session.pub.selectedConnection.status);
+});
+
+/*
+router.get( '/setSelectedConnStatus/:status', function( req, res ) {
+	if (req.session.pub.selectedConnection) {
+		req.session.pub.selectedConnection.status = req.params.status;
+	}
+	res.send("Status: " + req.params.status);
+});
+*/
+
 module.exports = router;

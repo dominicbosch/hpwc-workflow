@@ -6,14 +6,23 @@
 	<script type="text/javascript" src="../js/jquery-1.11.2.min.js"></script>
 	<link rel="stylesheet" href="../css/layout.css">
 	{% if username %}
+	<script type="text/javascript" src="../js/layout.js"></script>
 	<script type="text/javascript">
 	
 		"use strict";
 
 		$(document).ready(function() {
 
+			$('#connButton').on( 'click', function() {
+				connect();
+			});
+
+			$('#disconnectButton').on( 'click', function() {
+				disconnect();
+			});
+
 			//Get the possible configuration and check for the current configuration reading the project
-			$.get( '/services/configuration/get', function( data ) {
+			$.get( '/services/configuration/getAll', function( data ) {
 
 				if ( data ) {
 
@@ -22,43 +31,33 @@
 						$('#configs').append($('<option>').attr('value', config).text(config));
 					}
 
-					{% if connection %}
+					{% if selectedConnection %}
 
 					//Current configuration not empty
-					var currentConf = "{{ connection.name}}";
+					var currentConf = "{{ selectedConnection.name }}";
 
 					//set current configuration, change event is not raised because the configuration details are read from the session
 					$("#configs").val(currentConf);
-
-					//retrieve project list if old connection is set
-					$.get('/services/project/getProjects', function( data ) {
-
-						var projects_string = '<option value="">Choose A Project</option>';
-
-						if (data !== "") {
-							data.forEach(function(project) {
-								projects_string += '<option value="' + project + '">' + project + '</option>';
-							});
-						}
-
-						$('#projects').html(projects_string);
-
-						{% if connection.project %}
-
-						//Current project not empty
-						var currentProject = "{{ connection.project.name }}";
-						
-						//set current project, change event is not raised because the project details are read from the session
-						$("#projects").val(currentProject);
-
-						{% block ifprojectextra %}{% endblock %}
-
+/*
+					{% for el in listConnections %}
+						{% if el == selectedConnection.name %}
+							alert("YES");
 						{% else %}
-
-						//Current project empty
-
+							alert("NO");
 						{% endif %}
-					});
+					{% endfor %}
+*/
+
+					//alert ("{{ selectedConnection.status }}");
+
+					{% if selectedConnection.status %}
+					
+					$('#connButton').prop('hidden', true);
+					$('#disconnectButton').prop('hidden', false);
+
+					//retrieve project list if old connection is set and connected
+					getAndSetProjects( currentConf );
+					{% endif %}
 
 					{% block ifconnectionextra %}{% endblock %}
 
@@ -72,9 +71,41 @@
 			.fail( function( xhr ) {
 				console.log(' Request failed: (' + xhr.status + ') ' + xhr.statusText );
 			});
-		});		
+		});
+
+		function getAndSetProjects( config_name ) {
+
+			$('#projects').html('<option value="">Choose A Project</option>');
+
+			if ( config_name !== "" ){
+				//read the projects for an open connection and set the values
+				$.get('/services/project/getAll/' + config_name, function( projects ) {
+
+					for ( var i in projects ) {
+						$('#projects').append($('<option>').attr('value', projects[i]).text(projects[i]));
+					}
+
+					{% if selectedConnection.project %}
+
+					//Current project not empty
+					var currentProject = "{{ selectedConnection.project.name }}";
+					
+					//set current project, change event is not raised because the project details are read from the session
+					$("#projects").val(currentProject);
+
+					{% block ifprojectextra %}{% endblock %}
+
+					{% else %}
+
+					//Current project empty
+
+					{% endif %}
+				});
+			}
+		}
 	</script>
 	{% endif %}
+
 	{% block head %}{% endblock %}
 
 </head>
@@ -115,8 +146,8 @@
 							Hostname
 						</th>
 						<td name="hostname">
-							{% if connection %}
-								{{ connection.hostname }}
+							{% if selectedConnection %}
+								{{ configurations[ selectedConnection.name ][ 'name' ] }}
 							{% else %}
 								--
 							{% endif %}
@@ -127,8 +158,8 @@
 							Url
 						</th>
 						<td name="host">
-							{% if connection %}
-								{{ connection.url }}
+							{% if selectedConnection %}
+								{{ configurations[ selectedConnection.name ][ 'url' ] }}
 							{% else %}
 								--
 							{% endif %}
@@ -139,8 +170,8 @@
 							Username
 						</th>
 						<td name="username">
-							{% if connection %}
-								{{ connection.username }}
+							{% if selectedConnection %}
+								{{ configurations[ selectedConnection.name ][ 'username' ] }}
 							{% else %}
 								--
 							{% endif %}
@@ -151,8 +182,8 @@
 							Workflow path
 						</th>
 						<td name="workflow">
-							{% if connection %}
-								{{ connection.workhome }}
+							{% if selectedConnection %}
+								{{ configurations[ selectedConnection.name ][ 'workhome' ] }}
 							{% else %}
 								--
 							{% endif %}
@@ -163,14 +194,20 @@
 							Workspace path
 						</th>
 						<td name="workspace">
-							{% if connection %}
-								{{ connection.workspace }}
+							{% if selectedConnection %}
+								{{ configurations[ selectedConnection.name ][ 'workspace' ] }}
 							{% else %}
 								--
 							{% endif %}
 						</td>
 					</tr>
 				</table>
+				<div>
+					<input id="connButton" type="button" value="Connect">
+				</div>
+				<div>
+					<input id="disconnectButton" type="button" value="Disconnect" hidden>
+				</div>
 			</div>
 		{% endblock %}
 		{% endif %}

@@ -16,6 +16,19 @@ exports.getOpenConnections = function( username ) {
 	return arr;
 };
 
+exports.isConnOpen = function( username, connName, cb ) {
+
+	if ( !oUserConnections[ username ] ) {
+		oUserConnections[ username ] = {}
+	} 
+
+	if (oUserConnections[ username ][ connName ]) {
+		cb (true);
+	} else {
+		cb (false);
+	}
+};
+
 exports.createConfiguration = function( username, args, cb ) {
 	var cmd, oUser, oConn = new SSHConnection();
 
@@ -61,47 +74,64 @@ exports.createConfiguration = function( username, args, cb ) {
 
 exports.connectToHost = function( username, connObj, cb ) {
 
-	var oConn = oUserConnections[  username ];
-	if ( oConn && oConn[ '_state' ] !== 'closed' ) {
-		oConn.end();
+	var oConn = {};
+
+	if ( !oUserConnections[  username ] ) {
+		oUserConnections[  username ] = {}
 	} 
-	var oUser = persistence.getUser( username );
-	oConn = new SSHConnection();
-	oConn.on( 'ready', function() {
-		console.log( 'New SSH connection established for user ' +  username );
-		oUserConnections[ username ] = oConn;
-		cb( null, 'New SSH connection established for user ' +  username);
-		//console.log( 'UTIL: ' + util.inspect(oConn, {showHidden: false, depth: null}));
-	}).on( 'close', function() {
-		if ( oConn[ '_state' ] !== 'closed' ) {
-			oConn.destroy();
-		}
-		//console.log( 'CLOSE CONN: ' + oConn[ '_state' ]);
-	}).connect({
-		host: connObj.url,
-		port: connObj.port,
-		username: connObj.username,
-		privateKey: oUser.privateKey,
-		passphrase: oUser.password
-	});
+
+	oConn = oUserConnections[  username ][ connObj.name ];
+
+	if ( !oConn || oConn[ '_state' ] === 'closed' ) {
+		var oUser = persistence.getUser( username );
+		oConn = new SSHConnection();
+		oConn.on( 'ready', function() {
+			console.log( 'New SSH connection established for user ' +  username );
+			oUserConnections[ username ][ connObj.name ] = oConn;
+			cb( null, 'New SSH connection established for user ' +  username);
+			//console.log( 'UTIL: ' + util.inspect(oConn, {showHidden: false, depth: null}));
+		}).on( 'close', function() {
+			if ( oConn[ '_state' ] !== 'closed' ) {
+				oConn.destroy();
+			}
+			//console.log( 'CLOSE CONN: ' + oConn[ '_state' ]);
+		}).connect({
+			host: connObj.url,
+			port: connObj.port,
+			username: connObj.username,
+			privateKey: oUser.privateKey,
+			passphrase: oUser.password
+		});
+	} else {
+		cb( null, 'Connection already open for user ' +  username);
+	}
 };
 
 // We pass req and res in order to handle all the error cases, so we don't need
 // to handle them all in the services.
 // IMPORTANT: This means if callback function 'cb' receives an error as an argument
 //            no further response can be sent to the client!!!
-executeCommand = function( req, res, connection, command, cb ) {
+executeCommand = function( req, res, connection, command, wrkcmd, cb ) {
 
 	var oConn, errString, alldata = '',
 		username = req.session.pub.username,
-		oConnections = oUserConnections[ username ];
+		oConnections = oUserConnections[ username ],
+		conn = {};
 
 	console.log( 'Processing user "' + username + '"s request: ',  command );
 	errString = 'Command "%s" failed for user "%s": ';
-	
+
 	if( oConnections ) {
 		oConn = oConnections[ connection ];
 		if( oConn && oConn[ '_state' ] === 'authenticated' ) {
+
+			//if is a workflow command, add source of environment variables
+			if ( wrkcmd ) {
+				conn = req.session.pub.configurations[ connection ];
+				command = 'source ' + path.join( conn.workhome, 'util', 'SetupEnv.sh' )	
+					+ ' ' + conn.workspace + '; ' + command;
+			}
+
 			oConn.exec( command, function( err, stream ) {
 				if ( err ) {
 					// We do not take any further actions if an error ocurred here
@@ -145,26 +175,9 @@ executeCommand = function( req, res, connection, command, cb ) {
 
 // IMPORTANT: If callback function 'cb' receives an error as an argument
 //            no further response can be sent to the client!!!
-exports.execWorkComm = function( req, res, connection, command, cb ) {
-	var oConn, sourceWork = '',
-		oConnections = oUserConnections[ username ],
-		username = req.session.pub.username;
-
-	if( oConnections ) {
-		oConn = oConnections[ connection ];
-		if( oConn ) {
-			sourceWork = 'source ' + path.join( oConn.workhome, 'util', 'SetupEnv.sh' )
-				+ ' ' + oConn.workspace + '; ';
-		}
-	}
-	// We don't need an else because these cases are handled in the executeCommand
-	executeCommand( req, res, connection, sourceWork + command, cb );
-};
-
-// IMPORTANT: If callback function 'cb' receives an error as an argument
-//            no further response can be sent to the client!!!
 exports.getRemoteJSON = function( req, res, connection, filename, cb ) {
-	executeCommand( req, res, connection, 'cat ' + filename, function( err, data ) {
+	var workflowCommand = false;
+	executeCommand( req, res, connection, 'cat ' + filename, workflowCommand, function( err, data ) {
 		if( !err ) {
 			try {
 				cb( null, JSON.parse( data ) );
@@ -182,7 +195,8 @@ exports.getRemoteJSON = function( req, res, connection, filename, cb ) {
 // IMPORTANT: If callback function 'cb' receives an error as an argument
 //            no further response can be sent to the client!!!
 exports.getRemoteList = function( req, res, connection, command, cb ) {
-	executeCommandff( req, res, connection, command, function( err, data ) {
+	var workflowCommand = true;
+	executeCommand( req, res, connection, command, workflowCommand, function( err, data ) {
 		var pos, list = '';
 
 		if( !err ) {
