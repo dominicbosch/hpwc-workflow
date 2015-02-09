@@ -3,13 +3,19 @@
 <head>
 	<meta charset="utf-8">
 	<title>HPWC Workflow - {% block title %}{% endblock %}</title>
-	<script type="text/javascript" src="../js/jquery-1.11.2.min.js"></script>
+	<script type="text/javascript" src="../js/lib/jquery-1.11.2.min.js"></script>
 	<link rel="stylesheet" href="../css/layout.css">
 	{% if username %}
 	<script type="text/javascript" src="../js/layout.js"></script>
 	<script type="text/javascript">
 	
 		"use strict";
+
+		var selectedConn = {
+			name: '{{ selectedConnection.name }}',
+			status: '{{ selectedConnection.status }}',
+			projectName: '{{ selectedConnection.project.name }}' 
+		};
 
 		$(document).ready(function() {
 
@@ -24,41 +30,22 @@
 						$('#configs').append($('<option>').attr('value', config).text(config));
 					}
 
-					{% if selectedConnection %}
-
-						//Current configuration not empty
-						var currentConf = "{{ selectedConnection.name }}";
+					//Current configuration not empty
+					if( selectedConn.name !== '' ) {
 
 						//set current configuration, change event is not raised because the configuration details are read from the session
-						$("#configs").val(currentConf);
-	/*
-						{% for el in listConnections %}
-							{% if el == selectedConnection.name %}
-								alert("YES");
-							{% else %}
-								alert("NO");
-							{% endif %}
-						{% endfor %}
-	*/
+						$( '#configs' ).val( selectedConn.name );
 
-						//alert ("{{ selectedConnection.status }}");
+						if( selectedConn.status ) {
 
-						{% if selectedConnection.status %}
-						
-							$('#connButton').prop('hidden', true);
-							$('#disconnectButton').prop('hidden', false);
+							$( '#connectButton' ).text( selectedConn.status ? 'Connect' : 'Disconnect' );
 
 							//retrieve project list if old connection is set and connected
-							getAndSetProjects( currentConf );
-						{% endif %}
-
+							getAndSetProjects( selectedConn.name );
+						}
+						
 						{% block ifconnectionextra %}{% endblock %}
-
-					{% else %}
-
-						//Current configuration empty
-
-					{% endif %}
+					}
 				}
 			})
 			.fail( function( xhr ) {
@@ -76,24 +63,16 @@
 				$.get('/services/project/getAll/' + config_name, function( projects ) {
 	
 					for ( var i in projects ) {
-						$('#projects').append($('<option>').attr('value', projects[i]).text(projects[i]));
+						$( '#projects' ).append($( '<option>' ).attr( 'value', projects[i] ).text( projects[i] ));
 					}
 	
-					{% if selectedConnection.project %}
-	
 					//Current project not empty
-					var currentProject = "{{ selectedConnection.project.name }}";
-					
-					//set current project, change event is not raised because the project details are read from the session
-					$("#projects").val(currentProject);
-	
-					{% block ifprojectextra %}{% endblock %}
-	
-					{% else %}
-	
-					//Current project empty
-	
-					{% endif %}
+					if( selectedConn.projectName !== '' ) {
+						//set current project, change event is not raised because the project details are read from the session
+						$( '#projects' ).val( selectedConn.projectName );
+		
+						{% block ifprojectextra %}{% endblock %}
+					}
 				});
 			} 
 		}
@@ -109,6 +88,7 @@
 		<div></div>
 	</header>
 	<nav>
+		<a href="/views/configuration">Configurations</a>
 		<a href="/views/project">Project</a>
 		<a href="/views/method">Method</a>
 		<a href="/views/experiment">Experiment</a>
@@ -129,7 +109,7 @@
 		{% block shared_content_right %}
 			<div id="preview">
 				<div id="conf_title">
-					<label for="configs">Current connection settings</label>
+					<h3>Current connection settings</h3>
 					<select id="configs" name="configs">
 						<option value="">Choose A Configuration</option>
 					</select>
@@ -137,7 +117,7 @@
 				<table id="conf_table">
 					<tr>
 						<th>
-							Hostname
+							Hostname : 
 						</th>
 						<td name="hostname">
 							{% if selectedConnection %}
@@ -149,7 +129,7 @@
 					</tr>
 					<tr>
 						<th>
-							Url
+							Url : 
 						</th>
 						<td name="host">
 							{% if selectedConnection %}
@@ -161,7 +141,7 @@
 					</tr>
 					<tr>
 						<th>
-							Username
+							Username : 
 						</th>
 						<td name="username">
 							{% if selectedConnection %}
@@ -173,7 +153,7 @@
 					</tr>
 					<tr>
 						<th>
-							Workflow path
+							Workflow path : 
 						</th>
 						<td name="workflow">
 							{% if selectedConnection %}
@@ -185,7 +165,7 @@
 					</tr>
 					<tr>
 						<th>
-							Workspace path
+							Workspace path : 
 						</th>
 						<td name="workspace">
 							{% if selectedConnection %}
@@ -197,7 +177,8 @@
 					</tr>
 				</table>
 				<div class="centered-text">
-					<button id="connectButton" onclick="toggleSelectedConnection( this )" disabled="true">Connect</button>
+					<button id="connectButton" onclick="toggleSelectedConnection( this )"
+						{% if !selectedConnection %}disabled="true"{% endif %}>Connect</button>
 				</div>
 			</div>
 		{% endblock %}

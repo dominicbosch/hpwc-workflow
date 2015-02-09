@@ -1,6 +1,5 @@
 "use strict";
 
-
 function toggleSelectedConnection( el ) {
 	var button = $( el ),
 		config = $( '#configs' ).val();
@@ -14,12 +13,12 @@ function toggleSelectedConnection( el ) {
 	if( button.text() === 'Connect' ) {
 		toggleConnection( true, config, function( err ) {
 			button.text( 'Disconnect' );
-			button.removeProp( 'disabled' );
+			button.removeAttr( 'disabled' );
 		});
 	} else {
 		toggleConnection( false, config, function( err ) {
 			button.text( 'Connect' );
-			button.removeProp( 'disabled' );
+			button.removeAttr( 'disabled' );
 		});
 	}
 }
@@ -29,7 +28,7 @@ function toggleConnection( doConnect, config, cb ) {
 
 	$.get('/services/configuration/' + strAction + '/' + config, function( data ) {
 		getAndSetProjects( doConnect ? config : '' );
-		if( cb ) cb();
+		if( typeof(cb) === 'function' ) cb();
 	})
 	.fail( function( req ) {
 		// if( req.status === 409 ) {
@@ -48,7 +47,7 @@ function updateConfigurationForm( cb ) {
 	$( '#projects' ).html( '<option value="">Choose A Project</option>' );
 
 	if ( config_name === '' ) {
-		button.prop( 'disabled' );
+		button.attr( 'disabled', true );
 
 		//remove the connection from the session
 		$.get('/services/session/cleanConnection', function( data ) {
@@ -63,8 +62,8 @@ function updateConfigurationForm( cb ) {
 				setConnectionForm( data.configuration );
 				button.text( data.status ? 'Disconnect' : 'Connect' );
 				getAndSetProjects( data.status ? data.configuration.name : '' );
-				button.removeProp( 'disabled' );
-				if( cb ) cb();
+				button.removeAttr( 'disabled' );
+				if( typeof(cb) === 'function' ) cb();
 			} else {
 				alert ("Configuration not found");
 			}
@@ -79,3 +78,7 @@ function setConnectionForm( config ) {
 	$( '#conf_table td[name="workflow"]' ).text( config.workhome );
 	$( '#conf_table td[name="workspace"]' ).text( config.workspace );
 }
+
+$(document).ready(function() {
+	$( '#configs' ).change( updateConfigurationForm );
+});

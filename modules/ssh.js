@@ -61,6 +61,9 @@ exports.createConfiguration = function( username, args, cb ) {
 			});
 		}).on( 'close', function() {
 			console.log( 'Closed temporary SSH connection %s@%s:%s, now: %s', args.username, args.url, args.port, --tempConnCounter );
+		}).on( 'error', function( e ) {
+			console.log( 'Error connecting "'+args.username+'@'+args.url+':'+args.port+'": ' + e.code );
+			cb( new Error( 'Error connecting "'+args.username+'@'+args.url+':'+args.port+'": ' + e.code ) );
 		}).connect({
 			host: args.url,
 			port: parseInt( args.port ) || 22,
@@ -96,6 +99,9 @@ exports.connectToHost = function( username, connObj, cb ) {
 			console.log( 'SSH connection closed from "' + connObj.name
 					+ '" for user "' + username + '", #openConnections='+(--connCounter));
 			//console.log( 'CLOSE CONN: ' + oConn[ '_state' ]);
+		}).on( 'error', function( e ) {
+			console.log( 'Error connecting "'+args.username+'@'+args.url+':'+args.port+'": ' + e.code );
+			cb( new Error( 'Error connecting "'+args.username+'@'+args.url+':'+args.port+'": ' + e.code ) );
 		}).connect({
 			host: connObj.url,
 			port: connObj.port,
@@ -134,6 +140,10 @@ executeCommand = function( req, res, connection, command, wrkcmd, cb ) {
 			}
 
 			oConn.exec( command, function( err, stream ) {
+				oConn.on( 'close', function(){
+					stream.end( 'print "Connection Closed!"' );
+					console.log('Deleting stream');
+				});
 				if ( err ) {
 					// We do not take any further actions if an error ocurred here
 					console.error( errString + 'Execution error!', command, username );
@@ -148,6 +158,8 @@ executeCommand = function( req, res, connection, command, wrkcmd, cb ) {
 					}).on( 'end', function() {
 						//send all data back through Callback Function
 						cb( null, alldata );
+					}).on( 'error', function(e) {
+						console.error(e);
 					});
 					// // TODO: Since we do not handle these cases we can delete all event listeners here below
 					// .on( 'close', function() {

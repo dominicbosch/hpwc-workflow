@@ -4,60 +4,16 @@
 
 {% block head %}
 	<script type="text/javascript" src="../js/tab.js"></script>
+	<script type="text/javascript" src="../js/configuration.js"></script>
 	<link rel="stylesheet" type="text/css" href="../css/tab.css" />
-	<script type="text/javascript">
-		var fetchInputValues = function( arr ) {
-			var obj = {};
-			for( var i = 0; i < arr.length; i++) {
-				obj[ arr[ i ] ] = $( 'input[name=' + arr[ i ] + ']' ).val();
-			}
-			return obj;
-		};
-
-		var setInfo = function( text, fail ) {
-			$( '#info' )
-				.addClass( fail ? 'wrong' : 'right' )
-				.removeClass( fail ? 'right' : 'wrong' )
-				.text( text );
-		};
-		
-		var initConfiguration = function() {
-			var oValues, isValid = true,
-				arrInputs = [
-					'name',
-					'url',
-					'port',
-					'username',
-					'password',
-					'workspace',
-					'workhome'
-				];
-	
-			setInfo( '' );
-			oValues = fetchInputValues( arrInputs );
-			for( var el in oValues ) {
-				if( oValues[ el ] === '' ) isValid = false;
-			}
-			if( !isValid ) {
-				alert( 'You need to fill all input fields!' );
-			} else {
-				$.post( '/services/configuration/create', oValues, function( answ ) {
-					setInfo( answ );
-				})
-				.fail( function( xhr ) {
-					setInfo( xhr.responseText, true );
-				});
-			}
-		};
-	</script>
 {% endblock %}
 
 
 {% block content_left %}
-<h1>Configuration</h1>
+<h1>Configurations</h1>
 <div class="tabs">
 	<ul class="tab-links">
-		<li class="active"><a href="#tab1">New Configuration</a></li>
+		<li class="active"><a href="#tab1">New</a></li>
 		<!-- <li><a href="#tab2">Edit Configuration</a></li> -->
 	</ul>
 	<div class="tab-content">
@@ -92,7 +48,7 @@
 					<td><input name="workhome" type="text"></td>
 				</tr>
 			</table>
-			<div class="center_div">
+			<div class="centered-text">
 				<input type="button" value="Init Configuration" onclick="initConfiguration();">
 			</div>
 		</div>
@@ -132,7 +88,7 @@
 					</td>
 				</tr>
 			</table>
-			<div class="center_div">
+			<div class="centered-text">
 				<input type="button" value="Edit Project" onclick="manage_project('edit');">
 				<input type="button" value="Delete Project" onclick="manage_project('delete');">
 			</div>

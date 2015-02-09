@@ -80,6 +80,10 @@ td.threecol {
 	color: darkgreen;
 }
 
+#conf_table th {
+	font-size: 0.95em;
+	text-align: right;
+}
 .centered-text {
 	text-align: center;
 }
