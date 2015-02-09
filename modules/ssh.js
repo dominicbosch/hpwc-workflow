@@ -93,12 +93,16 @@ exports.connectToHost = function( username, connObj, cb ) {
 			cb( null, 'New SSH connection established for user ' + username);
 			//console.log( 'UTIL: ' + util.inspect(oConn, {showHidden: false, depth: null}));
 		}).on( 'close', function() {
-			if ( oConn[ '_state' ] !== 'closed' ) {
-				oConn.destroy();
-			}
+			console.log(oConn[ '_state' ]);
+			// if ( oConn[ '_state' ] !== 'closed' ) {
+				oConn.end();
+			// }
 			console.log( 'SSH connection closed from "' + connObj.name
 					+ '" for user "' + username + '", #openConnections='+(--connCounter));
 			//console.log( 'CLOSE CONN: ' + oConn[ '_state' ]);
+		}).on( 'end', function() {
+			console.log( 'SSH connection ENDED from "' + connObj.name
+					+ '" for user "' + username + '", #openConnections='+(connCounter));
 		}).on( 'error', function( e ) {
 			console.log( 'Error connecting "'+args.username+'@'+args.url+':'+args.port+'": ' + e.code );
 			cb( new Error( 'Error connecting "'+args.username+'@'+args.url+':'+args.port+'": ' + e.code ) );
@@ -141,7 +145,7 @@ executeCommand = function( req, res, connection, command, wrkcmd, cb ) {
 
 			oConn.exec( command, function( err, stream ) {
 				oConn.on( 'close', function(){
-					stream.end( 'print "Connection Closed!"' );
+					stream.end();
 					console.log('Deleting stream');
 				});
 				if ( err ) {
