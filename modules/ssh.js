@@ -1,7 +1,7 @@
 'use strict';
 
 var executeCommand, oUserConnections = {},
-	connCounter = 1,
+	tempConnCounter = 0, connCounter = 0,
 	fs = require( 'fs' ),
 	path = require( 'path' ),
 	SSHConnection = require( 'ssh2' ),
@@ -34,7 +34,7 @@ exports.createConfiguration = function( username, args, cb ) {
 		cb( new Error( 'Configuration already existing!' ) );
 	} else {
 		oConn.on( 'ready', function() {
-			console.log( 'New temporary SSH connection %s@%s:%s, now: %s', args.username, args.url, args.port, connCounter++ );
+			console.log( 'New temporary SSH connection %s@%s:%s, now: %s', args.username, args.url, args.port, ++tempConnCounter );
 			oUser = persistence.getUser( username );
 			cmd = 'mkdir -p ~/.ssh && echo "' + oUser.publicKey + '" >> ~/.ssh/authorized_keys && echo "OK!"';
 			oConn.exec( cmd, function( err, stream ) {
@@ -60,7 +60,7 @@ exports.createConfiguration = function( username, args, cb ) {
 				}
 			});
 		}).on( 'close', function() {
-			console.log( 'Closed temporary SSH connection %s@%s:%s, now: %s', args.username, args.url, args.port, --connCounter );
+			console.log( 'Closed temporary SSH connection %s@%s:%s, now: %s', args.username, args.url, args.port, --tempConnCounter );
 		}).connect({
 			host: args.url,
 			port: parseInt( args.port ) || 22,
@@ -74,24 +74,27 @@ exports.connectToHost = function( username, connObj, cb ) {
 
 	var oConn = {};
 
-	if ( !oUserConnections[  username ] ) {
-		oUserConnections[  username ] = {}
+	if ( !oUserConnections[ username ] ) {
+		oUserConnections[ username ] = {};
 	} 
-
-	oConn = oUserConnections[  username ][ connObj.name ];
+ 
+	oConn = oUserConnections[ username ][ connObj.name ];
 
 	if ( !oConn || oConn[ '_state' ] === 'closed' ) {
 		var oUser = persistence.getUser( username );
 		oConn = new SSHConnection();
 		oConn.on( 'ready', function() {
-			console.log( 'New SSH connection established for user ' +  username );
+			console.log( 'New SSH connection established to "' + connObj.name
+					+ '" for user "' + username + '", #openConnections='+(++connCounter));
 			oUserConnections[ username ][ connObj.name ] = oConn;
-			cb( null, 'New SSH connection established for user ' +  username);
+			cb( null, 'New SSH connection established for user ' + username);
 			//console.log( 'UTIL: ' + util.inspect(oConn, {showHidden: false, depth: null}));
 		}).on( 'close', function() {
 			if ( oConn[ '_state' ] !== 'closed' ) {
 				oConn.destroy();
 			}
+			console.log( 'SSH connection closed from "' + connObj.name
+					+ '" for user "' + username + '", #openConnections='+(--connCounter));
 			//console.log( 'CLOSE CONN: ' + oConn[ '_state' ]);
 		}).connect({
 			host: connObj.url,
@@ -101,7 +104,7 @@ exports.connectToHost = function( username, connObj, cb ) {
 			passphrase: oUser.password
 		});
 	} else {
-		cb( null, 'Connection already open for user ' +  username);
+		cb( null, 'Connection already open for user ' + username);
 	}
 };
 

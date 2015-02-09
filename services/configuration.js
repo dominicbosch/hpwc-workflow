@@ -51,6 +51,7 @@ router.get( '/connect/:name', function( req, res ) {
 			res.status( 400 );
 			res.send("Connection failed!");
 		} else {
+			console.log( 'User "' + oUser.username + '" connected to "' + req.params.name + '"' );
 			if (req.session.pub.selectedConnection.name === req.params.name ) {
 				req.session.pub.selectedConnection.status = true;
 			}
@@ -64,6 +65,7 @@ router.get( '/disconnect/:name', function( req, res ) {
 		if (req.session.pub.selectedConnection.name === req.params.name ) {
 			req.session.pub.selectedConnection.status = false;
 		}
+		console.log( 'User "' + req.session.pub.username + '" disconnected from "' + req.params.name + '"' );
 		res.send("Connection Closed!");
 	} else {
 		res.status( 404 );

@@ -66,11 +66,12 @@
 			});
 		});
 
-		function getAndSetProjects( isConnected, config_name ) {
+		function getAndSetProjects( config_name ) {
 
-			$('#projects').html('<option value="">Choose A Project</option>');
-
-			if( isConnected ) {
+			if( config_name === '' ) {
+				//clean project list
+				$( '#projects' ).html( '<option value="">Choose A Project</option>' );
+			} else {
 				//read the projects for an open connection and set the values
 				$.get('/services/project/getAll/' + config_name, function( projects ) {
 	
@@ -94,7 +95,7 @@
 	
 					{% endif %}
 				});
-			}
+			} 
 		}
 	</script>
 	{% endif %}

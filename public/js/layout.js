@@ -12,23 +12,23 @@ function toggleSelectedConnection( el ) {
 
 	button.prop( 'disabled', true );
 	if( button.text() === 'Connect' ) {
-		button.text( 'Disconnect' );
 		toggleConnection( true, config, function( err ) {
+			button.text( 'Disconnect' );
 			button.removeProp( 'disabled' );
 		});
 	} else {
-		button.text( 'Connect' );
 		toggleConnection( false, config, function( err ) {
+			button.text( 'Connect' );
 			button.removeProp( 'disabled' );
 		});
 	}
 }
 
-function toggleConnection( action, config, cb ) {
-	var strAction = connect ? 'connect' : 'disconnect';
+function toggleConnection( doConnect, config, cb ) {
+	var strAction = doConnect ? 'connect' : 'disconnect';
 
 	$.get('/services/configuration/' + strAction + '/' + config, function( data ) {
-		getAndSetProjects( action, config );
+		getAndSetProjects( doConnect ? config : '' );
 		if( cb ) cb();
 	})
 	.fail( function( req ) {
@@ -41,18 +41,18 @@ function toggleConnection( action, config, cb ) {
 }
 
 function updateConfigurationForm( cb ) {
-	var config_name = $( '#configs' ).val();
-	var button = $( '#connectButton' );
+	var config_name = $( '#configs' ).val(),
+		button = $( '#connectButton' );
 
 	//clean project list
 	$( '#projects' ).html( '<option value="">Choose A Project</option>' );
 
-	if (config_name === "") {
-		button.prop( 'disabled', true );
+	if ( config_name === '' ) {
+		button.prop( 'disabled' );
 
 		//remove the connection from the session
 		$.get('/services/session/cleanConnection', function( data ) {
-			cleanConnectionForm();
+			$( '#conf_table td' ).text( '--' );
 		});
 
 	} else {
@@ -62,9 +62,7 @@ function updateConfigurationForm( cb ) {
 			if ( data.configuration ) {
 				setConnectionForm( data.configuration );
 				button.text( data.status ? 'Disconnect' : 'Connect' );
-				if( data.status ) {
-					getAndSetProjects( data.configuration.name );
-				}
+				getAndSetProjects( data.status ? data.configuration.name : '' );
 				button.removeProp( 'disabled' );
 				if( cb ) cb();
 			} else {
@@ -74,49 +72,10 @@ function updateConfigurationForm( cb ) {
 	}
 }
 
-function connect( action, config, cb ) {
-
-	var config_name = $('#configs').val();
-	if ( config_name !== "" ) {
-		$.get('/services/configuration/connect/' + config_name, function( data ) {
-			$('#connButton').prop('hidden', true);
-			$('#disconnectButton').prop('hidden', false);
-			$('#connectButton').prop('hidden', false);
-			getAndSetProjects( config_name );
-		}).fail(function( xhr ) {
-			alert( '' );
-		});
-	} else {
-		alert("Choose a Configuration before connect");
-	}
-}
-
-function disconnect( cb ) {
-
-	var config_name = $('#configs').val();
-	if ( config_name !== "" ) {
-		$.get('/services/configuration/disconnect/' + config_name, function( data ) {
-			$('#connButton').prop('hidden', false);
-			$('#disconnectButton').prop('hidden', true);
-			getAndSetProjects( "" );
-		});
-	} else {
-		alert("Choose a Configuration before connect");
-	}
-}
-
-function cleanConnectionForm() {
-	$("#conf_table td[name='hostname']").html("--");
-	$("#conf_table td[name='host']").html("--");
-	$("#conf_table td[name='username']").html("--");
-	$("#conf_table td[name='workflow']").html("--");
-	$("#conf_table td[name='workspace']").html("--");
-}
-
 function setConnectionForm( config ) {
-	$("#conf_table td[name='hostname']").html(config.name);
-	$("#conf_table td[name='host']").html(config.url);
-	$("#conf_table td[name='username']").html(config.username);
-	$("#conf_table td[name='workflow']").html(config.workhome);
-	$("#conf_table td[name='workspace']").html(config.workspace);
+	$( '#conf_table td[name="hostname"]' ).text( config.name );
+	$( '#conf_table td[name="host"]' ).text( config.url );
+	$( '#conf_table td[name="username"]' ).text( config.username );
+	$( '#conf_table td[name="workflow"]' ).text( config.workhome );
+	$( '#conf_table td[name="workspace"]' ).text( config.workspace );
 }
