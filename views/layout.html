@@ -13,13 +13,6 @@
 
 		$(document).ready(function() {
 
-			$('#connButton').on( 'click', function() {
-				connect();
-			});
-
-			$('#disconnectButton').on( 'click', function() {
-				disconnect();
-			});
 
 			//Get the possible configuration and check for the current configuration reading the project
 			$.get( '/services/configuration/getAll', function( data ) {
@@ -33,37 +26,37 @@
 
 					{% if selectedConnection %}
 
-					//Current configuration not empty
-					var currentConf = "{{ selectedConnection.name }}";
+						//Current configuration not empty
+						var currentConf = "{{ selectedConnection.name }}";
 
-					//set current configuration, change event is not raised because the configuration details are read from the session
-					$("#configs").val(currentConf);
-/*
-					{% for el in listConnections %}
-						{% if el == selectedConnection.name %}
-							alert("YES");
-						{% else %}
-							alert("NO");
+						//set current configuration, change event is not raised because the configuration details are read from the session
+						$("#configs").val(currentConf);
+	/*
+						{% for el in listConnections %}
+							{% if el == selectedConnection.name %}
+								alert("YES");
+							{% else %}
+								alert("NO");
+							{% endif %}
+						{% endfor %}
+	*/
+
+						//alert ("{{ selectedConnection.status }}");
+
+						{% if selectedConnection.status %}
+						
+							$('#connButton').prop('hidden', true);
+							$('#disconnectButton').prop('hidden', false);
+
+							//retrieve project list if old connection is set and connected
+							getAndSetProjects( currentConf );
 						{% endif %}
-					{% endfor %}
-*/
 
-					//alert ("{{ selectedConnection.status }}");
-
-					{% if selectedConnection.status %}
-					
-					$('#connButton').prop('hidden', true);
-					$('#disconnectButton').prop('hidden', false);
-
-					//retrieve project list if old connection is set and connected
-					getAndSetProjects( currentConf );
-					{% endif %}
-
-					{% block ifconnectionextra %}{% endblock %}
+						{% block ifconnectionextra %}{% endblock %}
 
 					{% else %}
 
-					//Current configuration empty
+						//Current configuration empty
 
 					{% endif %}
 				}
@@ -202,11 +195,8 @@
 						</td>
 					</tr>
 				</table>
-				<div>
-					<input id="connButton" type="button" value="Connect">
-				</div>
-				<div>
-					<input id="disconnectButton" type="button" value="Disconnect" hidden>
+				<div class="centered-text">
+					<button id="connectButton" onclick="toggleSelectedConnection( this )" disabled="true">Connect</button>
 				</div>
 			</div>
 		{% endblock %}

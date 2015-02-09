@@ -8,8 +8,6 @@ var express = require( 'express' ),
 
 /*
  * TODO 
- * Create Connections: Create SSH key/value pair, copy public key to remote machine
- * select connection which will be shown in almost all views
  * allow connect/disconnect connections
  * dropdown allows selection of the connection without connecting -> in the page button to connect/disconnect
  * 
@@ -53,7 +51,7 @@ router.get( '/connect/:name', function( req, res ) {
 			res.status( 400 );
 			res.send("Connection failed!");
 		} else {
-			if (req.session.pub.selectedConnection) {
+			if (req.session.pub.selectedConnection.name === req.params.name ) {
 				req.session.pub.selectedConnection.status = true;
 			}
 			res.send("Connection Created!");
@@ -63,7 +61,7 @@ router.get( '/connect/:name', function( req, res ) {
 
 router.get( '/disconnect/:name', function( req, res ) {
 	if ( ssh.closeConnection( req.session.pub.username, req.params.name ) ) {
-		if (req.session.pub.selectedConnection) {
+		if (req.session.pub.selectedConnection.name === req.params.name ) {
 			req.session.pub.selectedConnection.status = false;
 		}
 		res.send("Connection Closed!");

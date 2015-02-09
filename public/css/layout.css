@@ -68,12 +68,20 @@ td.threecol {
 	text-align: center;
 }
 
+#connectButton {
+	margin-top: 20px;
+}
+
 #info.wrong {
 	color: darkred;
 }
 
 #info.right {
 	color: darkgreen;
+}
+
+.centered-text {
+	text-align: center;
 }
 
 @media (max-width: 820px) {
