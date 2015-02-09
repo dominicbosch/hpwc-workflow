@@ -16,17 +16,15 @@ exports.getOpenConnections = function( username ) {
 	return arr;
 };
 
-exports.isConnOpen = function( username, connName, cb ) {
+exports.isConnOpen = function( username, connName ) {
 
-	if ( !oUserConnections[ username ] ) {
-		oUserConnections[ username ] = {}
-	} 
-
-	if (oUserConnections[ username ][ connName ]) {
-		cb (true);
-	} else {
-		cb (false);
+	if ( oUserConnections[ username ] ) {
+		if (oUserConnections[ username ][ connName ]) {
+			return true;
+		}
 	}
+
+	return false;
 };
 
 exports.createConfiguration = function( username, args, cb ) {

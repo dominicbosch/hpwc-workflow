@@ -82,18 +82,17 @@ router.get( '/get/:name', function( req, res ) {
 	var pub = req.session.pub;
 	if ( pub ) {
 		//requesting a connection set also the connection and the status in session
-		ssh.isConnOpen ( pub.username, req.params.name, function ( isOpen ) {
-			pub.selectedConnection = {
-									name : req.params.name,
-									status : isOpen
-								};
-			res.send( pub.configurations[ req.params.name ] );
-		});
+		pub.selectedConnection = {
+			name : req.params.name,
+			status : ssh.isConnOpen( pub.username, req.params.name )
+		};
+		res.send( pub.configurations[ req.params.name ] );
 	} else {
 		res.send( {} );
 	}
 	
 });
+
 
 router.get( '/getStatus/:name', function( req, res ) {
 	if (ssh.isConnOpen ( req.session.pub.username, req.params.connection )) {
