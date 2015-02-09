@@ -66,32 +66,32 @@
 			});
 		});
 
-		function getAndSetProjects( config_name ) {
+		function getAndSetProjects( isConnected, config_name ) {
 
 			$('#projects').html('<option value="">Choose A Project</option>');
 
-			if ( config_name !== "" ){
+			if( isConnected ) {
 				//read the projects for an open connection and set the values
 				$.get('/services/project/getAll/' + config_name, function( projects ) {
-
+	
 					for ( var i in projects ) {
 						$('#projects').append($('<option>').attr('value', projects[i]).text(projects[i]));
 					}
-
+	
 					{% if selectedConnection.project %}
-
+	
 					//Current project not empty
 					var currentProject = "{{ selectedConnection.project.name }}";
 					
 					//set current project, change event is not raised because the project details are read from the session
 					$("#projects").val(currentProject);
-
+	
 					{% block ifprojectextra %}{% endblock %}
-
+	
 					{% else %}
-
+	
 					//Current project empty
-
+	
 					{% endif %}
 				});
 			}

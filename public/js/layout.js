@@ -14,24 +14,62 @@ function toggleSelectedConnection( el ) {
 	if( button.text() === 'Connect' ) {
 		button.text( 'Disconnect' );
 		toggleConnection( true, config, function( err ) {
-
-			button.prop( 'disabled', false );
+			button.removeProp( 'disabled' );
 		});
 	} else {
 		button.text( 'Connect' );
 		toggleConnection( false, config, function( err ) {
-
-			button.prop( 'disabled', false );
+			button.removeProp( 'disabled' );
 		});
 	}
 }
 
 function toggleConnection( action, config, cb ) {
-	var action = connect ? 'connect' : 'disconnect';
-		$.get('/services/configuration/' + action + '/' + config_name, function( data ) {
-			getAndSetProjects( config_name );
-		}).fail(function( xhr ) {
-			alert( '' );
+	var strAction = connect ? 'connect' : 'disconnect';
+
+	$.get('/services/configuration/' + strAction + '/' + config, function( data ) {
+		getAndSetProjects( action, config );
+		if( cb ) cb();
+	})
+	.fail( function( req ) {
+		// if( req.status === 409 ) {
+		// 	setInfo( 'User already existing!', true );
+		// } else {
+		// 	setInfo( req.statusText, true );
+		// }
+	});
+}
+
+function updateConfigurationForm( cb ) {
+	var config_name = $( '#configs' ).val();
+	var button = $( '#connectButton' );
+
+	//clean project list
+	$( '#projects' ).html( '<option value="">Choose A Project</option>' );
+
+	if (config_name === "") {
+		button.prop( 'disabled', true );
+
+		//remove the connection from the session
+		$.get('/services/session/cleanConnection', function( data ) {
+			cleanConnectionForm();
+		});
+
+	} else {
+		//fill configuration form
+		$.get( '/services/configuration/get/' + config_name, function( data ) {
+
+			if ( data.configuration ) {
+				setConnectionForm( data.configuration );
+				button.text( data.status ? 'Disconnect' : 'Connect' );
+				if( data.status ) {
+					getAndSetProjects( data.configuration.name );
+				}
+				button.removeProp( 'disabled' );
+				if( cb ) cb();
+			} else {
+				alert ("Configuration not found");
+			}
 		});
 	}
 }

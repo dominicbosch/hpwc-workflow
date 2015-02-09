@@ -34,6 +34,7 @@ Session Object:
       [... user.pub: properties from Users Object above ...]
       "selectedConnection": {
         "name": "austin-1",
+        "status": false,
         "project": {
           "name": "prova",
           "parameters": {

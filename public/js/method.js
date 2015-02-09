@@ -13,56 +13,20 @@ $(document).ready(function() {
 		//clean method type
 		$("#method_types").html("<option value=''>Choose A Method Type</option>");
 
-		//clean project list
-		$("#projects").html("<option value=''>Choose A Project</option>");
+		updateConfigurationForm(function() {
 
-		var conf_file = $(this).val();
-		if (conf_file == "") {
-			$("#conf_table td[name='hostname']").html("--");
-			$("#conf_table td[name='host']").html("--");
-			$("#conf_table td[name='username']").html("--");
-			$("#conf_table td[name='workflow']").html("--");
-			$("#conf_table td[name='workspace']").html("--");
+			$.get('/services/method/getInstalled', function( data ) {
 
-			//close the connection
-			$.get('/services/gen/ssh/close', function( data ) {
-				alert( data );
+				var types_string = '<option value="">Choose A Method Type</option>';
+
+				if (data !== "") {
+					data.forEach(function(type) {
+						types_string += '<option value="' + type + '">' + type + '</option>';
+					});
+				}
+				$('#method_types').html(types_string);
 			});
-		} else {
-			$.get('/services/gen/getConfigs?conf=' + conf_file, function( data ) {
-				var obj = data;
-				$("#conf_table td[name='hostname']").html(obj.hostname);
-				$("#conf_table td[name='host']").html(obj.url);
-				$("#conf_table td[name='username']").html(obj.username);
-				$("#conf_table td[name='workflow']").html(obj.workhome);
-				$("#conf_table td[name='workspace']").html(obj.workspace);
-
-				//when the configuration change, we read again the project
-				$.get('/services/project/getProjects', function( data ) {
-
-					var projects_string = '<option value="">Choose A Project</option>';
-
-					if (data !== "") {
-						data.forEach(function(project) {
-							projects_string += '<option value="' + project + '">' + project + '</option>';
-						});
-					}
-					$('#projects').html(projects_string);
-				});
-
-				$.get('/services/method/getInstalled', function( data ) {
-
-					var types_string = '<option value="">Choose A Method Type</option>';
-
-					if (data !== "") {
-						data.forEach(function(type) {
-							types_string += '<option value="' + type + '">' + type + '</option>';
-						});
-					}
-					$('#method_types').html(types_string);
-				});
-			});
-		}
+		});
 	});
 
 	//get method

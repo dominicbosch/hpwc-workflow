@@ -77,14 +77,18 @@ router.get( '/getAll', function( req, res ) {
 });
 
 router.get( '/get/:name', function( req, res ) {
-	var pub = req.session.pub;
+	var status, pub = req.session.pub;
 	if ( pub ) {
 		//requesting a connection set also the connection and the status in session
+		status = ssh.isConnOpen( pub.username, req.params.name );
 		pub.selectedConnection = {
 			name : req.params.name,
-			status : ssh.isConnOpen( pub.username, req.params.name )
+			status : status
 		};
-		res.send( pub.configurations[ req.params.name ] );
+		res.send({
+			configuration: pub.configurations[ req.params.name ],
+			status: status
+		});
 	} else {
 		res.send( {} );
 	}

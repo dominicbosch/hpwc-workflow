@@ -95,62 +95,10 @@ $(document).ready(function() {
 	//create handler for changing of configuraton
 	$("#configs").change( function() {
 
-		//clean project list
-		$("#projects").html("<option value=''>Choose A Project</option>");
-
 		cleanProjectForm();
 
-		var config_name = $(this).val();
-		if (config_name == "") {
+		updateConfigurationForm();
 
-			$('#connButton').prop('hidden', false);
-			$('#disconnectButton').prop('hidden', true);
-
-			//remove the connection from the session
-			$.get('/services/session/cleanConnection', function( data ) {
-				cleanConnectionForm();
-			});
-
-		} else {
-			//fill configuration form
-			$.get('/services/configuration/get/' + config_name, function( config ) {
-
-				if ( config ) {
-					setConnectionForm( config );
-					$.get('/services/session/getSelectedConnStatus/', function( status ) {
-						if (status) {
-							$('#connButton').prop('hidden', true);
-							$('#disconnectButton').prop('hidden', false);
-							getAndSetProjects( config.name );
-						}
-					});
-				} else {
-					alert ("Configuration not found");
-				}
-				/*
-				if ( data ) {
-					var config = data[ 0 ];
-					var config_status = data[ 1 ];
-					//set connection in session
-					var selectedConnection = JSON.stringify({
-						name : config.name,
-						status : config_status
-					});
-
-					$.get('/services/session/setConnection/' + selectedConnection, function( data ) {
-						setConnectionForm( config );
-						if (config_status) {
-							$('#connButton').prop('hidden', true);
-							$('#disconnectButton').prop('hidden', false);
-							getAndSetProjects( config.name );
-						}
-					});
-				} else {
-					alert ("Configuration not found");
-				}
-				*/
-			});
-		}
 	});
 
 	//when the project selected change, we read the value of parameters (user change)
