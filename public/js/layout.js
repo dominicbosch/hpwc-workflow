@@ -43,10 +43,11 @@ function updateConfigurationForm( cb ) {
 	var config_name = $( '#configs' ).val(),
 		button = $( '#connectButton' );
 
-	//clean project list
-	$( '#projects' ).html( '<option value="">Choose A Project</option>' );
-
 	if ( config_name === '' ) {
+
+		//clean project list
+		$( '#projects' ).html( '<option value="">Choose A Project</option>' );
+
 		button.attr( 'disabled', true );
 
 		//remove the connection from the session

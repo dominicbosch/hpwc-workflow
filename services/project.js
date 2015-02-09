@@ -19,17 +19,25 @@ router.get( '/getAll/:connection', function( req, res ) {
 // TODO Should this be moved into the session service?
 // GET descriptor. 
 router.get( '/get/:connection/:project', function( req, res ) {
-	var oConn = req.session.pub.configurations[ connection ],
-		filename = path.join( oConn.workspace, req.query.project, '.project' );
 
-	ssh.getRemoteJSON( req, res, req.params.connection, filename, function( err, json ) {
-		if( !err ) {
-			res.send( json );
-			//store data in session
-			// FIXME Really store in session?
-			req.session.pub.selectedConnection.project = json;
-		}
-	});
+	var filename, pub = req.session.pub,
+		oConn = {};
+
+	if ( pub ) {
+		oConn = req.session.pub.configurations[ req.params.connection ];
+		filename = path.join( oConn.workspace, req.params.project, '.project' );
+
+		ssh.getRemoteJSON( req, res, req.params.connection, filename, function( err, json ) {
+			if( !err ) {
+				res.send( json );
+				//store data in session
+				// FIXME Really store in session?
+				req.session.pub.selectedConnection.project = json;
+			}
+		});
+	} else {
+		res.send( {} );
+	}
 });
 
 // Manage project 

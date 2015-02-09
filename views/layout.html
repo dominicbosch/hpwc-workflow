@@ -27,7 +27,7 @@
 
 					//put data inside "configs" element
 					for ( var config in data ) {
-						$('#configs').append($('<option>').attr('value', config).text(config));
+						$( '#configs' ).append($( '<option>' ).attr( 'value', config ).text( config ) );
 					}
 
 					//Current configuration not empty
@@ -36,9 +36,9 @@
 						//set current configuration, change event is not raised because the configuration details are read from the session
 						$( '#configs' ).val( selectedConn.name );
 
-						if( selectedConn.status ) {
+						$( '#connectButton' ).text( selectedConn.status ? 'Disconnect' : 'Connect' );
 
-							$( '#connectButton' ).text( selectedConn.status ? 'Connect' : 'Disconnect' );
+						if( selectedConn.status ) {
 
 							//retrieve project list if old connection is set and connected
 							getAndSetProjects( selectedConn.name );
@@ -55,15 +55,15 @@
 
 		function getAndSetProjects( config_name ) {
 
-			if( config_name === '' ) {
-				//clean project list
-				$( '#projects' ).html( '<option value="">Choose A Project</option>' );
-			} else {
+			//clean project list
+			$( '#projects' ).html( '<option value="">Choose A Project</option>' );
+
+			if( config_name !== '' ) {
 				//read the projects for an open connection and set the values
-				$.get('/services/project/getAll/' + config_name, function( projects ) {
+				$.get( '/services/project/getAll/' + config_name, function( projects ) {
 	
 					for ( var i in projects ) {
-						$( '#projects' ).append($( '<option>' ).attr( 'value', projects[i] ).text( projects[i] ));
+						$( '#projects' ).append($( '<option>' ).attr( 'value', projects[i] ).text( projects[i] ) );
 					}
 	
 					//Current project not empty
