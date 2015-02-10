@@ -1,29 +1,36 @@
 'use strict';
 
-var persist, strFile, oUsers,
+var persist, loadUser, oUsers = {},
 	fs = require( 'fs' ),
-	path = require( 'path' ),
-	pathToFile = path.resolve( __dirname, 'users.json' );
+	path = require( 'path' );
 
-persist = function() {
+persist = function( username ) {
+	var pathToFile = path.resolve( __dirname, 'store_' + username + '.json' );
+
+	if( !oUsers[ username ] ) {
+		loadUser( username );
+		if( !oUsers[ username ] ) console.error( 'You are trying to persist an unregistered user!');
+	}
 	try {
-		fs.writeFile( pathToFile, JSON.stringify( oUsers, null, 2 ) );
+		fs.writeFile( pathToFile, JSON.stringify( oUsers[ username ], null, 2 ) );
 	} catch( e ) {
 		console.error( 'Persisting failed! Your user object will not be stored!' );
 		console.error( e );
 	}
 };
 
-try {
-	strFile = fs.readFileSync( pathToFile );
-	oUsers = JSON.parse( strFile );
-} catch( e ) {
-	console.log( 'Users object not existing, creating new one!' );
-	oUsers = {};
-	persist();
-}
+loadUser = function( username ) {
+	var pathToFile = path.resolve( __dirname, 'store_' + username + '.json' );
+	try {
+		oUsers[ username ] = JSON.parse( fs.readFileSync( pathToFile ) );
+	} catch( e ) {
+		console.log( 'User "' + username + '"\'s persistent file not existing!' );
+	}
+
+};
 
 exports.getUser = function( username ) {
+	if( !oUsers[ username ] ) loadUser( username );
 	return oUsers[ username ];
 };
 
@@ -39,7 +46,7 @@ exports.storeUser = function( username, password, privKey, pubKey ) {
 		publicKey: pubKey
 	};
 	console.log( 'User "' + username + '" registered' );
-	persist();
+	persist( username );
 };
 
 exports.getConfiguration = function( username, confname ) {
@@ -52,6 +59,6 @@ exports.storeConfiguration = function( username, args ) {
 	delete args.password;
 	oUser.pub.configurations[ args.name ] = args;
 	console.log( 'Configuration "' + args.name + '" for user "' + username + '" stored' );
-	persist();
+	persist( username );
 	return args;
 }

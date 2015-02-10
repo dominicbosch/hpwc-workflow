@@ -27,10 +27,10 @@ exports.isConnOpen = function( username, connName ) {
 	return false;
 };
 
-exports.createConfiguration = function( username, args, cb ) {
+exports.createConfiguration = function( username, args, force, cb ) {
 	var cmd, oUser, oConn = new SSHConnection();
 
-	if( persistence.getConfiguration( username, args.name ) ) {
+	if( !force && persistence.getConfiguration( username, args.name ) ) {
 		cb( new Error( 'Configuration already existing!' ) );
 	} else {
 		oConn.on( 'ready', function() {
@@ -73,6 +73,32 @@ exports.createConfiguration = function( username, args, cb ) {
 	}
 };
 
+exports.updateConfiguration = function( username, args, cb ) {
+	var oUser, oConf, oConn, oConns = oUserConnections[ username ],
+		conf = persistence.getConfiguration( username, args.name ) ;
+
+	if( !conf ) {
+		cb( new Error( 'Configuration not existing!' ) );
+	} else {
+		if ( oConns ) {
+			oConn = oConns[ args.name ];
+			if ( oConn ) {
+				oConn.end();
+				oUser = persistence.getUser( username );
+				args.password = oUser.password;
+				if( conf.username !== args.username || conf.url !== args.url ) {
+					// We need to create a new configuration because major properties changed
+					exports.createConfiguration( username, args, true, cb );
+					return;
+				}
+			}
+		}
+		oConf = persistence.storeConfiguration( username, args );
+		cb( null, oConf );
+	}
+
+};
+
 exports.connectToHost = function( username, connObj, cb ) {
 
 	var oConn = {};
@@ -104,8 +130,8 @@ exports.connectToHost = function( username, connObj, cb ) {
 			console.log( 'SSH connection ENDED from "' + connObj.name
 					+ '" for user "' + username + '", #openConnections='+(connCounter));
 		}).on( 'error', function( e ) {
-			console.log( 'Error connecting "'+args.username+'@'+args.url+':'+args.port+'": ' + e.code );
-			cb( new Error( 'Error connecting "'+args.username+'@'+args.url+':'+args.port+'": ' + e.code ) );
+			console.log( 'Error connecting (#'+(++connCounter)+') "'+connObj.username+'@'+connObj.url+':'+connObj.port+'": ' + e.code );
+			cb( new Error( 'Error connecting "'+connObj.username+'@'+connObj.url+':'+connObj.port+'": ' + e.code ) );
 		}).connect({
 			host: connObj.url,
 			port: connObj.port,
