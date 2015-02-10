@@ -43,3 +43,42 @@ var initConfiguration = function() {
 		});
 	}
 };
+
+var fillSelectBox = function( tab ) {
+	var selBox = $( 'select', tab );
+	// $( '*', selBox ).remove();
+
+	$.get( '/services/configuration/getAll', function( oConfs ) {
+		console.log( oConfs );
+
+		for( var el in oConfs ) {
+			selBox.append( $( '<option>' ).text( el ) );
+		// console.log( el, $( 'input [name="' + el + '"]', tab ) );
+		// 	$( 'input [name="' + el + '"]', tab ).val( oConfs[ el ] );
+		}
+	});
+};
+
+var saveConfiguration = function() {
+
+};
+
+var deleteConfiguration = function() {
+
+};
+
+$(document).ready(function() {
+	$( '.tab-links a' ).click( function() {
+		var id = $( this ).attr( 'href' ),
+			activeTab = $( id );
+		
+		fillSelectBox( activeTab );
+
+		if( id === '#tab2' ) {
+
+		} else if( id == '#tab3' ) {
+
+		}
+
+	});
+});

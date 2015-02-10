@@ -14,85 +14,88 @@
 <div class="tabs">
 	<ul class="tab-links">
 		<li class="active"><a href="#tab1">New</a></li>
-		<!-- <li><a href="#tab2">Edit Configuration</a></li> -->
+		<li><a href="#tab2">Edit</a></li>
+		<li><a href="#tab3">Delete</a></li>
 	</ul>
 	<div class="tab-content">
 		<div id="tab1" class="tab active">
-			<table id="new_project">
+			<table>
 				<tr>
 					<td>Configuration Name</td>
-					<td><input name="name" type="text"></td>
+					<td> : <input name="name" type="text"></td>
 				</tr>
 				<tr>
 					<td>Host Url</td>
-					<td><input name="url" type="text"></td>
+					<td> : <input name="url" type="text"></td>
 				</tr>
 				<tr>
 					<td>Host Port</td>
-					<td><input name="port" type="text"></td>
+					<td> : <input name="port" type="text"></td>
 				</tr>
 				<tr>
 					<td>Host Username</td>
-					<td><input name="username" type="text"></td>
+					<td> : <input name="username" type="text"></td>
 				</tr>
 				<tr>
 					<td>Host Password</td>
-					<td><input name="password" type="password"></td>
+					<td> : <input name="password" type="password"></td>
 				</tr>
 				<tr>
 					<td>Workspace</td>
-					<td><input name="workspace" type="text"></td>
+					<td> : <input name="workspace" type="text"></td>
 				</tr>
 				<tr>
 					<td>Workhome</td>
-					<td><input name="workhome" type="text"></td>
+					<td> : <input name="workhome" type="text"></td>
 				</tr>
 			</table>
 			<div class="centered-text">
-				<input type="button" value="Init Configuration" onclick="initConfiguration();">
+				<button onclick="initConfiguration();">Create</button>
 			</div>
 		</div>
-<!-- 
+
 		<div id="tab2" class="tab">
-			<table id="project_details">
+			<table>
 				<tr>
-					<td>Project Name</td>
-					<td>
-						<select id="projects" name="project_name">
-							<option value="">Choose A Project</option>
-						</select>
-					</td>
+					<td>Configuration Name</td>
+					<td> : <select></select></td>
 				</tr>
 				<tr>
-					<td>Parameters Name</td>
-					<td>
-						<input name="par_list" type="text" size="30" value="{{ connection.project.parameters.list }}">
-					</td>
+					<td>Host Url</td>
+					<td> : <input name="url" type="text"></td>
 				</tr>
 				<tr>
-					<td>Default parameters value</td>
-					<td>
-						<input name="par_val" type="text" size="30" value="{{ connection.project.parameters.default }}">
-					</td>
+					<td>Host Port</td>
+					<td> : <input name="port" type="text"></td>
 				</tr>
 				<tr>
-					<td>Default number of threads</td>
-					<td>
-						<input name="nthreads" type="number" min="1" value="{{ connection.project.threads }}">
-					</td>
+					<td>Host Username</td>
+					<td> : <input name="username" type="text"></td>
 				</tr>
 				<tr>
-					<td>Comment</td>
-					<td>
-						<textarea name="comment">{{ connection.project.comment }}</textarea>
-					</td>
+					<td>Host Password</td>
+					<td> : <input name="password" type="password"></td>
+				</tr>
+				<tr>
+					<td>Workspace</td>
+					<td> : <input name="workspace" type="text"></td>
+				</tr>
+				<tr>
+					<td>Workhome</td>
+					<td> : <input name="workhome" type="text"></td>
 				</tr>
 			</table>
 			<div class="centered-text">
-				<input type="button" value="Edit Project" onclick="manage_project('edit');">
-				<input type="button" value="Delete Project" onclick="manage_project('delete');">
+				<button onclick="saveConfiguration();">Save</button>
 			</div>
-		</div> -->
+		</div>
+
+		<div id="tab3" class="tab">
+			<div class="centered-text">
+				<select></select>
+				<button onclick="deleteConfiguration();">Delete</bitton>
+			</div>
+		</div>
 	</div>
 </div>		
 
