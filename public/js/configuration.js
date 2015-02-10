@@ -1,7 +1,7 @@
-var fetchInputValues = function( arr ) {
+var fetchInputValues = function( parent, arr ) {
 	var obj = {};
 	for( var i = 0; i < arr.length; i++) {
-		obj[ arr[ i ] ] = $( 'input[name=' + arr[ i ] + ']' ).val();
+		obj[ arr[ i ] ] = $( 'input[name=' + arr[ i ] + ']', parent ).val();
 	}
 	return obj;
 };
@@ -26,7 +26,7 @@ var initConfiguration = function() {
 		];
 
 	setInfo( '' );
-	oValues = fetchInputValues( arrInputs );
+	oValues = fetchInputValues( $( '#tab1' ), arrInputs );
 	for( var el in oValues ) {
 		if( oValues[ el ] === '' ) isValid = false;
 	}
@@ -35,8 +35,7 @@ var initConfiguration = function() {
 	} else {
 		$.post( '/services/configuration/create', oValues, function( answ ) {
 			setInfo( answ );
-			
-			updateConfigurationForm();
+			updateConfigurationsList();
 		})
 		.fail( function( xhr ) {
 			setInfo( xhr.responseText, true );
@@ -45,20 +44,62 @@ var initConfiguration = function() {
 };
 
 var fillSelectBox = function() {
-	var selBox = $( 'select', $( '#tab2' ) ).html( '<option>Choose Configuration</option>' );
-
-	$.get( '/services/configuration/getAll', function( oConfs ) {
-		oPub.configurations = oConfs;
-		for( var el in oConfs ) selBox.append( $( '<option>' ).text( el ) );
+	var selBox = $( '#tab2 select' ).html( '<option>Choose Configuration</option>' );
+	getAllConfigurations(function( err, data ) {
+		for( var el in data.configurations ) selBox.append( $( '<option>' ).text( el ) );
 	});
 };
 
 var saveConfiguration = function() {
-
+	var oValues, isValid = true,
+		arrInputs = [
+			'name',
+			'url',
+			'port',
+			'username',
+			'workspace',
+			'workhome'
+		];
+	if( $( '#tab2 select' ).prop( 'selectedIndex' ) === 0 ) {
+		alert( 'Select a configuration first!' );
+		return;
+	}
+	oValues = fetchInputValues( $( '#tab2' ), arrInputs );
+	for( var el in oValues ) {
+		if( oValues[ el ] === '' ) isValid = false;
+	}
+	if( !isValid ) {
+		alert( 'You need to fill all input fields!' );
+	} else {
+		var result = confirm( 'Do you really want to update this configuration?' );
+		if( result ) {
+			oValues.name = $( '#tab2 select' ).val();
+			$.post( '/services/configuration/update', oValues, function( answ ) {
+				setInfo( answ );
+				updateConfigurationsList();
+			})
+			.fail( function( xhr ) {
+				setInfo( xhr.responseText, true );
+			});
+		}
+	}
 };
 
 var deleteConfiguration = function() {
-
+	if( $( '#tab2 select' ).prop( 'selectedIndex' ) === 0 ) {
+		alert( 'Select a configuration first!' );
+		return;
+	}
+	var result = confirm( 'Do you really want to delete this configuration?' );
+	if( result ) {
+		$.post( '/services/configuration/delete', $( '#tab2 select' ).val(), function( answ ) {
+			setInfo( answ );
+			updateConfigurationsList();
+		})
+		.fail( function( xhr ) {
+			setInfo( xhr.responseText, true );
+		});
+	}
 };
 
 $(document).ready(function() {

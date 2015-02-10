@@ -6,19 +6,6 @@ var express = require( 'express' ),
 	ssh = require( '../modules/ssh' ),
 	router = express.Router();
 
-/*
- * TODO 
- * allow connect/disconnect connections
- * dropdown allows selection of the connection without connecting -> in the page button to connect/disconnect
- * 
- *
- *
- *
- *
- *
- *
- */
-
 
 router.post( '/create', function( req, res ) {
 	var args, user = req.session.pub,
@@ -29,7 +16,7 @@ router.post( '/create', function( req, res ) {
 		res.status( 400 );
 		res.send( 'Missing Parameters!' );
 	} else {
-		ssh.createConfiguration( req.session.pub.username, oBody, function( err, oConf ) {
+		ssh.createConfiguration( req.session.pub.username, oBody, false, function( err, oConf ) {
 			if( err ) {
 				console.error( err );
 				res.status( 400 );
@@ -37,6 +24,29 @@ router.post( '/create', function( req, res ) {
 			} else {
 				req.session.pub.configurations[ oConf.name ] = oConf;
 				res.send( 'Connection initialization successful!' );
+			}
+		});
+	}
+});
+
+
+router.post( '/update', function( req, res ) {
+	var args, user = req.session.pub,
+		oBody = req.body;
+
+	if( !oBody.name || !oBody.url || !oBody.port || !oBody.workspace || !oBody.workhome
+			|| !oBody.username ) {
+		res.status( 400 );
+		res.send( 'Missing Parameters!' );
+	} else {
+		ssh.updateConfiguration( req.session.pub.username, oBody, function( err, oConf ) {
+			if( err ) {
+				console.error( err );
+				res.status( 400 );
+				res.send( 'Configuration update failed: ' + err.message );
+			} else {
+				req.session.pub.configurations[ oConf.name ] = oConf;
+				res.send( 'Configuration update successful!' );
 			}
 		});
 	}
@@ -79,7 +89,7 @@ router.get( '/getAll', function( req, res ) {
 	var pub = (req.session.pub || {} );
 	res.send({
 		configurations: pub.configurations,
-		openConnections: ssh.getOpenConnections( req.session.pub.username )
+		openConnections: ssh.getOpenConnections( pub.username )
 	});
 });
 

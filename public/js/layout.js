@@ -1,7 +1,7 @@
 "use strict";
 
 // Fetch the latest state of the configurations and store it in the public object
-var getAllConfigurations = function( cb ) {
+function getAllConfigurations( cb ) {
 	$.get( '/services/configuration/getAll', function( data ) {
 		oPub.configurations = data.configurations;
 		oPub.openConnections = data.openConnections;
@@ -11,6 +11,16 @@ var getAllConfigurations = function( cb ) {
 		if( typeof(cb) === 'function' ) cb( new Error( xhr.statusText ) );
 	});
 };
+
+function selectFirstOption( idSelect ) {
+	var selectBox = $( idSelect ),
+		firstOption = $( 'option:first-child', selectBox );
+
+	if( firstOption.length > 0 ) {
+		firstOption.attr( 'selected', true );
+		selectBox.change();
+	}
+}
 
 function toggleSelectedConnection( el ) {
 	var button = $( el ),

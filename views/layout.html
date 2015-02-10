@@ -12,8 +12,7 @@
 		"use strict";
 
 		// The public object
-		var oPub = {};
-		oPub.selectedConn = {};
+		var oPub = { selectedConn: {} };
 		{% if selectedConnection %}
 			oPub.selectedConn = {
 				name: '{{ selectedConnection.name }}',
@@ -22,13 +21,14 @@
 			};
 		{% endif %}
 
-		$(document).ready(function() {
+		function updateConfigurationsList( cb ) {
 
 			//Get the possible configuration and check for the current configuration reading the project
 			getAllConfigurations(function( err, data ) {
 
 				if ( data.configurations ) {
 
+					$( '#configs' ).html( '<option>Choose A Configuration</option>' );
 					//put data inside "configs" element
 					for ( var config in data.configurations ) {
 						$( '#configs' ).append($( '<option>' ).attr( 'value', config ).text( config ) );
@@ -49,11 +49,14 @@
 						}
 					}
 				}
+				if( typeof(cb) === 'function' ) cb( err, data );
 			});
 
-		});
+		}
 
-		function getAndSetProjects( config_name, project_val ) {
+		$(document).ready( updateConfigurationsList );
+
+		function getAndSetProjects( config_name, project_val, cb ) {
 
 			if( config_name !== '' ) {
 				//read the projects for an open connection and set the values
@@ -109,9 +112,7 @@
 			<div id="preview">
 				<div id="conf_title">
 					<h3>Current connection settings</h3>
-					<select id="configs" name="configs">
-						<option value="">Choose A Configuration</option>
-					</select>
+					<select id="configs" name="configs"></select>
 				</div>
 				<table id="conf_table">
 					<tr>
