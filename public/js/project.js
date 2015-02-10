@@ -52,7 +52,8 @@ function manage_project(action) {
 		project.comment = $( '#'+id+' textarea[name="comment"]' ).val();
 	}
 
-	$.post( '/services/project/manage', project, function( data ) {
+	$.post( '/services/project/manage/' + $( '#configs' ).val(), project, function( data ) {
+
 		$( '#resp_textarea' ).val( data );
 		
 		//update project list
@@ -96,7 +97,7 @@ $(document).ready(function() {
 	$( '#projects' ).change( function() {
 		var project = $( this ).val();
 		$( '#resp_textarea' ).val( '' );
-		updateProjectForm( project );
+		updateProjectForm( );
 	});
 
 });

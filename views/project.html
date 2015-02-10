@@ -61,25 +61,25 @@
 				<tr>
 					<td>Parameters Name</td>
 					<td>
-						<input name="par_list" type="text" size="30" value="{{ connection.project.parameters.list }}">
+						<input name="par_list" type="text" size="30" value="{{ selectedConnection.project.parameters.list }}">
 					</td>
 				</tr>
 				<tr>
 					<td>Default parameters value</td>
 					<td>
-						<input name="par_val" type="text" size="30" value="{{ connection.project.parameters.default }}">
+						<input name="par_val" type="text" size="30" value="{{ selectedConnection.project.parameters.default }}">
 					</td>
 				</tr>
 				<tr>
 					<td>Default number of threads</td>
 					<td>
-						<input name="nthreads" type="number" min="1" value="{{ connection.project.threads }}">
+						<input name="nthreads" type="number" min="1" value="{{ selectedConnection.project.threads }}">
 					</td>
 				</tr>
 				<tr>
 					<td>Comment</td>
 					<td>
-						<textarea name="comment">{{ connection.project.comment }}</textarea>
+						<textarea name="comment">{{ selectedConnection.project.comment }}</textarea>
 					</td>
 				</tr>
 			</table>

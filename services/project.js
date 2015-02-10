@@ -24,15 +24,16 @@ router.get( '/get/:connection/:project', function( req, res ) {
 		oConn = {};
 
 	if ( pub ) {
-		oConn = req.session.pub.configurations[ req.params.connection ];
+		oConn = pub.configurations[ req.params.connection ];
 		filename = path.join( oConn.workspace, req.params.project, '.project' );
 
 		ssh.getRemoteJSON( req, res, req.params.connection, filename, function( err, json ) {
 			if( !err ) {
-				res.send( json );
 				//store data in session
 				// FIXME Really store in session?
-				req.session.pub.selectedConnection.project = json;
+				pub.selectedConnection.project = json;
+				
+				res.send( json );
 			}
 		});
 	} else {
@@ -44,26 +45,26 @@ router.get( '/get/:connection/:project', function( req, res ) {
 router.post( '/manage/:connection', function( req, res ) {
 	var arrCommand, opt = '',
 		conn = req.params.connection,
-		oBody = req.body;
+		project = req.body;
 
-	if( oBody.action === 'delete' ) {
+	if( project.action === 'delete' ) {
 		arrCommand = [
 			'workflow', 'project', '-d',
-			'-p', '"' + oBody.name + '"'
+			'-p', '"' + project.name + '"'
 		];
 	} else {
-		if ( oBody.action === 'create' ) {
+		if ( project.action === 'create' ) {
 			opt = '-c';
-		} else if ( oBody.action === 'edit' ) {
+		} else if ( project.action === 'edit' ) {
 			opt = '-e';
 		}
 		arrCommand = [
 			'workflow', 'project', opt,
-			'-p', '"' + oBody.name + '"',
-			'--params', oBody.par_name,
-			'--values', oBody.par_val,
-			'--threads', oBody.nthreads,
-			'--comment', '"' + oBody.comment + '"'
+			'-p', '"' + project.name + '"',
+			'--params', project.par_name,
+			'--values', project.par_val,
+			'--threads', project.nthreads,
+			'--comment', '"' + project.comment + '"'
 		];
 	}
 

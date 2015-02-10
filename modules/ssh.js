@@ -186,6 +186,10 @@ executeCommand = function( req, res, connection, command, wrkcmd, cb ) {
 	}
 };
 
+exports.execWorkComm = function( req, res, connection, command, cb ) {
+	executeCommand( req, res, connection, command, true, cb );
+};
+
 // IMPORTANT: If callback function 'cb' receives an error as an argument
 //            no further response can be sent to the client!!!
 exports.getRemoteJSON = function( req, res, connection, filename, cb ) {
