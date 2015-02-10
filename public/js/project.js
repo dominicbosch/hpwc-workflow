@@ -56,11 +56,14 @@ function manage_project(action) {
 	$.post( '/services/project/manage/' + $( '#configs' ).val(), project, function( data ) {
 
 		$( '#resp_textarea' ).val( data );
-		
-		var	project_val = null;
 
-		if( project.action === 'edit' ) {
-			project_val = project.name;
+		//clean project list
+		$( '#projects' ).html( '<option value="">Choose A Project</option>' );
+		
+		var	project_val = project.name;
+
+		if( project.action === 'delete' ) {
+			project_val = null;
 		} else if ( project.action === 'create' ) {
 			//clean creation form
 			$( '#new_project input' ).val( '' );
@@ -70,34 +73,6 @@ function manage_project(action) {
 		//update project list
 		getAndSetProjects( $( '#configs' ).val(), project_val );
 
-/*
-		$.get( '/services/project/getProjects', function( data ) {
-
-			var projects_string = '<option value="">Choose A Project</option>';
-			var	project_val = '';
-			
-			if ( data !== '' ) {
-				data.forEach(function(project) {
-					projects_string += '<option value="' + project + '">' + project + '</option>';
-				});
-			}
-
-			$( '#projects' ).html(projects_string);
-			
-			//if edit, select again the project
-			if( project.action === 'edit' ) {
-				project_val = project.name;
-			} else if ( project.action === 'create' ) {
-				//clean creation form
-				$( '#new_project input' ).val( '' );
-				$( '#new_project textarea' ).val( '' );
-			}
-
-			$( '#projects' ).val(project_val);
-
-			updateProjectForm(project_val);
-		});
-*/
 	});
 }
 

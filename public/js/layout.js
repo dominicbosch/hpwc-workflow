@@ -1,7 +1,5 @@
 "use strict";
 
-
-
 // Fetch the latest state of the configurations and store it in the public object
 var getAllConfigurations = function( cb ) {
 	$.get( '/services/configuration/getAll', function( data ) {
@@ -57,10 +55,10 @@ function updateConfigurationForm( cb ) {
 	var config_name = $( '#configs' ).val(),
 		button = $( '#connectButton' );
 
-	if ( config_name === '' ) {
+	//clean project list
+	$( '#projects' ).html( '<option value="">Choose A Project</option>' );
 
-		//clean project list
-		$( '#projects' ).html( '<option value="">Choose A Project</option>' );
+	if ( config_name === '' ) {
 
 		button.attr( 'disabled', true );
 

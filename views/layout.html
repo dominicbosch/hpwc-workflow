@@ -13,6 +13,7 @@
 
 		// The public object
 		var oPub = {};
+		oPub.selectedConn = {};
 		{% if selectedConnection %}
 			oPub.selectedConn = {
 				name: '{{ selectedConnection.name }}',
@@ -54,9 +55,6 @@
 
 		function getAndSetProjects( config_name, project_val ) {
 
-			//clean project list
-			$( '#projects' ).html( '<option value="">Choose A Project</option>' );
-
 			if( config_name !== '' ) {
 				//read the projects for an open connection and set the values
 				$.get( '/services/project/getAll/' + config_name, function( projects ) {
@@ -67,11 +65,15 @@
 	
 					if (project_val) {
 						$( '#projects' ).val( project_val );
+						updateProjectForm( );
 					}
 				}).fail(function( xhr ) {
 					console.log( xhr.responseText );
 				});
-			} 
+			} else {
+				//clean project list
+				$( '#projects' ).html( '<option value="">Choose A Project</option>' );
+			}
 		}
 	</script>
 	{% endif %}
