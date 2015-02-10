@@ -31,7 +31,7 @@ router.get( '/get/:connection/:project', function( req, res ) {
 			if( !err ) {
 				//store data in session
 				// FIXME Really store in session?
-				pub.selectedConnection.project = json;
+				pub.selectedConnection.selectedProject = json.name;
 				
 				res.send( json );
 			}

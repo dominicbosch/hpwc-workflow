@@ -57,6 +57,8 @@ function manage_project(action) {
 
 		$( '#resp_textarea' ).val( data );
 
+		cleanProjectForm();
+		
 		//clean project list
 		$( '#projects' ).html( '<option value="">Choose A Project</option>' );
 		

@@ -75,7 +75,7 @@ router.get( '/disconnect/:name', function( req, res ) {
 		if (req.session.pub.selectedConnection.name === req.params.name ) {
 			req.session.pub.selectedConnection.status = false;
 			//clean selectedProject
-			delete req.session.pub.selectedConnection.project;
+			delete req.session.pub.selectedConnection.selectedProject;
 		}
 		console.log( 'User "' + req.session.pub.username + '" disconnected from "' + req.params.name + '"' );
 		res.send("Connection Closed!");

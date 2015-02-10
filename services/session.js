@@ -22,7 +22,7 @@ router.post( '/logout', function( req, res ) {
 });
 
 router.get( '/cleanProject', function( req, res ) {
-	delete req.session.pub.selectedConnection.project;
+	delete req.session.pub.selectedConnection.selectedProject;
 	res.send( 'Project cleaned from session' );
 });
 
