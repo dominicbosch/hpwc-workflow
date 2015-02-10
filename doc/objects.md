@@ -44,6 +44,5 @@ Session Object:
           "threads":"4",
           "comment":"test22"
         }
-      },
-      "listConnections": [ "austin-1" ]
+      }
     }

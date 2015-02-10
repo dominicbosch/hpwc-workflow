@@ -11,47 +11,45 @@
 	
 		"use strict";
 
-		var selectedConn = {};
+		// The public object
+		var oPub = {};
 		{% if selectedConnection %}
-		selectedConn = {
-			name: '{{ selectedConnection.name }}',
-			status: {{ selectedConnection.status }},
-			projectName: '{{ selectedConnection.project.name }}' 
-		};
+			oPub.selectedConn = {
+				name: '{{ selectedConnection.name }}',
+				status: {{ selectedConnection.status }},
+				projectName: '{{ selectedConnection.project.name }}' 
+			};
 		{% endif %}
 
 		$(document).ready(function() {
 
-
 			//Get the possible configuration and check for the current configuration reading the project
-			$.get( '/services/configuration/getAll', function( data ) {
+			getAllConfigurations(function( err, data ) {
 
-				if ( data ) {
+				if ( data.configurations ) {
 
 					//put data inside "configs" element
-					for ( var config in data ) {
+					for ( var config in data.configurations ) {
 						$( '#configs' ).append($( '<option>' ).attr( 'value', config ).text( config ) );
 					}
 
 					//Current configuration not empty
-					if( selectedConn.name !== '' ) {
+					if( oPub.selectedConn.name !== '' ) {
 
 						//set current configuration, change event is not raised because the configuration details are read from the session
-						$( '#configs' ).val( selectedConn.name );
+						$( '#configs' ).val( oPub.selectedConn.name );
 
-						$( '#connectButton' ).text( selectedConn.status ? 'Disconnect' : 'Connect' );
+						$( '#connectButton' ).text( oPub.selectedConn.status ? 'Disconnect' : 'Connect' );
 
-						if( selectedConn.status ) {
+						if( oPub.selectedConn.status ) {
 
 							//retrieve project list if old connection is set and connected
-							getAndSetProjects( selectedConn.name, selectedConn.projectName );
+							getAndSetProjects( oPub.selectedConn.name, oPub.selectedConn.projectName );
 						}
 					}
 				}
-			})
-			.fail( function( xhr ) {
-				console.log(' Request failed: (' + xhr.status + ') ' + xhr.statusText );
 			});
+
 		});
 
 		function getAndSetProjects( config_name, project_val ) {

@@ -77,7 +77,10 @@ router.get( '/disconnect/:name', function( req, res ) {
 
 router.get( '/getAll', function( req, res ) {
 	var pub = (req.session.pub || {} );
-	res.send( pub.configurations );
+	res.send({
+		configurations: pub.configurations,
+		openConnections: ssh.getOpenConnections( req.session.pub.username )
+	});
 });
 
 router.get( '/get/:name', function( req, res ) {

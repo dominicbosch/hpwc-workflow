@@ -44,17 +44,12 @@ var initConfiguration = function() {
 	}
 };
 
-var fillSelectBox = function( tab ) {
-	var selBox = $( 'select', tab ).html( '<option>Choose Configuration</option>' );
+var fillSelectBox = function() {
+	var selBox = $( 'select', $( '#tab2' ) ).html( '<option>Choose Configuration</option>' );
 
 	$.get( '/services/configuration/getAll', function( oConfs ) {
-		console.log( oConfs );
-
-		for( var el in oConfs ) {
-			selBox.append( $( '<option>' ).text( el ) );
-		// console.log( el, $( 'input [name="' + el + '"]', tab ) );
-		// 	$( 'input [name="' + el + '"]', tab ).val( oConfs[ el ] );
-		}
+		oPub.configurations = oConfs;
+		for( var el in oConfs ) selBox.append( $( '<option>' ).text( el ) );
 	});
 };
 
@@ -67,21 +62,15 @@ var deleteConfiguration = function() {
 };
 
 $(document).ready(function() {
+	fillSelectBox();
+	// We also update the select box on every tab click on this page:
 	$( '.tab-links a' ).click( function() {
-		var id = $( this ).attr( 'href' ),
-			activeTab = $( id );
-		
-		fillSelectBox( activeTab );
-
-		if( id === '#tab2' ) {
-
-		} else if( id == '#tab3' ) {
-
-		}
-
+		fillSelectBox();
 	});
 	$( '.tab-content select' ).change(function() {
-
-		console.log('CHANGE');
+		var oConfs = oPub.configurations[ $(this).val() ];
+		for( var el in oConfs ) {
+			$( '#tab2 input[name="' + el + '"]' ).val( oConfs[ el ] );
+		}
 	});
 });

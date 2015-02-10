@@ -1,5 +1,19 @@
 "use strict";
 
+
+
+// Fetch the latest state of the configurations and store it in the public object
+var getAllConfigurations = function( cb ) {
+	$.get( '/services/configuration/getAll', function( data ) {
+		oPub.configurations = data.configurations;
+		oPub.openConnections = data.openConnections;
+		if( typeof(cb) === 'function' ) cb( null, data );
+	})
+	.fail( function( xhr ) {
+		if( typeof(cb) === 'function' ) cb( new Error( xhr.statusText ) );
+	});
+};
+
 function toggleSelectedConnection( el ) {
 	var button = $( el ),
 		config = $( '#configs' ).val();

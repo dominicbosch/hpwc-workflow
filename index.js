@@ -63,12 +63,8 @@ exports.init = function( args ) {
 
 	// Redirect the views that will be loaded by the swig templating engine
 	app.get( '/views/*', function ( req, res ) {
-		var view = 'index';
-		
+		var view = 'index';		
 		if( isValidRequest( req ) ) view = req.params[ 0 ];
-		if( req.session.pub ) {
-			req.session.pub.listConnections = ssh.getOpenConnections( req.session.pub.username );
-		}
 		res.render( view, req.session.pub );
 	});
 	
