@@ -73,6 +73,8 @@
 		
 						{% block ifprojectextra %}{% endblock %}
 					}
+				}).fail(function( xhr ) {
+					console.log( xhr.responseText );
 				});
 			} 
 		}

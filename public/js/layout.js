@@ -80,6 +80,20 @@ function setConnectionForm( config ) {
 	$( '#conf_table td[name="workspace"]' ).text( config.workspace );
 }
 
+function getURLQuery() {
+	var query = window.location.search.substring(1),
+		arrParams = query.split( '&' ),
+		arrKeyVal, oQuery = {};
+
+	for( var i = 0; i < arrParams.length; i++ ) {
+		arrKeyVal = arrParams[ i ].split( '=' );
+		if( arrKeyVal[ 0 ] !== '' ) {
+			oQuery[ arrKeyVal[ 0 ] ] =  arrKeyVal[ 1 ];
+		}
+	}
+	return oQuery;
+}
+
 $(document).ready(function() {
 	$( '#configs' ).change( updateConfigurationForm );
 });
