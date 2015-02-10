@@ -45,8 +45,7 @@ var initConfiguration = function() {
 };
 
 var fillSelectBox = function( tab ) {
-	var selBox = $( 'select', tab );
-	// $( '*', selBox ).remove();
+	var selBox = $( 'select', tab ).html( '<option>Choose Configuration</option>' );
 
 	$.get( '/services/configuration/getAll', function( oConfs ) {
 		console.log( oConfs );
@@ -80,5 +79,9 @@ $(document).ready(function() {
 
 		}
 
+	});
+	$( '.tab-content select' ).change(function() {
+
+		console.log('CHANGE');
 	});
 });

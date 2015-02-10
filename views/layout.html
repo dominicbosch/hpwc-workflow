@@ -70,6 +70,8 @@
 					if (project_val) {
 						$( '#projects' ).val( project_val );
 					}
+				}).fail(function( xhr ) {
+					console.log( xhr.responseText );
 				});
 			} 
 		}
