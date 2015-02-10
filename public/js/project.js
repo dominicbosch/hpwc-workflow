@@ -5,27 +5,33 @@ function cleanProjectForm() {
 	$( '#project_details textarea' ).val( '' );
 }
 
+function setProjectForm( project ) {
+	$( '#project_details input[name="par_list"]' ).val(project.parameters.list);
+	$( '#project_details input[name="par_val"]' ).val(project.parameters.default);
+	$( '#project_details input[name="nthreads"]' ).val(project.threads);
+	$( '#project_details textarea[name="comment"]' ).val(project.comment);
+}
 
 function updateProjectForm( cb ) {
-	var project_name = $( '#projects' ).val();
+	var config_name = $( '#configs' ).val(),
+		project_name = $( '#projects' ).val();
 	if ( project_name === '' ) {
 		$.get( '/services/session/cleanProject', function( data ) {
 			cleanProjectForm();
 		});
 	} else {
 		//fill project form
-		$.get( '/services/project/get/' + $( '#configs' ).val() + '/' + project_name, function( project ) {
-			$( '#project_details input[name="par_list"]' ).val(project.parameters.list);
-			$( '#project_details input[name="par_val"]' ).val(project.parameters.default);
-			$( '#project_details input[name="nthreads"]' ).val(project.threads);
-			$( '#project_details textarea[name="comment"]' ).val(project.comment);
+		$.get( '/services/project/get/' 
+			+ config_name + '/' 
+			+ project_name, function( project ) {
+			setProjectForm( project );
 		});
 	}
 }
 
-function manage_project(action) {
+function manage_project( action ) {
 
-	var id = "";
+	var id = '' ;
 	var	project = {
 			action: action
 		};
@@ -40,10 +46,10 @@ function manage_project(action) {
 		project.name = $( '#projects' ).val();
 	} else {
 		if ( action === 'create' ) {
-			id = 'new_project';
+			id = 'new_project' ;
 			project.name = $( '#new_project input[name="project_name"]' ).val();
 		} else if (action === 'edit' ) {
-			id = 'project_details';
+			id = 'project_details' ;
 			project.name = $( '#projects' ).val();
 		}
 
@@ -53,12 +59,13 @@ function manage_project(action) {
 		project.comment = $( '#'+id+' textarea[name="comment"]' ).val();
 	}
 
-	$.post( '/services/project/manage/' + $( '#configs' ).val(), project, function( data ) {
+	$.post( '/services/project/manage/' 
+		+ config_name, project, function( data ) {
 
 		$( '#resp_textarea' ).val( data );
 
 		cleanProjectForm();
-		
+
 		//clean project list
 		$( '#projects' ).html( '<option value="">Choose A Project</option>' );
 		
@@ -80,14 +87,12 @@ function manage_project(action) {
 
 $(document).ready(function() {
 		
-	//create handler for changing of configuraton
 	$( '#configs' ).change( cleanProjectForm );
 
 	$( '#connectButton' ).on( 'click', cleanProjectForm );
 
 	//when the project selected change, we read the value of parameters (user change)
 	$( '#projects' ).change( function() {
-		var project = $( this ).val();
 		$( '#resp_textarea' ).val( '' );
 		updateProjectForm( );
 	});

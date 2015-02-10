@@ -1,3 +1,5 @@
+'use strict';
+
 var express = require( 'express' ),
 	ssh = require( '../modules/ssh' ),
 	path = require( 'path' ),
@@ -32,32 +34,32 @@ router.get( '/get/:connection/:project/:method', function( req, res ) {
 // Manage method. 
 router.post( '/manage/:connection/:project', function( req, res ) {
 	var opt = '', arrCommand,
-		oBody = req.body,
 		conn = req.params.connection,
-		project = req.params.project;
+		project = req.params.project,
+		method = req.body;
 
-	if( oBody.action === 'delete' ) {
+	if( method.action === 'delete' ) {
 		arrCommand = [
 			'workflow', 'project_module', '-d',
 			'-p', '"' + project + '"',
-			'-n', '"' + oBody.name + '"'
+			'-n', '"' + method.name + '"'
 		];
 	} else {
-		if( oBody.action === 'create' ) {
+		if( method.action === 'create' ) {
 			opt = '-c';
-		} else if ( oBody.action === 'edit' ) {
+		} else if ( method.action === 'edit' ) {
 			opt = '-e';
 		}
 		arrCommand = [
 			'workflow', 'project_module', opt,
 			'-p', '"' + project + '"',
-			'-m', '"' + oBody.type + '"',
-			'-n', '"' + oBody.name + '"',
-			'--comment', '"' + oBody.comment + '"'
+			'-m', '"' + method.type + '"',
+			'-n', '"' + method.name + '"',
+			'--comment', '"' + method.comment + '"'
 		];
 	}
 
-	ssh.execWorkComm( req, res, conn, arrCommand.join(), function( err, data ) {
+	ssh.execWorkComm( req, res, conn, arrCommand.join( ' ' ), function( err, data ) {
 		if( !err ) {
 			console.log( 'Method manage command (' + arrCommand.join() + ') got data: ' + data );
 			res.send( data );

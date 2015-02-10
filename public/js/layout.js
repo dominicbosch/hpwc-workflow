@@ -69,7 +69,8 @@ function updateConfigurationForm( cb ) {
 
 	} else {
 		//fill configuration form
-		$.get( '/services/configuration/get/' + config_name, function( data ) {
+		$.get( '/services/configuration/get/' 
+			+ config_name, function( data ) {
 
 			if ( data.configuration ) {
 				setConnectionForm( data.configuration );
