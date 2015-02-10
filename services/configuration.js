@@ -64,6 +64,8 @@ router.get( '/disconnect/:name', function( req, res ) {
 	if ( ssh.closeConnection( req.session.pub.username, req.params.name ) ) {
 		if (req.session.pub.selectedConnection.name === req.params.name ) {
 			req.session.pub.selectedConnection.status = false;
+			//clean selectedProject
+			delete req.session.pub.selectedConnection.project;
 		}
 		console.log( 'User "' + req.session.pub.username + '" disconnected from "' + req.params.name + '"' );
 		res.send("Connection Closed!");

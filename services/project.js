@@ -68,9 +68,9 @@ router.post( '/manage/:connection', function( req, res ) {
 		];
 	}
 
-	ssh.execWorkComm( req, res, conn, arrCommand.join(), function( err, data ) {
+	ssh.execWorkComm( req, res, conn, arrCommand.join(' '), function( err, data ) {
 		if( !err ) {
-			console.log( 'Project manage command (' + arrCommand.join() + ') got data: ' + data );
+			console.log( 'Project manage command (' + arrCommand.join(' ') + ') got data: ' + data );
 			res.send( data );
 		}
 	});

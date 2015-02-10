@@ -11,11 +11,14 @@
 	
 		"use strict";
 
-		var selectedConn = {
+		var selectedConn = {};
+		{% if selectedConnection %}
+		selectedConn = {
 			name: '{{ selectedConnection.name }}',
-			status: '{{ selectedConnection.status }}',
+			status: {{ selectedConnection.status }},
 			projectName: '{{ selectedConnection.project.name }}' 
 		};
+		{% endif %}
 
 		$(document).ready(function() {
 
@@ -41,10 +44,8 @@
 						if( selectedConn.status ) {
 
 							//retrieve project list if old connection is set and connected
-							getAndSetProjects( selectedConn.name );
+							getAndSetProjects( selectedConn.name, selectedConn.projectName );
 						}
-						
-						{% block ifconnectionextra %}{% endblock %}
 					}
 				}
 			})
@@ -53,7 +54,7 @@
 			});
 		});
 
-		function getAndSetProjects( config_name ) {
+		function getAndSetProjects( config_name, project_val ) {
 
 			//clean project list
 			$( '#projects' ).html( '<option value="">Choose A Project</option>' );
@@ -66,12 +67,8 @@
 						$( '#projects' ).append($( '<option>' ).attr( 'value', projects[i] ).text( projects[i] ) );
 					}
 	
-					//Current project not empty
-					if( selectedConn.projectName !== '' ) {
-						//set current project, change event is not raised because the project details are read from the session
-						$( '#projects' ).val( selectedConn.projectName );
-		
-						{% block ifprojectextra %}{% endblock %}
+					if (project_val) {
+						$( '#projects' ).val( project_val );
 					}
 				});
 			} 

@@ -5,6 +5,7 @@ function cleanProjectForm() {
 	$( '#project_details textarea' ).val( '' );
 }
 
+
 function updateProjectForm( cb ) {
 	var project_name = $( '#projects' ).val();
 	if ( project_name === '' ) {
@@ -56,7 +57,20 @@ function manage_project(action) {
 
 		$( '#resp_textarea' ).val( data );
 		
+		var	project_val = null;
+
+		if( project.action === 'edit' ) {
+			project_val = project.name;
+		} else if ( project.action === 'create' ) {
+			//clean creation form
+			$( '#new_project input' ).val( '' );
+			$( '#new_project textarea' ).val( '' );
+		}
+
 		//update project list
+		getAndSetProjects( $( '#configs' ).val(), project_val );
+
+/*
 		$.get( '/services/project/getProjects', function( data ) {
 
 			var projects_string = '<option value="">Choose A Project</option>';
@@ -83,6 +97,7 @@ function manage_project(action) {
 
 			updateProjectForm(project_val);
 		});
+*/
 	});
 }
 
