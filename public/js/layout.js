@@ -87,11 +87,65 @@ function updateConfigurationForm( cb ) {
 				button.text( data.status ? 'Disconnect' : 'Connect' );
 				getAndSetProjects( data.status ? data.configuration.name : '' );
 				button.removeAttr( 'disabled' );
-				if( typeof(cb) === 'function' ) cb();
+				if( typeof(cb) === 'function' ) cb( data.status ? data.configuration.name : '' );
 			} else {
 				alert ("Configuration not found");
 			}
 		});
+	}
+}
+
+function updateConfigurationsList( cb ) {
+
+	$( '#configs' ).html( '<option value="">Choose A Configuration</option>' );
+
+	//Get the possible configuration and check for the current configuration reading the project
+	getAllConfigurations(function( err, data ) {
+
+		if ( data.configurations ) {
+			//put data inside "configs" element
+			for ( var config in data.configurations ) {
+				$( '#configs' ).append($( '<option>' ).attr( 'value', config ).text( config ) );
+			}
+
+			//Current configuration not empty
+			if( oPub.selectedConn.name !== '' ) {
+
+				//set current configuration, change event is not raised because the configuration details are read from the session
+				$( '#configs' ).val( oPub.selectedConn.name );
+
+				$( '#connectButton' ).text( oPub.selectedConn.status ? 'Disconnect' : 'Connect' );
+
+				if( oPub.selectedConn.status ) {
+					//retrieve project list if old connection is set and connected
+					getAndSetProjects( oPub.selectedConn.name, oPub.selectedConn.projectName, cb );
+				}
+			}
+		}
+	});
+}
+
+function getAndSetProjects( config_name, project_val, cb ) {
+
+	if( config_name !== '' ) {
+		//read the projects for an open connection and set the values
+		$.get( '/services/project/getAll/' + config_name, function( projects ) {
+
+			for ( var i in projects ) {
+				$( '#projects' ).append($( '<option>' ).attr( 'value', projects[i] ).text( projects[i] ) );
+			}
+
+			if (project_val) {
+				$( '#projects' ).val( project_val );
+				if ( typeof(cb) === 'function' ) 
+					cb( );
+			}
+		}).fail(function( xhr ) {
+			console.log( xhr.responseText );
+		});
+	} else {
+		//clean project list
+		$( '#projects' ).html( '<option value="">Choose A Project</option>' );
 	}
 }
 
@@ -116,7 +170,3 @@ function getURLQuery() {
 	}
 	return oQuery;
 }
-
-$(document).ready(function() {
-	$( '#configs' ).change( updateConfigurationForm );
-});

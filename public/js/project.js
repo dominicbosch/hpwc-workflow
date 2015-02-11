@@ -80,14 +80,18 @@ function manage_project( action ) {
 		}
 
 		//update project list
-		getAndSetProjects( $( '#configs' ).val(), project_val );
+		getAndSetProjects( $( '#configs' ).val(), project_val, updateProjectForm);
 
 	});
 }
 
 $(document).ready(function() {
-		
+	
+	updateConfigurationsList( updateProjectForm );
+
 	$( '#configs' ).change( cleanProjectForm );
+
+	$( '#configs' ).change( updateConfigurationForm );
 
 	$( '#connectButton' ).on( 'click', cleanProjectForm );
 

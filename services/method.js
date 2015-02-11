@@ -26,8 +26,38 @@ router.get( '/get/:connection/:project/:method', function( req, res ) {
 		oConn = req.session.pub.configurations[ connection ],
 		filename  = path.join( oConn.workspace, project, method, '.module' );
 
-	ssh.getRemoteJSON( req, res, connection, filename, function( err, json ) {
-		if( !err ) res.send( json );
+	ssh.getRemoteJSON( req, res, connection, filename, function( err, method ) {
+		if( !err ) {
+			var command = 'workflow list_src ' 
+				+ ' -p ' + req.params.project 
+				+ ' -n ' + req.params.method ;
+			ssh.getRemoteList( req, res, connection, command, function( err, data ) {
+				method.srcList = data;
+				res.send( method );
+			});
+		}
+	});
+});
+
+// GET source file list
+router.get( '/getSrcList/:connection/:project/:method', function( req, res ) {	
+	var command = 'workflow list_src ' 
+		+ ' -p ' + req.params.project 
+		+ ' -n ' + req.params.method ;
+	ssh.getAndSendRemoteList( req, res, req.params.connection, command );
+});
+
+// GET single source file
+router.get( '/getSrcFile/:connection/:project/:method/:source_name', function( req, res ) {	
+	var connection = req.params.connection,
+		project = req.params.project,
+		method = req.params.method,
+		source_name = req.params.source_name,
+		oConn = req.session.pub.configurations[ connection ],
+		filename  = path.join( oConn.workspace, project, method, 'src', source_name );
+
+	ssh.getRemoteFile( req, res, connection, filename, function( err, file ) {
+		if( !err ) res.send( file );
 	});
 });
 

@@ -238,6 +238,15 @@ exports.getRemoteJSON = function( req, res, connection, filename, cb ) {
 	});
 };
 
+exports.getRemoteFile = function( req, res, connection, filename, cb ) {
+	var workflowCommand = false;
+	executeCommand( req, res, connection, 'cat ' + filename, workflowCommand, function( err, data ) {
+		if( !err ) {
+			cb( null, data );
+		}
+	});
+};
+
 // This is a general handler for retrieved lists of the same format
 // IMPORTANT: If callback function 'cb' receives an error as an argument
 //            no further response can be sent to the client!!!

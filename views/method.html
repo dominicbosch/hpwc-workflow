@@ -2,31 +2,6 @@
 
 {% block title %}Method{% endblock %}
 
-{% block ifprojectextra %}
-//retrieve method list if current project is set
-$.get('/services/method/get', function( data ) {
-	var methods_string = '<option value="">Choose A Method</option>';
-	if (data !== "") {
-		data.forEach(function(method) {
-			methods_string += '<option value="' + method + '">' + method + '</option>';
-		});
-	}
-	$('#methods').html(methods_string);
-});
-{% endblock %}
-
-{% block ifconnectionextra %}
-$.get('/services/method/getInstalled', function( data ) {
-	var types_string = '<option value="">Choose A Method Type</option>';
-	if (data !== "") {
-		data.forEach(function(type) {
-			types_string += '<option value="' + type + '">' + type + '</option>';
-		});
-	}
-	$('#method_types').html(types_string);
-});
-{% endblock %}
-
 {% block head %}
 <script type="text/javascript" src="../js/tab.js"></script>
 <script type="text/javascript" src="../js/method.js"></script>
@@ -95,6 +70,14 @@ $.get('/services/method/getInstalled', function( data ) {
 					</td>
 				</tr>
 				<tr>
+					<td>Source Files</td>
+					<td>
+						<select id="src_files" name="src_name" size="5">
+							
+						</select>
+					</td>
+				</tr>
+				<tr>
 					<td>Comment</td>
 					<td>
 						<textarea name="comment"></textarea>
@@ -104,6 +87,7 @@ $.get('/services/method/getInstalled', function( data ) {
 			<div>
 				<input type="button" value="Edit Method" onclick="manage_method('edit');">
 				<input type="button" value="Delete Method" onclick="manage_method('delete');">
+				<input id="edit_code" type="button" value="Edit Code">
 			</div>
 		</div>
 	</div>
@@ -113,5 +97,24 @@ $.get('/services/method/getInstalled', function( data ) {
 <div id="cmd_response">
 	<h3>Command Response</h3>
 	<textarea id="resp_textarea" readonly></textarea>
+</div>
+<div class="overlay" style="display: none;">
+	<div class="edit-wrapper">
+		<div class="edit-content">
+			<a class="close">x</a>
+			<h3>Source code Editor</h3>
+			<form >
+				<div id="src_editor"></div>
+				<script>
+				    var editor = ace.edit("src_editor");
+					editor.setTheme("ace/theme/twilight");
+					editor.getSession().setMode("ace/mode/c_cpp");
+					//editor.getSession().setValue(value);
+				</script>
+				</br>
+				<button type="submit">Save code</button>
+			</form>
+		</div>
+	</div>
 </div>
 {% endblock %}

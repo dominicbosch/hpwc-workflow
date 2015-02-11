@@ -2,11 +2,16 @@
 
 function cleanMethodForm() {
 	$( '#edit_method input[name="method_type"]' ).val( '' );
+	$( '#src_files' ).empty();
 	$( '#edit_method textarea[name="comment"]' ).val( '' );
 }
 
 function setMethodForm( method ) {
 	$( '#edit_method input[name="method_type"]' ).val( method.type );
+	var srcList = method.srcList;
+	for ( var i in srcList ) {
+		$( '#src_files' ).append($( '<option>' ).attr( 'value', srcList[i] ).text( srcList[i] ) );
+	}
 	$( '#edit_method textarea[name="comment"]' ).val( method.comment );
 }
 
@@ -27,7 +32,7 @@ function updateMethodForm( cb ) {
 	}
 }
 
-function getAndSetMethods( config_name, project_val, method_val ) {
+function getAndSetMethods( config_name, project_val, method_val, cb ) {
 
 	if( config_name !== '' ) {
 		//read the projects for an open connection and set the values
@@ -39,16 +44,39 @@ function getAndSetMethods( config_name, project_val, method_val ) {
 				$( '#methods' ).append($( '<option>' ).attr( 'value', methods[i] ).text( methods[i] ) );
 			}
 
-			if (method_val) {
+			if ( method_val ) {
 				$( '#methods' ).val( method_val );
 				updateMethodForm( );
 			}
 		}).fail(function( xhr ) {
 			console.log( xhr.responseText );
 		});
+
+		if ( typeof(cb) === 'function' ) 
+			cb( );
+
 	} else {
 		//clean method list
 		$( '#methods' ).html( '<option value="">Choose A Method</option>' );
+	}
+}
+
+function getInstalledMethod( config_name ) {
+
+	//clean method list
+	$( '#method_types' ).html( '<option value="">Choose A Method Type</option>' );
+
+	if( config_name !== '' ) {
+		
+		$.get('/services/method/getInstalled/'
+			+ config_name, function( methods ) {
+
+			for ( var i in methods ) {
+				$( '#method_types' ).append($( '<option>' ).attr( 'value', methods[i] ).text( methods[i] ) );
+			}
+		}).fail(function( xhr ) {
+			console.log( xhr.responseText );
+		});
 	}
 }
 
@@ -58,10 +86,10 @@ function manage_method( action ) {
 	var	method = {
 			action: action
 		};
-	var	conf_file = $( '#configs' ).val();
+	var	config_name = $( '#configs' ).val();
 	var project_name = $( '#projects' ).val();
 
-	if ( conf_file === '' ) {
+	if ( config_name === '' ) {
 		alert( 'Select A Configuration' );
 		return;
 	}
@@ -79,8 +107,6 @@ function manage_method( action ) {
 			method.name = $( '#new_method input[name="method_name"]' ).val();
 			method.type = $( '#method_types' ).val();
 		} else if ( action === 'edit' ) {
-			alert ( 'to be implemented on the script' );
-			return;
 			id = 'edit_method';
 			method.name = $( '#methods' ).val();
 			method.type = $( '#' + id + ' input[name="method_type"]' ).val();
@@ -89,7 +115,12 @@ function manage_method( action ) {
 		method.comment = $( '#' + id + ' textarea[name="comment"]' ).val();
 	}
 
-	$.post( '/services/method/manage'
+	if ( ( method.name === '' ) || ( method.type === '' ) ) {
+		alert('Module name and type are mandatory, choose both');
+		return;
+	}
+
+	$.post( '/services/method/manage/'
 		+ config_name + '/' 
 		+ project_name, method, function( data ) {
 
@@ -116,45 +147,73 @@ function manage_method( action ) {
 	});
 }
 
+function updateConfigListInMethod( cb ) {
+
+	$( '#configs' ).html( '<option value="">Choose A Configuration</option>' );
+
+	//Get the possible configuration and check for the current configuration reading the project
+	getAllConfigurations(function( err, data ) {
+
+		if ( data.configurations ) {
+			//put data inside "configs" element
+			for ( var config in data.configurations ) {
+				$( '#configs' ).append($( '<option>' ).attr( 'value', config ).text( config ) );
+			}
+
+			//Current configuration not empty
+			if( oPub.selectedConn.name !== '' ) {
+
+				//set current configuration, change event is not raised because the configuration details are read from the session
+				$( '#configs' ).val( oPub.selectedConn.name );
+
+				$( '#connectButton' ).text( oPub.selectedConn.status ? 'Disconnect' : 'Connect' );
+
+				if( oPub.selectedConn.status ) {
+					//retrieve project list if old connection is set and connected
+					var config_name = oPub.selectedConn.name, 
+						project_val = oPub.selectedConn.projectName;
+
+					$.get( '/services/project/getAll/' + config_name, function( projects ) {
+
+						for ( var i in projects ) {
+							$( '#projects' ).append($( '<option>' ).attr( 'value', projects[i] ).text( projects[i] ) );
+						}
+
+						if (project_val) {
+							$( '#projects' ).val( project_val );
+							getAndSetMethods( config_name, project_val );
+						}
+					}).fail(function( xhr ) {
+						console.log( xhr.responseText );
+					});
+
+					getInstalledMethod( config_name );
+				}
+			}
+		}
+	});
+}
+
 $(document).ready(function() {
 
 	$( '#connectButton' ).on( 'click', cleanMethodForm );
-/*
-	//create handler for changing of configuraton
-	$("#configs").change( function() {
 
-		//clean method list
-		$("#methods").html("<option value=''>Choose A Method</option>");
+	updateConfigListInMethod();
 
-		cleanMethodForm();
-
-		//clean method type
-		$("#method_types").html("<option value=''>Choose A Method Type</option>");
-
-		updateConfigurationForm(function() {
-
-			$.get('/services/method/getInstalled', function( data ) {
-
-				var types_string = '<option value="">Choose A Method Type</option>';
-
-				if (data !== "") {
-					data.forEach(function(type) {
-						types_string += '<option value="' + type + '">' + type + '</option>';
-					});
-				}
-				$('#method_types').html(types_string);
-			});
-		});
-	});
-*/
 	$( '#configs' ).change( function() {
 
+		var config_name = $( '#configs' ).val();
+
+		//clean method list
+		$( '#methods' ).html( '<option value="">Choose A Method</option>' );
+
 		cleanMethodForm();
 
 		//clean method type
-		$("#method_types").html("<option value=''>Choose A Method Type</option>");
+		$( '#method_types' ).html( '<option value="">Choose A Method Type</option>' );
 
-		
+		updateConfigurationForm( getInstalledMethod );
+
 	});
 
 	//get method

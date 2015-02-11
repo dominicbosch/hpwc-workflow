@@ -44,7 +44,7 @@ var initConfiguration = function() {
 };
 
 var fillSelectBox = function() {
-	var selBox = $( '#tab2 select' ).html( '<option>Choose Configuration</option>' );
+	var selBox = $( '#tab2 select' ).html( '<option value="">Choose Configuration</option>' );
 	getAllConfigurations(function( err, data ) {
 		for( var el in data.configurations ) selBox.append( $( '<option>' ).text( el ) );
 	});
@@ -102,7 +102,14 @@ var deleteConfiguration = function() {
 	}
 };
 
+$(document).ready( updateConfigurationsList );
+
 $(document).ready(function() {
+	$( '#configs' ).change( updateConfigurationForm );
+});
+
+$(document).ready(function() {
+	
 	fillSelectBox();
 	// We also update the select box on every tab click on this page:
 	$( '.tab-links a' ).click( function() {

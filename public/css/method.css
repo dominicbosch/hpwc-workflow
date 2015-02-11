@@ -52,3 +52,7 @@ a.close {
 	text-align: left;
 	font-size: 60%;
 }
+
+#src_files {
+	width: 100%;
+}

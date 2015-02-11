@@ -21,63 +21,6 @@
 			};
 		{% endif %}
 
-		function updateConfigurationsList( cb ) {
-
-			//Get the possible configuration and check for the current configuration reading the project
-			getAllConfigurations(function( err, data ) {
-
-				if ( data.configurations ) {
-
-					$( '#configs' ).html( '<option>Choose A Configuration</option>' );
-					//put data inside "configs" element
-					for ( var config in data.configurations ) {
-						$( '#configs' ).append($( '<option>' ).attr( 'value', config ).text( config ) );
-					}
-
-					//Current configuration not empty
-					if( oPub.selectedConn.name !== '' ) {
-
-						//set current configuration, change event is not raised because the configuration details are read from the session
-						$( '#configs' ).val( oPub.selectedConn.name );
-
-						$( '#connectButton' ).text( oPub.selectedConn.status ? 'Disconnect' : 'Connect' );
-
-						if( oPub.selectedConn.status ) {
-
-							//retrieve project list if old connection is set and connected
-							getAndSetProjects( oPub.selectedConn.name, oPub.selectedConn.projectName );
-						}
-					}
-				}
-				if( typeof(cb) === 'function' ) cb( err, data );
-			});
-
-		}
-
-		$(document).ready( updateConfigurationsList );
-
-		function getAndSetProjects( config_name, project_val, cb ) {
-
-			if( config_name !== '' ) {
-				//read the projects for an open connection and set the values
-				$.get( '/services/project/getAll/' + config_name, function( projects ) {
-	
-					for ( var i in projects ) {
-						$( '#projects' ).append($( '<option>' ).attr( 'value', projects[i] ).text( projects[i] ) );
-					}
-	
-					if (project_val) {
-						$( '#projects' ).val( project_val );
-						updateProjectForm( );
-					}
-				}).fail(function( xhr ) {
-					console.log( xhr.responseText );
-				});
-			} else {
-				//clean project list
-				$( '#projects' ).html( '<option value="">Choose A Project</option>' );
-			}
-		}
 	</script>
 	{% endif %}
 
