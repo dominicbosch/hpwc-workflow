@@ -31,8 +31,10 @@ function showGraph() {
 	$.post( '/services/graph/buildAndGet/' 
 		+ config_name + '/' 
 		+ project_name + '/' 
-		+ experiment_name, experiment, function( localFile ) {
-				
+		+ experiment_name, experiment, function( encImage ) {
+		
+		$( '#out_image' ).attr( 'src', 'data:image/png; base64, ' + encImage );
+
 	}).fail(function( xhr ) {
 		console.log( xhr.responseText );
 	});
@@ -190,7 +192,7 @@ $(document).ready(function() {
 	$("#configs").change( function() {
 
 		//clean output list
-		$("#graphs").html("<option value=''>Choose An Experiment Output</option>");
+		$("#graphs").html("<option value=''>Choose An Experiment</option>");
 
 		cleanOutputForm();
 
@@ -213,7 +215,7 @@ $(document).ready(function() {
 	$("#projects").change( function() {
 
 		//clean output list
-		$("#graphs").html("<option value=''>Choose An Experiment Output</option>");
+		$("#graphs").html("<option value=''>Choose An Experiment</option>");
 
 		cleanOutputForm();
 

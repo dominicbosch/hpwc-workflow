@@ -197,7 +197,7 @@ exports.connectToHost = function( username, connObj, cb ) {
 // to handle them all in the services.
 // IMPORTANT: This means if callback function 'cb' receives an error as an argument
 //            no further response can be sent to the client!!!
-executeCommand = function( req, res, connection, command, wrkcmd, cb ) {
+exports.executeCommand = executeCommand = function( req, res, connection, command, wrkcmd, cb ) {
 
 	var oConn, errString, alldata = '',
 		username = req.session.pub.username,

@@ -1,6 +1,15 @@
 "use strict";
 
+
+
+
+
+
 $(document).ready(function() {
+
+
+
+	
 
 	//create handler for changing of configuraton
 	$("#configs").change( function() {

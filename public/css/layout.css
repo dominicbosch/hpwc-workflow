@@ -52,6 +52,11 @@ section > div.right {
 	max-width: 320px;
 }
 
+section > div.bottom {
+	width: 100%;
+	text-align: center;
+}
+
 section:after { 
 	content: " ";
 	display: block; 
