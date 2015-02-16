@@ -80,21 +80,31 @@ exports.updateConfiguration = function( username, args, cb ) {
 	if( !conf ) {
 		cb( new Error( 'Configuration not existing!' ) );
 	} else {
-		if ( oConns ) {
-			oConn = oConns[ args.name ];
-			if ( oConn ) {
-				oConn.end();
-				oUser = persistence.getUser( username );
-				args.password = oUser.password;
-				if( conf.username !== args.username || conf.url !== args.url ) {
-					// We need to create a new configuration because major properties changed
-					exports.createConfiguration( username, args, true, cb );
-					return;
-				}
-			}
+		exports.closeConnection( username, args.name );
+		oUser = persistence.getUser( username );
+		args.password = oUser.password;
+		if( conf.username !== args.username || conf.url !== args.url ) {
+			// We need to create a new configuration because major properties changed
+			exports.createConfiguration( username, args, true, cb );
+
+			// we need to return here since createConfiguration has its own callback handling:
+			return;
 		}
 		oConf = persistence.storeConfiguration( username, args );
 		cb( null, oConf );
+	}
+
+};
+
+exports.deleteConfiguration = function( username, confName, cb ) {
+	var conf = persistence.getConfiguration( username, confName );
+
+	if( !conf ) {
+		cb( new Error( 'Configuration not existing!' ) );
+	} else {
+		exports.closeConnection( username, confName );
+		persistence.deleteConfiguration( username, confName );
+		cb( null );
 	}
 
 };
@@ -272,14 +282,14 @@ exports.getAndSendRemoteList = function( req, res, connection, command ) {
 	});
 };
 
-exports.closeConnection = function( username, connection ) {
+exports.closeConnection = function( username, confName ) {
 	var oConn, oConns = oUserConnections[ username ];
 
 	if ( oConns ) {
-		oConn = oConns[ connection ];
+		oConn = oConns[ confName ];
 		if( oConn ) {
 			oConn.end();
-			delete oUserConnections[  username ][ connection ];
+			delete oUserConnections[  username ][ confName ];
 			return true;
 		}
 		else return false;

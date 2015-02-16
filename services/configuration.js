@@ -52,6 +52,27 @@ router.post( '/update', function( req, res ) {
 	}
 });
 
+router.post( '/delete', function( req, res ) {
+	var args, user = req.session.pub,
+		oBody = req.body;
+
+	if( !oBody.name ) {
+		res.status( 400 );
+		res.send( 'Missing Configuration Name!' );
+	} else {
+		ssh.deleteConfiguration( req.session.pub.username, oBody.name, function( err ) {
+			if( err ) {
+				console.error( err );
+				res.status( 400 );
+				res.send( 'Configuration deletion failed: ' + err.message );
+			} else {
+				delete req.session.pub.configurations[ oBody.name ];
+				res.send( 'Configuration deletion successful!' );
+			}
+		});
+	}
+});
+
 
 router.get( '/connect/:name', function( req, res ) {
 	var oUser = req.session.pub;

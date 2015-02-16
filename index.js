@@ -19,12 +19,6 @@ ssh = require( './modules/ssh' ); // We need to load this after setting the pers
 
 isValidRequest = function( req ) {
 	var name = req.params[ 0 ];
-
-	if( !req.session.pub ) {
-		if( name === 'login' || name === 'register' ) {
-			return true;
-		} else return false;
-	}
 	for( var i = 0; i < arrViews.length; i++ ) {
 		if( arrViews[ i ] === name + '.html' ) return true;
 	}	
@@ -60,6 +54,25 @@ exports.init = function( args ) {
 	app.use( bodyParser.json() );      
 	app.use( bodyParser.urlencoded({ extended: true }) );
 	app.use( express.static( path.join( __dirname, 'public' ) ) );
+
+	app.use( function( req, res, next ) {
+		var allowedRoutes = [
+			'/views/login',
+			'/views/register',
+			'/services/session/login',
+			'/services/users/create'
+		];
+		if( req.session.pub ) next();
+		else {
+			if( allowedRoutes.indexOf( req.url ) > -1 ) next();
+			else if( req.method === 'GET' ) {
+				res.render( 'index' );
+			} else {
+				res.status( 401 );
+				res.send( 'Login first!' );
+			}
+		}
+	});
 
 	// Redirect the views that will be loaded by the swig templating engine
 	app.get( '/views/*', function ( req, res ) {

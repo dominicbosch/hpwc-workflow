@@ -62,3 +62,10 @@ exports.storeConfiguration = function( username, args ) {
 	persist( username );
 	return args;
 }
+
+exports.deleteConfiguration = function( username, confName ) {
+	var oUser = exports.getUser( username );
+	delete oUser.pub.configurations[ confName ];
+	console.log( 'Configuration "' + confName + '" for user "' + username + '" deleted!' );
+	persist( username );
+}

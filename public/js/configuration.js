@@ -86,13 +86,17 @@ var saveConfiguration = function() {
 };
 
 var deleteConfiguration = function() {
+	var result, options;
 	if( $( '#tab2 select' ).prop( 'selectedIndex' ) === 0 ) {
 		alert( 'Select a configuration first!' );
 		return;
 	}
-	var result = confirm( 'Do you really want to delete this configuration?' );
+	result = confirm( 'Do you really want to delete this configuration?' );
 	if( result ) {
-		$.post( '/services/configuration/delete', $( '#tab2 select' ).val(), function( answ ) {
+		options = {
+			name: $( '#tab2 select' ).val()
+		};
+		$.post( '/services/configuration/delete', options, function( answ ) {
 			setInfo( answ );
 			updateConfigurationsList();
 		})
