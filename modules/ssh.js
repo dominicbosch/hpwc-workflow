@@ -86,6 +86,7 @@ exports.createConfiguration = function( username, args, force, cb ) {
 						.on( 'end', function() {
 							oConn.end();
 							if( data === 'OK!\n' ) {
+								args.port = parseInt( args.port ) || 22;
 								oConf = persistence.storeConfiguration( username, args );
 								cb( null, oConf );
 							} else {
@@ -122,7 +123,7 @@ exports.updateConfiguration = function( username, args, cb ) {
 		exports.closeConnection( username, args.name );
 		oUser = persistence.getUser( username );
 		args.password = oUser.password;
-		if( conf.username !== args.username || conf.url !== args.url ) {
+		if( conf.username !== args.username || conf.url !== args.url || conf.port !== args.port ) {
 			// We need to create a new configuration because major properties changed
 			exports.createConfiguration( username, args, true, cb );
 

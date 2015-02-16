@@ -4,8 +4,8 @@ var express = require( 'express' ),
 	fs = require( 'fs' ),
 	path = require( 'path' ),
 	ssh = require( '../modules/ssh' ),
-	router = express.Router();
-
+	router = express.Router(),
+	persistence = global.persistence;
 
 router.post( '/create', function( req, res ) {
 	var args, user = req.session.pub,
@@ -32,24 +32,22 @@ router.post( '/create', function( req, res ) {
 
 
 router.post( '/update', function( req, res ) {
-	var args, user = req.session.pub,
+	var args, conf, user = req.session.pub,
 		oBody = req.body;
 
-	if( !oBody.name || !oBody.url || !oBody.port || !oBody.workspace || !oBody.workhome
-			|| !oBody.username ) {
+	if( !oBody.name || !oBody.workspace || !oBody.workhome ) {
 		res.status( 400 );
 		res.send( 'Missing Parameters!' );
 	} else {
-		ssh.updateConfiguration( req.session.pub.username, oBody, function( err, oConf ) {
-			if( err ) {
-				console.error( err );
-				res.status( 400 );
-				res.send( 'Configuration update failed: ' + err.message );
-			} else {
-				req.session.pub.configurations[ oConf.name ] = oConf;
-				res.send( 'Configuration "' + oConf.name + '" update successful!' );
-			}
-		});
+		conf = persistence.getConfiguration( req.session.pub.username, oBody.name ) ;
+		if( !conf ) {
+			res.status( 400 );
+			res.send( 'Configuration not existing: ' );
+		} else {
+			oConf = persistence.storeConfiguration( username, oBody );
+			req.session.pub.configurations[ oConf.name ] = oConf;
+			res.send( 'Configuration "' + oConf.name + '" update successful!' );
+		}
 	}
 });
 
