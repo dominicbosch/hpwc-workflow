@@ -1,5 +1,7 @@
 "use strict";
 
+var updateProject = true;
+
 function cleanProjectForm() {
 	$( '#project_details input' ).val( '' );
 	$( '#project_details textarea' ).val( '' );
@@ -86,7 +88,7 @@ function manage_project( action ) {
 }
 
 $(document).ready(function() {
-	
+
 	updateConfigurationsList( updateProjectForm );
 
 	$( '#configs' ).change( cleanProjectForm );

@@ -11,25 +11,6 @@
 
 {% endblock %}
 
-{% block ifprojectextra %}
-//retrieve experiment output list if current project is set
-$.get('/services/experiment/get', function( data ) {
-	var output_string = '<option value="">Choose An Experiment Output</option>';
-	if (data !== "") {
-		data.forEach(function(outName) {
-			var year = outName.substring(0,4);
-			var month = outName.substring(4,6);
-			var day = outName.substring(6,8);
-			var hour = outName.substring(9,11);
-			var minute = outName.substring(11,13);
-			var output = day + '/' + month + '/' + year + ' at ' + hour + ':' + minute;
-			output_string += '<option value="' + outName + '">' + output + '</option>';
-		});
-	}
-	$('#graphs').html(output_string);
-});
-{% endblock %}
-
 {% block content_left %}
 <h1>Graphs Selection</h1>
 </br>
@@ -45,52 +26,40 @@ $.get('/services/experiment/get', function( data ) {
 	<table id="exp_details">
 		<tr>
 			<th></th>
-			<th>
-				Fixed
-			</th>
-			<th>
-				List
-			</th>
+			<th>Fixed</th>
+			<th>List</th>
 		</tr>
 		<tr>
-			<th>
-				Parameters
-			</th>
+			<th>Parameters</th>
 			<td>
-				<input class="fixed" type="checkbox" id="fix_par" checked disabled>
+				<input class="fixed" type="checkbox" id="fix_par" value="0" checked disabled>
 			</td>
 			<td name="parameters">
 				--
 			</td>
 		</tr>
 		<tr>
-			<th>
-				Methods
-			</th>
+			<th>Methods</th>
 			<td>
-				<input class="fixed" type="checkbox" id="fix_met" checked disabled>
+				<input class="fixed" type="checkbox" id="fix_met" value="1" checked disabled>
 			</td>
 			<td name="methods">
 				--
 			</td>
 		</tr>
 		<tr>
-			<th>
-				Threads
-			</th>
+			<th>Threads</th>
 			<td>
-				<input class="fixed" type="checkbox" id="fix_thr" checked disabled>
+				<input class="fixed" type="checkbox" id="fix_thr" value="2" checked disabled>
 			</td>
 			<td name="nthreads">
 				--
 			</td>
 		</tr>
 		<tr>
-			<th>
-				Number of Executions
-			</th>
+			<th>Number of Executions</th>
 			<td>
-				--
+				
 			</td>
 			<td name="nexecs">
 				--

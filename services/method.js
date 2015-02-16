@@ -61,6 +61,23 @@ router.get( '/getSrcFile/:connection/:project/:method/:source_name', function( r
 	});
 });
 
+// SET single file
+router.post( '/setSrcFile/:connection/:project/:method/:source_name', function( req, res ) {
+	var connection = req.params.connection,
+		project = req.params.project,
+		method = req.params.method, 
+		source_name = req.params.source_name,
+		oConn = req.session.pub.configurations[ connection ],
+		filename  = path.join( oConn.workspace, project, method, 'src', source_name ),
+		file = req.body;
+
+	ssh.setRemoteFile( req, res, connection, filename, file.content, function( err, data ) {
+		if( !err ) {
+			res.send( data );
+		}
+	});
+});
+
 // Manage method. 
 router.post( '/manage/:connection/:project', function( req, res ) {
 	var opt = '', arrCommand,

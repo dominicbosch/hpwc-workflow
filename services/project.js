@@ -15,17 +15,18 @@ router.get( '/getAll/:connection', function( req, res ) {
 // GET descriptor. 
 router.get( '/get/:connection/:project', function( req, res ) {
 
-	var filename, pub = req.session.pub,
-		oConn = {};
+	var filename, oConn = {},
+		confName = req.params.connection,
+		projName = req.params.project;
 
-	if ( pub ) {
-		oConn = pub.configurations[ req.params.connection ];
-		filename = path.join( oConn.workspace, req.params.project, '.project' );
+	if ( req.session.pub ) {
+		oConn = req.session.pub.configurations[ confName ];
+		filename = path.join( oConn.workspace, projName, '.project' );
 
-		ssh.getRemoteJSON( req, res, req.params.connection, filename, function( err, json ) {
+		ssh.getRemoteJSON( req, res, confName, filename, function( err, project ) {
 			if( !err ) {
-				pub.selectedConnection.selectedProject = json.name;	
-				res.send( json );
+				req.session.pub.selectedConnection.selectedProject = project.name;	
+				res.send( project );
 			}
 		});
 	} else {

@@ -27,6 +27,45 @@ exports.isConnOpen = function( username, connName ) {
 	return false;
 };
 
+exports.getFile = function( req, res, connection, remotePath, localPath, cb ) {
+
+	var oConn, errString,
+		username = req.session.pub.username,
+		oConnections = oUserConnections[ username ];
+
+	console.log( 'Processing user "' + username + '"s request: getFile' );
+	errString = 'Command "%s" failed for user "%s": ';
+
+	if( oConnections ) {
+		oConn = oConnections[ connection ];
+		if( oConn && oConn[ '_state' ] === 'authenticated' ) {
+
+			oConn.sftp( function (err, sftp) {
+				if (err) {
+					console.log( 'err1' );
+					throw err;
+				}
+				sftp.fastGet( remotePath, localPath, function ( err ) {
+					cb( err ? new Error( "Can't read file" ) : localPath );
+					console.log( err ? "Could not read. " : "Read." );
+				});
+			});
+		} else {
+			console.error( errString + 'Connection "%s" is not ready!', command, username, connection );
+			res.status( 400 );
+			res.send( 'The connection "' + connection + '" is not ready!' );
+			cb( new Error( 'The connection "' + connection + '" is not ready!' ) );
+		}
+	} else {
+		console.error( errString + 'No open connections!', command, username );
+		res.status( 400 );
+		res.send( 'User has no open connections!' );
+		cb( new Error( 'User has no open connections!' ) );
+	}
+
+	return false;
+};
+
 exports.createConfiguration = function( username, args, force, cb ) {
 	var cmd, oUser, oConn = new SSHConnection();
 
@@ -241,6 +280,15 @@ exports.getRemoteJSON = function( req, res, connection, filename, cb ) {
 exports.getRemoteFile = function( req, res, connection, filename, cb ) {
 	var workflowCommand = false;
 	executeCommand( req, res, connection, 'cat ' + filename, workflowCommand, function( err, data ) {
+		if( !err ) {
+			cb( null, data );
+		}
+	});
+};
+
+exports.setRemoteFile = function( req, res, connection, filename, content, cb ) {
+	var workflowCommand = false;
+	executeCommand( req, res, connection, 'echo "' + content + '" > ' + filename, workflowCommand, function( err, data ) {
 		if( !err ) {
 			cb( null, data );
 		}

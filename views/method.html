@@ -87,7 +87,7 @@
 			<div>
 				<input type="button" value="Edit Method" onclick="manage_method('edit');">
 				<input type="button" value="Delete Method" onclick="manage_method('delete');">
-				<input id="edit_code" type="button" value="Edit Code">
+				<input id="edit_code" onclick="getRemoteSrc( event )" type="button" value="Edit Code">
 			</div>
 		</div>
 	</div>
@@ -103,17 +103,15 @@
 		<div class="edit-content">
 			<a class="close">x</a>
 			<h3>Source code Editor</h3>
-			<form >
-				<div id="src_editor"></div>
-				<script>
-				    var editor = ace.edit("src_editor");
-					editor.setTheme("ace/theme/twilight");
-					editor.getSession().setMode("ace/mode/c_cpp");
-					//editor.getSession().setValue(value);
-				</script>
-				</br>
-				<button type="submit">Save code</button>
-			</form>
+			<div id="src_editor"></div>
+			<script>
+			    var editor = ace.edit("src_editor");
+				editor.setTheme("ace/theme/twilight");
+				editor.getSession().setMode("ace/mode/c_cpp");
+				//editor.getSession().setValue(value);
+			</script>
+			</br>
+			<input type="button" onclick="setSrc()" value="Save code">
 		</div>
 	</div>
 </div>
