@@ -8,8 +8,7 @@ var express = require( 'express' ),
 
 // buildAndGet graph
 router.post( '/buildAndGet/:connection/:project/:experiment', function( req, res ) {
-	var remotePath, localPath, arrCommand, 
-		oConn = {}, imgPath,
+	var arrCommand, oConn = {},
 		confName = req.params.connection,
 		projName = req.params.project,
 		expName = req.params.experiment,
@@ -29,31 +28,32 @@ router.post( '/buildAndGet/:connection/:project/:experiment', function( req, res
 		];
 		
 		ssh.execWorkComm( req, res, confName, arrCommand.join( ' ' ), function( err, data ) {
+			var pos, command, remotePath = '';
+
 			if( !err ) {
 				console.log( 'Project manage command (' + arrCommand.join(' ') + ') got data: ' + data );
 				
-				remotePath = path.join( 
-					oConn.workspace.replace( '~', '.' ), 
-					projName, 'experiments', 
-					expName, 'graph.png' );
-
-				imgPath = path.join( path.dirname(require.main.filename), 
-					'public/img/' );
+				pos = data.indexOf( ':' );
+				if( pos !== -1 ) {
+					remotePath = data.substring( pos + 1 ).trim();
+				}
 				
-				localPath = path.join( imgPath,
-					req.session.pub.username 
-					+ '_' + expName 
-					+ '_' + 'graph.png' );
+				if ( remotePath !== '' ){
 
-				ssh.getFile ( req, res, confName, remotePath, localPath, function( localFile ) {
-					console.log( 'localFile: ' + localFile );
-					res.send( localFile );
-				});
+					command = 'base64 ' + remotePath;
+
+					ssh.executeCommand( req, res, confName, command, false, function( err, encImage ) {
+						console.log( 'Encode Image: ' + encImage);
+						res.send( encImage);
+					});
+				} else {
+					res.send( '' );
+				}
 			}
 		});
 
 	} else {
-		res.send( {} );
+		res.send( '' );
 	}
 });
 

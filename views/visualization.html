@@ -14,13 +14,13 @@
 {% block content_left %}
 <h1>Graphs Selection</h1>
 </br>
-<h4>Select the graph you want to visualize, out of your run benchmarks</h4>
+<h4>Select the experiment, out of your run benchmarks, to build a graph</h4>
 <br/>
 <div id="output_preview">
 	<div>
 		<label for="graphs">Current graph</label>
 		<select id="graphs" name="graph_name">
-			<option value="">Choose An Experiment Output</option>
+			<option value="">Choose An Experiment</option>
 		</select>
 	</div>
 	<table id="exp_details">
@@ -66,10 +66,8 @@
 			</td>
 		</tr>
 	</table>
-	<div>
-		<input type="button" value="Show Graph" onclick="showGraph();"> 
-	</div>
-	<div id="out_image">
+	<div class="centered-text">
+		<button onclick="showGraph()">Show Graph</button>
 	</div>
 </div>
 {% endblock %}
@@ -87,32 +85,17 @@
 			<th>
 				Parameters Name
 			</th>
-			<td name="par_list">
-				{% if connection.project %}
-					{{ connection.project.parameters.list }}
-				{% else %}
-					--
-				{% endif %}
-			</td>
+			<td name="par_list">--</td>
 		</tr>
 		<tr>
 			<th>
 				Comment
 			</th>
-			<td name="comment">
-				{% if connection.project %}
-					{{ connection.project.comment }}
-				{% else %}
-					--
-				{% endif %}
-			</td>
+			<td name="comment">--</td>
 		</tr>
 	</table>
 </div>
-<!--
-<div id="cmd_response">
-	<h3>Command Response</h3>
-	<textarea id="resp_textarea" readonly></textarea>
-</div>
--->
+{% endblock %}
+{% block bottom %}
+<img id="out_image"/>
 {% endblock %}
