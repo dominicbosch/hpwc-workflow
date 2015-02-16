@@ -32,14 +32,15 @@ router.post( '/create', function( req, res ) {
 
 
 router.post( '/update', function( req, res ) {
-	var args, conf, user = req.session.pub,
+	var args, conf, oConf, user = req.session.pub,
+		username = req.session.pub.username,
 		oBody = req.body;
 
 	if( !oBody.name || !oBody.workspace || !oBody.workhome ) {
 		res.status( 400 );
 		res.send( 'Missing Parameters!' );
 	} else {
-		conf = persistence.getConfiguration( req.session.pub.username, oBody.name ) ;
+		conf = persistence.getConfiguration( username, oBody.name ) ;
 		if( !conf ) {
 			res.status( 400 );
 			res.send( 'Configuration not existing: ' );
