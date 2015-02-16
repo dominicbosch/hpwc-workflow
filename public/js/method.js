@@ -1,6 +1,6 @@
 "use strict";
 
-var updateProject = true;
+oPub.updateProject = true;
 
 function cleanMethodForm() {
 	$( '#edit_method input[name="method_type"]' ).val( '' );

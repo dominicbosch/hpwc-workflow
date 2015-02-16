@@ -1,7 +1,7 @@
 "use strict";
 
-var updateProject = true;
-
+oPub.updateProject = true;
+		
 function cleanProjectForm() {
 	$( '#project_details input' ).val( '' );
 	$( '#project_details textarea' ).val( '' );

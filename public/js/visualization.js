@@ -1,6 +1,6 @@
 "use strict";
 
-var updateProject = true;
+oPub.updateProject = true;
 
 function buildList( td_name ) {
 	var string = '';

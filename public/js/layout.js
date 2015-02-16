@@ -56,7 +56,7 @@ function toggleSelectedConnection( el ) {
 function toggleConnection( doConnect, config, cb ) {
 	var strAction = doConnect ? 'connect' : 'disconnect';
 	$.get('/services/configuration/' + strAction + '/' + config, function( data ) {
-		if ( updateProject ) {
+		if ( oPub.updateProject ) {
 			getAndSetProjects( doConnect ? config : '' );
 		}
 		if( typeof(cb) === 'function' ) cb();
@@ -70,7 +70,7 @@ function updateConfigurationForm( cb ) {
 	var config_name = $( '#configs' ).val(),
 		button = $( '#connectButton' );
 
-	if ( updateProject ) {
+	if ( oPub.updateProject ) {
 		//clean project list
 		$( '#projects' ).html( '<option value="">Choose A Project</option>' );
 	}
@@ -92,7 +92,7 @@ function updateConfigurationForm( cb ) {
 			if ( data.configuration ) {
 				setConnectionForm( data.configuration );
 				button.text( data.status ? 'Disconnect' : 'Connect' );
-				if ( updateProject ) {
+				if ( oPub.updateProject ) {
 					getAndSetProjects( data.status ? data.configuration.name : '' );
 					if ( typeof(cb) === 'function' ) 
 						cb( data.status ? data.configuration.name : '' );
@@ -126,7 +126,7 @@ function updateConfigurationsList( cb, cb2 ) {
 
 				$( '#connectButton' ).text( oPub.selectedConn.status ? 'Disconnect' : 'Connect' );
 
-				if ( ( oPub.selectedConn.status ) && ( updateProject ) ) {
+				if ( ( oPub.selectedConn.status ) && ( oPub.updateProject ) ) {
 					//retrieve project list if old connection is set and connected
 					var config_name = oPub.selectedConn.name, 
 						project_val = oPub.selectedConn.projectName;

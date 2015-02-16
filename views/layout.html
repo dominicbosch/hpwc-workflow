@@ -12,7 +12,10 @@
 		"use strict";
 
 		// The public object
-		var oPub = { selectedConn: {} };
+		var oPub = {
+			selectedConn: {},
+			updatePRoject: false
+		};
 		{% if selectedConnection %}
 			oPub.selectedConn = {
 				name: '{{ selectedConnection.name }}',
