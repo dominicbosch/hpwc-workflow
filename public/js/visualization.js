@@ -1,6 +1,190 @@
 "use strict";
 
+var updateProject = true;
+
+function buildList( td_name ) {
+	var string = '';
+	$( '#exp_details td[name="' + td_name + '"] input:checked' ).each( function() {
+		string += '"' + $( this ).val() + '" ';
+	});
+
+	return string;
+}
+
+function showGraph() {
+
+	var config_name = $( '#configs' ).val(),
+		project_name = $( '#projects' ).val(),
+		experiment_name = $( '#graphs' ).val(),
+		experiment;
+
+	if ( experiment_name === '' )
+		return;
+
+	experiment = {
+		dimensions : buildList( 'parameters' ),
+		methods : buildList( 'methods' ),
+		nthreads : buildList( 'nthreads' ),
+		fixed : $( '.fixed:checked' ).first().val()
+	}
+
+	$.post( '/services/graph/buildAndGet/' 
+		+ config_name + '/' 
+		+ project_name + '/' 
+		+ experiment_name, experiment, function( localFile ) {
+				
+	}).fail(function( xhr ) {
+		console.log( xhr.responseText );
+	});
+
+}
+function cleanProjectForm() {
+	$( '#project_details td' ).text( '--' );
+}
+
+function setProjectForm( project ) {
+	$("#project_details td[name='par_list']").text(project.parameters.list);
+	$("#project_details td[name='comment']").text(project.comment);
+}
+
+function updateProjectFormInViz( cb ) {
+	var config_name = $( '#configs' ).val(),
+		project_name = $( '#projects' ).val();
+
+	if ( project_name === '' ) {
+		$.get( '/services/session/cleanProject', function( data ) {
+			cleanProjectForm();
+		});
+	} else {
+		//fill project form
+		$.get( '/services/project/get/' 
+			+ config_name + '/' 
+			+ project_name, function( project ) {
+
+			setProjectForm( project );
+
+			//update experiments list
+			getAndSetExperiments( config_name, project_name );
+		});
+	}
+}
+
+function getAndSetExperiments( config_name, project_val, cb ) {
+
+	if( ( config_name !== '' ) && ( project_val !== '' ) ) {
+		
+		$.get( '/services/experiment/getAll/' 
+			+ config_name + '/'
+			+ project_val, function( experiments ) {
+
+			var year, month, day, hour, minute, output;
+
+			for ( var i in experiments ) {
+				year = experiments[i].substring(0,4);
+				month = experiments[i].substring(4,6);
+				day = experiments[i].substring(6,8);
+				hour = experiments[i].substring(9,11);
+				minute = experiments[i].substring(11,13);
+				output = day + '/' + month + '/' + year + ' at ' + hour + ':' + minute;
+				$( '#graphs' ).append($( '<option>' ).attr( 'value', experiments[i] ).text( output ) );
+			}
+		}).fail(function( xhr ) {
+			console.log( xhr.responseText );
+		});
+
+		if ( typeof(cb) === 'function' ) 
+			cb( );
+
+	} else {
+		//clean graphs list
+		$( '#graphs' ).html( '<option value="">Choose An Experiment</option>' );
+	}
+}
+
+function cleanOutputForm() {
+	$("#exp_details td[name='parameters']").text("--");
+	$("#exp_details td[name='methods']").text("--");
+	$("#exp_details td[name='nthreads']").text("--");
+	$("#exp_details td[name='nexecs']").text("--");
+}
+
+function setOutputForm( experiment ) {
+
+	var params = experiment.parameters,
+		methods = experiment.methods,
+		nthreads = experiment.nthreads,
+		string_html, i;
+
+	//fill parameters
+	var createListItem = function( item, isChecked, isDisabled ) {
+		return '<label>'
+				+ '<input type="checkbox" value="' 
+					+ item + '" ' 
+					+ (isChecked ? 'checked ' : '') 
+					+ (isDisabled ? 'disabled ' : '') 
+				+ '>' 
+				+ item 
+			+ '</label>';
+	};
+
+	$( '#fix_par' ).prop( 'disabled', params.length === 1 );
+	$( '#fix_met' ).prop( 'disabled', methods.length === 1 );
+	$( '#fix_thr' ).prop( 'disabled', nthreads.length === 1 );
+
+	//fill parameters
+	string_html = '';
+	for (i = 0; i < params.length; i++) {
+		string_html += createListItem( params[ i ], (i===0), true );
+	}
+	$("#exp_details td[name='parameters']").html(string_html);
+
+	//fill methods
+	string_html = '';
+	for (i = 0; i < methods.length; i++) {
+		string_html += createListItem( methods[ i ], (i===0), true );
+	}
+	$("#exp_details td[name='methods']").html(string_html);
+
+	//fill number of threads
+	string_html = '';
+	for (i = 0; i < nthreads.length; i++) {
+		string_html += createListItem( nthreads[ i ], (i===0), true );
+	}
+	$("#exp_details td[name='nthreads']").html(string_html);
+
+	$("#exp_details td[name='nexecs']").html(experiment.executions);
+}
+
+function updateOutputForm( cb ) {
+
+	var config_name = $( '#configs' ).val(),
+		project_name = $( '#projects' ).val(),
+		experiment_name = $( '#graphs' ).val();
+
+	if ( experiment_name === '' ) {
+		cleanOutputForm();
+	} else {
+		//getDescriptor
+		$.get( '/services/experiment/get/' 
+			+ config_name + '/' 
+			+ project_name + '/' 
+			+ experiment_name, function( experiment ) {
+
+			setOutputForm( experiment );
+		});
+	}
+}
+
 $(document).ready(function() {
+
+	$( '#connectButton' ).on( 'click', cleanOutputForm );
+
+	$( '#connectButton' ).on( 'click', cleanProjectForm );
+
+	updateConfigurationsList( 
+		null,
+		updateProjectFormInViz
+	);
 
 	//create handler for changing of configuraton
 	$("#configs").change( function() {
@@ -15,48 +199,14 @@ $(document).ready(function() {
 
 		cleanProjectForm();
 
-		var conf_file = $(this).val();
-		if (conf_file == "") {
-			$("#conf_table td[name='hostname']").html("--");
-			$("#conf_table td[name='host']").html("--");
-			$("#conf_table td[name='username']").html("--");
-			$("#conf_table td[name='workflow']").html("--");
-			$("#conf_table td[name='workspace']").html("--");
+		updateConfigurationForm( );
 
-			//close the connection
-			$.get('/services/gen/ssh/close', function( data ) {
-				alert( data );
-			});
-		} else {
-			$.get('/services/gen/getConfigs?conf=' + conf_file, function( data ) {
-				var obj = data;
-				$("#conf_table td[name='hostname']").html(obj.hostname);
-				$("#conf_table td[name='host']").html(obj.url);
-				$("#conf_table td[name='username']").html(obj.username);
-				$("#conf_table td[name='workflow']").html(obj.workhome);
-				$("#conf_table td[name='workspace']").html(obj.workspace);
-
-				//when the configuration change, we read again the project
-				$.get('/services/project/getProjects', function( data ) {
-
-					var projects_string = '<option value="">Choose A Project</option>';
-
-					if (data !== "") {
-						data.forEach(function(project) {
-							projects_string += '<option value="' + project + '">' + project + '</option>';
-						});
-					}
-					$('#projects').html(projects_string);
-				});
-			});
-		}
 	});
 
 	//get outputs
 	$("#graphs").change( function() {
 
-		var output = $(this).val();
-		update_output( output );
+		updateOutputForm( );
 	});
 
 	//when the project selected change, we read the value of parameters (user change)
@@ -67,15 +217,14 @@ $(document).ready(function() {
 
 		cleanOutputForm();
 
-		var project = $(this).val();
-		update_project( project );
+		updateProjectFormInViz( );
 	});
 
 	
 	$("#fix_par").on( "change", function() {
 		if ($(this).is(":checked")) {
 			var n = $( "#exp_details td[name='parameters'] input:checked" ).length;
-			if ( n > 1) {
+			if ( n !== 1) {
 				$(this).prop('checked', false);
 				alert("To fix a property, only 1 correspondent value has to be selected");
 			} else {
@@ -93,7 +242,7 @@ $(document).ready(function() {
 	$("#fix_met").on( "change", function() {
 		if ($(this).is(":checked")) {
 			var n = $( "#exp_details td[name='methods'] input:checked" ).length;
-			if ( n > 1) {
+			if ( n !== 1) {
 				$(this).prop('checked', false);
 				alert("To fix a property, only 1 correspondent value has to be selected");
 			} else {
@@ -111,7 +260,7 @@ $(document).ready(function() {
 	$("#fix_thr").on( "change", function() {
 		if ($(this).is(":checked")) {
 			var n = $( "#exp_details td[name='nthreads'] input:checked" ).length;
-			if ( n > 1) {
+			if ( n !== 1) {
 				$(this).prop('checked', false);
 				alert("To fix a property, only 1 correspondent value has to be selected");
 			} else {
@@ -127,98 +276,3 @@ $(document).ready(function() {
 		}
 	});
 });
-
-function cleanOutputForm() {
-	$("#exp_details td[name='parameters']").html("--");
-	$("#exp_details td[name='methods']").html("--");
-	$("#exp_details td[name='nthreads']").html("--");
-	$("#exp_details td[name='nexecs']").html("--");
-}
-
-function update_output( output ) {
-	if (output == "") {
-		cleanOutputForm();
-	} else {
-		//getDescriptor
-		$.get('/services/experiment/getDescriptor?&output=' + output, function( data ) {
-			var params = data.parameters;
-			var par_html = "";
-			var methods = data.methods;
-			var met_html = "";
-			var nthreads = data.nthreads;
-			var thr_html = "";
-			var par_disabled = params.length === 1;
-			var met_disabled = methods.length === 1;
-			var thr_disabled = nthreads.length === 1;
-			var i;
-			//fill parameters
-
-			var createListItem = function( item, isChecked, isDisabled ) {
-				return '<label><input class="smallselector" type="checkbox" value="' + item + '" ' + 
-					(isChecked ? 'checked ' : '') + (isDisabled ? 'disabled ' : '') + '>' + item + '</label>';
-			};
-
-			$('#fix_par').prop('disabled', par_disabled);
-			$('#fix_met').prop('disabled', met_disabled);
-			$('#fix_thr').prop('disabled', thr_disabled);
-
-			//reset disabled
-			par_disabled = met_disabled = thr_disabled = true;
-
-			for (i = 0; i < params.length; i++) {
-				par_html += createListItem( params[ i ], (i===0), par_disabled );
-			}
-			$("#exp_details td[name='parameters']").html(par_html);
-		//	$("#exp_details td[name='parameters'] input").prop('disabled', true);
-			//fill methods
-			for (i = 0; i < methods.length; i++) {
-				met_html += createListItem( methods[ i ], (i===0), met_disabled );
-			}
-			$("#exp_details td[name='methods']").html(met_html);
-		//	$("#exp_details td[name='methods'] input").prop('disabled', true);
-			//fill number of threads
-			for (i = 0; i < nthreads.length; i++) {
-				thr_html += createListItem( nthreads[ i ], (i===0), thr_disabled );
-			}
-			$("#exp_details td[name='nthreads']").html(thr_html);
-		//	$("#exp_details td[name='nthreads'] input").prop('disabled', true);
-			$("#exp_details td[name='nexecs']").html(data.executions);
-		});
-	}
-}
-
-function cleanProjectForm() {
-	$("#project_details td[name='par_list']").html("--");
-	$("#project_details td[name='comment']").html("--");
-}
-
-function update_project( project ) {
-	if (project == "") {
-		$.get('/services/session/cleanProject', function( data ) {
-			cleanProjectForm();
-		});
-	} else {
-		//getDescriptor
-		$.get('/services/project/getDescriptor?project=' + project, function( data ) {
-			var desc = data;
-			$("#project_details td[name='par_list']").html(desc.parameters.list);
-			$("#project_details td[name='comment']").html(desc.comment);
-
-			$.get('/services/experiment/get', function( data ) {
-				var output_string = '<option value="">Choose An Experiment Output</option>';
-				if (data !== "") {
-					data.forEach(function(outName) {
-						var year = outName.substring(0,4);
-						var month = outName.substring(4,6);
-						var day = outName.substring(6,8);
-						var hour = outName.substring(9,11);
-						var minute = outName.substring(11,13);
-						var output = day + '/' + month + '/' + year + ' at ' + hour + ':' + minute;
-						output_string += '<option value="' + outName + '">' + output + '</option>';
-					});
-				}
-				$('#graphs').html(output_string);
-			});
-		});
-	}
-}

@@ -7,23 +7,30 @@ var express = require( 'express' ),
 	router = express.Router();
 
 // GET experiments list. 
-router.get( '/get/:connection/:project', function( req, res ) {
+router.get( '/getAll/:connection/:project', function( req, res ) {
 	var command = 'workflow exp -l -p ' + req.params.project;
 	ssh.getAndSendRemoteList( req, res, req.params.connection, command );
 });
 
 // GET experiments descriptor. 
-router.get( '/getDescriptor/:connection/:project/:output', function( req, res ) {
-	var filename, username = req.session.pub.username,
+router.get( '/get/:connection/:project/:experiment', function( req, res ) {
+	var filename, oConn = {},
 		confName = req.params.connection,
 		projName = req.params.project,
-		output = req.params.output,
-		oConn = req.session.pub.configurations[ confName ];
+		expName = req.params.experiment;
 
-	filename = path.join( oConn.workspace, projName, 'experiments', output, '.experiment' );
-	ssh.getRemoteJSON( username, filename, function( err, json ) {
-		if( !err ) res.send( json );
-	});
+	if ( req.session.pub ) {
+		oConn = req.session.pub.configurations[ confName ],
+		filename = path.join( oConn.workspace, projName, 'experiments', expName, '.experiment' );
+		
+		ssh.getRemoteJSON( req, res, confName, filename, function( err, experiment ) {
+			if( !err ) {
+				res.send( experiment );
+			}
+		});
+	} else {
+		res.send( {} );
+	}
 });
 
 module.exports = router;

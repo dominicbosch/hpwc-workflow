@@ -2,12 +2,22 @@
 
 {% block title %}Welcome {{ user.name }}{% endblock %}
 
-<script type="text/javascript">
-	"use strict";
-</script>
-
 {% block head %}
 	<link rel="stylesheet" href="../css/index.css">
+
+	{% if username %}
+	<script type="text/javascript">
+		"use strict";
+		var updateProject = false;
+
+		$(document).ready( updateConfigurationsList );
+
+		$(document).ready( function() {
+			$( '#configs' ).change( updateConfigurationForm );
+		});
+
+	</script>
+	{% endif %}
 {% endblock %}
 
 {% block content_left %}

@@ -55,9 +55,10 @@ function toggleSelectedConnection( el ) {
 
 function toggleConnection( doConnect, config, cb ) {
 	var strAction = doConnect ? 'connect' : 'disconnect';
-
 	$.get('/services/configuration/' + strAction + '/' + config, function( data ) {
-		getAndSetProjects( doConnect ? config : '' );
+		if ( updateProject ) {
+			getAndSetProjects( doConnect ? config : '' );
+		}
 		if( typeof(cb) === 'function' ) cb();
 	})
 	.fail( function( xhr ) {
@@ -69,9 +70,11 @@ function updateConfigurationForm( cb ) {
 	var config_name = $( '#configs' ).val(),
 		button = $( '#connectButton' );
 
-	//clean project list
-	$( '#projects' ).html( '<option value="">Choose A Project</option>' );
-
+	if ( updateProject ) {
+		//clean project list
+		$( '#projects' ).html( '<option value="">Choose A Project</option>' );
+	}
+	
 	if ( config_name === '' ) {
 
 		button.attr( 'disabled', true );
@@ -89,9 +92,12 @@ function updateConfigurationForm( cb ) {
 			if ( data.configuration ) {
 				setConnectionForm( data.configuration );
 				button.text( data.status ? 'Disconnect' : 'Connect' );
-				getAndSetProjects( data.status ? data.configuration.name : '' );
-				button.removeAttr( 'disabled' );
-				if( typeof(cb) === 'function' ) cb( data.status ? data.configuration.name : '' );
+				if ( updateProject ) {
+					getAndSetProjects( data.status ? data.configuration.name : '' );
+					if ( typeof(cb) === 'function' ) 
+						cb( data.status ? data.configuration.name : '' );
+				}
+				button.removeAttr( 'disabled' );				
 			} else {
 				alert ("Configuration not found");
 			}
@@ -99,7 +105,7 @@ function updateConfigurationForm( cb ) {
 	}
 }
 
-function updateConfigurationsList( cb ) {
+function updateConfigurationsList( cb, cb2 ) {
 
 	$( '#configs' ).html( '<option value="">Choose A Configuration</option>' );
 
@@ -120,9 +126,15 @@ function updateConfigurationsList( cb ) {
 
 				$( '#connectButton' ).text( oPub.selectedConn.status ? 'Disconnect' : 'Connect' );
 
-				if( oPub.selectedConn.status ) {
+				if ( ( oPub.selectedConn.status ) && ( updateProject ) ) {
 					//retrieve project list if old connection is set and connected
-					getAndSetProjects( oPub.selectedConn.name, oPub.selectedConn.projectName, cb );
+					var config_name = oPub.selectedConn.name, 
+						project_val = oPub.selectedConn.projectName;
+
+					getAndSetProjects( config_name, project_val, cb2 );
+
+					if ( typeof(cb) === 'function' ) 
+						cb();
 				}
 			}
 		}
@@ -142,7 +154,7 @@ function getAndSetProjects( config_name, project_val, cb ) {
 			if (project_val) {
 				$( '#projects' ).val( project_val );
 				if ( typeof(cb) === 'function' ) 
-					cb( );
+					cb();
 			}
 		}).fail(function( xhr ) {
 			console.log( xhr.responseText );
