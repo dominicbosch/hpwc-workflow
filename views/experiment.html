@@ -12,13 +12,13 @@
 {% block content_left %}
 <h1>Macro-experiment</h1>
 </br>
-<table id = 'experiment_setup' >
+<table id="experiment_setup">
 	<tr>
-		<td colspan = '2' >
+		<td colspan="2">
 			<h1>Problem</h1>
 			<h4>Choose the problem and its parameters for the experiment</h4>
 		</td>
-		<td colspan = '2' >
+		<td colspan="2">
 			<h1>Methods</h1>
 			<h4>Select the methods you want to be used in your experiment</h4>
 		</td>
@@ -26,27 +26,27 @@
 	<tr>
 		<td>
 			Project name										
-			<select id = 'projects' name = 'project_name' >
-				<option value = ''>Choose A Project</option>
+			<select id="projects" name="project_name">
+				<option value="">Choose A Project</option>
 			</select>			
 		</td>
 		<td>
 			Parameters
-			list: <label name = 'par_list' ></label>
-			values: <input name = 'par_val' type = 'text' >
+			list: <label name="par_list"></label>
+			values: <input name="par_val" type="text">
 		</td>
-		<td colspan = '2' >
+		<td colspan="2">
 			<div name="methods">
 				No Methods
 			</div>
 		</td>
 	</tr>
 	<tr>
-		<td colspan = '2' >
+		<td colspan="2">
 			<h1>System</h1>
 			<h4>Choose system and system-specific options for the experiment</h4>
 		</td>
-		<td colspan = '2' >
+		<td colspan="2">
 			<h1>Old configurations</h1>
 			<h4>List of existing experiment configuration for this project</h4>
 		</td>
@@ -55,11 +55,11 @@
 		<td>
 			Machine										
 			<select name="system">
-				<option value="'.$_SESSION['host'].'">'.$_SESSION['hostname'].'</option>
+				<option value="localhost">localhost</option>
 			</select>
 		</td>
 		<td>
-			<h4>Threads # up to</h4>	
+			Threads # up to	
 			<div>
 				<select id="threads" name="threads">
 					<option value="1">1</option>
@@ -71,14 +71,16 @@
 				</select>			
 			</div>
 		</td>
-		<td colspan = '2' >
-			<div id = 'experiments' />
+		<td colspan="2">
+			<div id="experiments">
+				No previous experiment
+			</div>
 		</td>
 	</tr>
 </table>
-<div>
-	<input type = 'button' value = 'Save Experiment' onclick = "runExp();" >
-	<input type = 'button' value = 'Save&Run Experiment' onclick = "runExp();" >
+<div class="centered-text">
+	<button onclick="runExp();" >Save Experiment</button>
+	<button onclick="runExp();" >Save&Run Experiment</button>
 </div>
 {% endblock %}
 
