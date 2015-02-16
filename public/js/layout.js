@@ -34,12 +34,20 @@ function toggleSelectedConnection( el ) {
 	button.prop( 'disabled', true );
 	if( button.text() === 'Connect' ) {
 		toggleConnection( true, config, function( err ) {
-			button.text( 'Disconnect' );
+			if( err ) {
+				alert( err.message );
+			} else {
+				button.text( 'Disconnect' );
+			}
 			button.removeAttr( 'disabled' );
 		});
 	} else {
 		toggleConnection( false, config, function( err ) {
-			button.text( 'Connect' );
+			if( err ) {
+				alert( err.message );
+			} else {
+				button.text( 'Connect' );
+			}
 			button.removeAttr( 'disabled' );
 		});
 	}
@@ -53,12 +61,8 @@ function toggleConnection( doConnect, config, cb ) {
 		}
 		if( typeof(cb) === 'function' ) cb();
 	})
-	.fail( function( req ) {
-		// if( req.status === 409 ) {
-		// 	setInfo( 'User already existing!', true );
-		// } else {
-		// 	setInfo( req.statusText, true );
-		// }
+	.fail( function( xhr ) {
+		cb( new Error( xhr.responseText ) );
 	});
 }
 
