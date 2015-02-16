@@ -26,19 +26,23 @@ var initConfiguration = function() {
 		];
 
 	setInfo( '' );
+	$( '#tab1 button' ).prop( 'disabled', true );
 	oValues = fetchInputValues( $( '#tab1' ), arrInputs );
 	for( var el in oValues ) {
 		if( oValues[ el ] === '' ) isValid = false;
 	}
 	if( !isValid ) {
 		alert( 'You need to fill all input fields!' );
+		$( '#tab1 button' ).prop( 'disabled', false );
 	} else {
 		$.post( '/services/configuration/create', oValues, function( answ ) {
 			setInfo( answ );
 			updateConfigurationsList();
+			$( '#tab1 button' ).prop( 'disabled', false );
 		})
 		.fail( function( xhr ) {
 			setInfo( xhr.responseText, true );
+			$( '#tab1 button' ).prop( 'disabled', false );
 		});
 	}
 };
@@ -60,8 +64,10 @@ var saveConfiguration = function() {
 			'workspace',
 			'workhome'
 		];
+	$( '#tab2 button' ).prop( 'disabled', true );
 	if( $( '#tab2 select' ).prop( 'selectedIndex' ) === 0 ) {
 		alert( 'Select a configuration first!' );
+		$( '#tab2 button' ).prop( 'disabled', false );
 		return;
 	}
 	oValues = fetchInputValues( $( '#tab2' ), arrInputs );
@@ -70,6 +76,7 @@ var saveConfiguration = function() {
 	}
 	if( !isValid ) {
 		alert( 'You need to fill all input fields!' );
+		$( '#tab2 button' ).prop( 'disabled', false );
 	} else {
 		var result = confirm( 'Do you really want to update this configuration?' );
 		if( result ) {
@@ -77,18 +84,22 @@ var saveConfiguration = function() {
 			$.post( '/services/configuration/update', oValues, function( answ ) {
 				setInfo( answ );
 				updateConfigurationsList();
+				$( '#tab2 button' ).prop( 'disabled', false );
 			})
 			.fail( function( xhr ) {
 				setInfo( xhr.responseText, true );
+				$( '#tab2 button' ).prop( 'disabled', false );
 			});
-		}
+		} else $( '#tab2 button' ).prop( 'disabled', false );
 	}
 };
 
 var deleteConfiguration = function() {
 	var result, options;
+	$( '#tab2 button' ).prop( 'disabled', true );
 	if( $( '#tab2 select' ).prop( 'selectedIndex' ) === 0 ) {
 		alert( 'Select a configuration first!' );
+		$( '#tab2 button' ).prop( 'disabled', false );
 		return;
 	}
 	result = confirm( 'Do you really want to delete this configuration?' );
@@ -100,11 +111,14 @@ var deleteConfiguration = function() {
 			setInfo( answ );
 			updateConfigurationsList();
 			fillSelectBox();
+			$( '#tab2 button' ).prop( 'disabled', false );
+			$( '#tab2 input' ).val( '' );
 		})
 		.fail( function( xhr ) {
 			setInfo( xhr.responseText, true );
+			$( '#tab2 button' ).prop( 'disabled', false );
 		});
-	}
+	} else $( '#tab2 button' ).prop( 'disabled', false );
 };
 
 $(document).ready( updateConfigurationsList );

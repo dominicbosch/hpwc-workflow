@@ -20,10 +20,11 @@ router.post( '/create', function( req, res ) {
 			if( err ) {
 				console.error( err );
 				res.status( 400 );
-				res.send( 'Connection initialization failed: ' + err.message );
+				res.send( 'Connection "' + oBody.name + '" initialization failed: ' + err.message );
 			} else {
 				req.session.pub.configurations[ oConf.name ] = oConf;
-				res.send( 'Connection initialization successful!' );
+				res.send( 'Connection initialization successful, configuration "' 
+					+ oConf.name + '" created!' );
 			}
 		});
 	}
@@ -46,7 +47,7 @@ router.post( '/update', function( req, res ) {
 				res.send( 'Configuration update failed: ' + err.message );
 			} else {
 				req.session.pub.configurations[ oConf.name ] = oConf;
-				res.send( 'Configuration update successful!' );
+				res.send( 'Configuration "' + oConf.name + '" update successful!' );
 			}
 		});
 	}
@@ -67,7 +68,7 @@ router.post( '/delete', function( req, res ) {
 				res.send( 'Configuration deletion failed: ' + err.message );
 			} else {
 				delete req.session.pub.configurations[ oBody.name ];
-				res.send( 'Configuration deletion successful!' );
+				res.send( 'Configuration "' + oBody.name + '" deletion successful!' );
 			}
 		});
 	}
