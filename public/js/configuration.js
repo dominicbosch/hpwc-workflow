@@ -99,6 +99,7 @@ var deleteConfiguration = function() {
 		$.post( '/services/configuration/delete', options, function( answ ) {
 			setInfo( answ );
 			updateConfigurationsList();
+			fillSelectBox();
 		})
 		.fail( function( xhr ) {
 			setInfo( xhr.responseText, true );
