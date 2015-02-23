@@ -1,6 +1,7 @@
 "use strict";
 
 oPub.updateProject = true;
+var getLogTimeout = null;
 
 function cleanMethodForm() {
 	$( '#edit_method input[name="method_type"]' ).val( '' );
@@ -34,13 +35,13 @@ function updateMethodForm( cb ) {
 	}
 }
 
-function getAndSetMethods( config_name, project_val, method_val, cb ) {
+function getAndSetMethods( config_name, project_name, method_val, cb ) {
 
-	if( ( config_name !== '' ) && ( project_val !== '' ) ) {
+	if( ( config_name !== '' ) && ( project_name !== '' ) ) {
 		//read the projects for an open connection and set the values
 		$.get( '/services/method/getAll/' 
 			+ config_name + '/'
-			+ project_val, function( methods ) {
+			+ project_name, function( methods ) {
 
 			for ( var i in methods ) {
 				$( '#methods' ).append($( '<option>' ).attr( 'value', methods[i] ).text( methods[i] ) );
@@ -82,6 +83,80 @@ function getInstalledMethod( config_name ) {
 	}
 }
 
+function actionOnMethod( cmd ) {
+
+	var	config_name = $( '#configs' ).val(),
+		project_name = $( '#projects' ).val(),
+		method_name = $( '#methods' ).val();
+
+	if ( config_name === '' ) {
+		alert( 'Select A Configuration' );
+		return;
+	}
+
+	if ( project_name === '' ) {
+		alert( 'Select A Project' );
+		return;
+	}
+
+	if ( method_name === '' ) {
+		alert( 'Select A Method' );
+		return;
+	}
+
+	$( '#respWait' ).attr( 'src', '../img/ajax-loader.gif' );
+
+	$.get('/services/method/' 
+		+ cmd + '/'
+		+ config_name + '/' 
+		+ project_name + '/' 
+		+ method_name, function( data ) {
+	
+		if ( !data.err ) {
+			$( '.action' ).prop( 'disabled', true );
+
+			$("#resp_textarea").val( data.log );
+
+			getLogTimeout = setTimeout( function() {
+				getLog( config_name, project_name );
+			}, 2000 );
+
+		} else {
+			//clean wait image
+			$( '#respWait' ).removeAttr( 'src' );
+
+			$("#resp_textarea").val( data.err + '\n' + data.log );
+		}
+	}).fail(function( xhr ) {
+		console.log( xhr.responseText );
+	});
+}
+
+function getLog( config_name, project_name ) {
+
+	if( config_name !== '' && project_name !== '') {
+
+		$.get('/services/method/getLog/' 
+			+ config_name + '/'
+			+ project_name, function( data ) {
+
+			$("#resp_textarea").val( data.log );
+
+			if ( data.commandActive.status ) {
+				getLogTimeout = setTimeout( function() {
+					getLog( config_name, project_name );
+				}, 2000 );
+			} else {
+				//clean wait image
+				$( '#respWait' ).removeAttr( 'src' );
+
+				$( '.action' ).prop( 'disabled', false );
+			}
+		}).fail(function( xhr ) {
+			console.log( xhr.responseText );
+		});
+	}
+}
 function manage_method( action ) {
 
 	var id = '' ;
@@ -151,21 +226,32 @@ function manage_method( action ) {
 
 $(document).ready(function() {
 
-	$( '#connectButton' ).on( 'click', cleanMethodForm );
-
 	var config_name = oPub.selectedConn.name, 
-		project_val = oPub.selectedConn.projectName;
+		project_name = oPub.selectedConn.projectName;
 
-	updateConfigurationsList( function() {
-		getInstalledMethod( config_name );
-	}, function() {
-		getAndSetMethods( config_name, project_val );
-	});
+	updateConfigurationsList( 
+		function() {
+			getInstalledMethod( config_name );
+		}, 
+		function() {
+			getAndSetMethods( config_name, project_name );
+			$( '.action' ).prop( 'disabled', true );
+			$( '#respWait' ).attr( 'src', '../img/ajax-loader.gif' );
+			getLog( config_name, project_name ); 
+		}
+	);
+
+	$( '#connectButton' ).on( 'click', cleanMethodForm );
 
 	$( '#configs' ).change( function() {
 
 		var config_name = $( '#configs' ).val();
 
+		//clean getLog timeout, wait image and response area
+		clearTimeout( getLogTimeout );
+		$( '#respWait' ).removeAttr( 'src' );
+		$( '#resp_textarea' ).val( '' );
+		
 		//clean method list
 		$( '#methods' ).html( '<option value="">Choose A Method</option>' );
 
@@ -180,7 +266,7 @@ $(document).ready(function() {
 
 	//get method
 	$("#methods").change( function() {
-		$( '#resp_textarea' ).val( '' );
+		//$( '#resp_textarea' ).val( '' );
 		updateMethodForm( );
 	});
 
@@ -194,6 +280,11 @@ $(document).ready(function() {
 			alert( 'Select A Configuration' );
 			return;
 		}
+
+		//clean getLog timeout, wait image and response area
+		clearTimeout( getLogTimeout );
+		$( '#respWait' ).removeAttr( 'src' );
+		$( '#resp_textarea' ).val( '' );
 
 		$( '#methods' ).html( '<option value="">Choose A Method</option>' );
 
@@ -210,6 +301,9 @@ $(document).ready(function() {
 				+ project_name, function( project ) {
 				
 				getAndSetMethods( config_name, project_name, null);
+				$( '.action' ).prop( 'disabled', true );
+				$( '#respWait' ).attr( 'src', '../img/ajax-loader.gif' );
+				getLog( config_name, project_name ); 
 
 			});
 		}

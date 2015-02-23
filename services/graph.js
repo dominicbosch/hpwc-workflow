@@ -27,7 +27,7 @@ router.post( '/buildAndGet/:connection/:project/:experiment', function( req, res
 			'-f', experiment.fixed
 		];
 		
-		ssh.execWorkComm( req, res, confName, arrCommand.join( ' ' ), function( err, data ) {
+		ssh.execWorkCommSync( req, res, confName, arrCommand.join( ' ' ), function( err, data ) {
 			var pos, command, remotePath = '';
 
 			if( !err ) {
@@ -42,7 +42,7 @@ router.post( '/buildAndGet/:connection/:project/:experiment', function( req, res
 
 					command = 'base64 ' + remotePath;
 
-					ssh.executeCommand( req, res, confName, command, false, function( err, encImage ) {
+					ssh.executeCommandSync( req, res, confName, command, false, function( err, encImage ) {
 						console.log( 'Encode Image: ' + encImage);
 						res.send( encImage);
 					});

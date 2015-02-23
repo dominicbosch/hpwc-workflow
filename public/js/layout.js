@@ -81,6 +81,7 @@ function updateConfigurationForm( cb ) {
 
 		//remove the connection from the session
 		$.get('/services/session/cleanConnection', function( data ) {
+			oPub.selectedConn.name = '';
 			$( '#conf_table td' ).text( '--' );
 		});
 
@@ -90,6 +91,7 @@ function updateConfigurationForm( cb ) {
 			+ config_name, function( data ) {
 
 			if ( data.configuration ) {
+				oPub.selectedConn.name = config_name;
 				setConnectionForm( data.configuration );
 				button.text( data.status ? 'Disconnect' : 'Connect' );
 				if ( oPub.updateProject ) {
@@ -129,9 +131,9 @@ function updateConfigurationsList( cb, cb2 ) {
 				if ( ( oPub.selectedConn.status ) && ( oPub.updateProject ) ) {
 					//retrieve project list if old connection is set and connected
 					var config_name = oPub.selectedConn.name, 
-						project_val = oPub.selectedConn.projectName;
+						project_name = oPub.selectedConn.projectName;
 
-					getAndSetProjects( config_name, project_val, cb2 );
+					getAndSetProjects( config_name, project_name, cb2 );
 
 					if ( typeof(cb) === 'function' ) 
 						cb();
@@ -141,7 +143,7 @@ function updateConfigurationsList( cb, cb2 ) {
 	});
 }
 
-function getAndSetProjects( config_name, project_val, cb ) {
+function getAndSetProjects( config_name, project_name, cb ) {
 
 	if( config_name !== '' ) {
 		//read the projects for an open connection and set the values
@@ -151,8 +153,8 @@ function getAndSetProjects( config_name, project_val, cb ) {
 				$( '#projects' ).append($( '<option>' ).attr( 'value', projects[i] ).text( projects[i] ) );
 			}
 
-			if (project_val) {
-				$( '#projects' ).val( project_val );
+			if ( project_name ) {
+				$( '#projects' ).val( project_name );
 				if ( typeof(cb) === 'function' ) 
 					cb();
 			}
@@ -186,3 +188,15 @@ function getURLQuery() {
 	}
 	return oQuery;
 }
+
+function createListItem( item, isChecked, isDisabled ) {
+	return '<label>'
+			+ '<input type="checkbox" value="' 
+				+ item + '" ' 
+				+ (isChecked ? 'checked ' : '') 
+				+ (isDisabled ? 'disabled ' : '') 
+			+ '>' 
+			+ item 
+		+ '</label>';
+};
+

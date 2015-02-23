@@ -62,9 +62,15 @@ router.post( '/manage/:connection', function( req, res ) {
 	}
 
 	ssh.execWorkComm( req, res, conn, arrCommand.join( ' ' ), function( err, data ) {
+		console.log( 'Method manage command (' + arrCommand.join() + ') got data: ');
 		if( !err ) {
-			console.log( 'Project manage command (' + arrCommand.join(' ') + ') got data: ' + data );
-			res.send( data );
+			if ( data ) {
+				console.log( data );
+				res.write( data );
+			} else {
+				console.log( 'End Of Stream' );
+				res.end();
+			}
 		}
 	});
 });

@@ -62,12 +62,18 @@
 							<option value="">Choose A Method</option>
 						</select>
 					</td>
+					<td>
+						<button onclick="manage_method('edit');">Edit Method</button>
+						<br/>
+						<button onclick="manage_method('delete');">Delete Method</button>
+					</td>
 				</tr>
 				<tr>
 					<td>Method Type</td>
 					<td>
 						<input name="method_type" type="text" size="30" readonly>
 					</td>
+					<td></td>
 				</tr>
 				<tr>
 					<td>Source Files</td>
@@ -76,18 +82,25 @@
 							
 						</select>
 					</td>
+					<td>
+						<button id="edit_code" onclick="getRemoteSrc( event )">New File</button>
+						<br/>
+						<button id="edit_code" onclick="getRemoteSrc( event )">Edit File</button>
+						<br/>
+						<button id="edit_code" onclick="getRemoteSrc( event )">Delete File</button>
+					</td>
 				</tr>
 				<tr>
 					<td>Comment</td>
 					<td>
 						<textarea name="comment"></textarea>
 					</td>
+					<td></td>
 				</tr>
 			</table>
 			<div class="centered-text">
-				<button onclick="manage_method('edit');">Edit Method</button>
-				<button onclick="manage_method('delete');">Delete Method</button>
-				<button id="edit_code" onclick="getRemoteSrc( event )">Edit Code</button>
+				<button class="action" onclick="actionOnMethod('compile');">Compile</button>
+				<button class="action" onclick="actionOnMethod('run');">Run</button>
 			</div>
 		</div>
 	</div>
@@ -95,7 +108,10 @@
 {% endblock %}
 {% block content_right %}
 <div id="cmd_response">
-	<h3>Command Response</h3>
+	<h3>
+		Command Response
+		<img id="respWait" style="float:right"/>
+	</h3>
 	<textarea id="resp_textarea" readonly></textarea>
 </div>
 <div class="overlay" style="display: none;">

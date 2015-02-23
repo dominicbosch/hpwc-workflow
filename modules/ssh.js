@@ -1,7 +1,8 @@
 'use strict';
 
-var executeCommand, oUserConnections = {},
-	tempConnCounter = 0, connCounter = 0,
+var executeCommandSync, oUserConnections = {},
+	executeCommand, tempConnCounter = 0, connCounter = 0,
+	execWorkCommSync, execWorkComm,
 	fs = require( 'fs' ),
 	path = require( 'path' ),
 	SSHConnection = require( 'ssh2' ),
@@ -198,12 +199,11 @@ exports.connectToHost = function( username, connObj, cb ) {
 // to handle them all in the services.
 // IMPORTANT: This means if callback function 'cb' receives an error as an argument
 //            no further response can be sent to the client!!!
-exports.executeCommand = executeCommand = function( req, res, connection, command, wrkcmd, cb ) {
+exports.executeCommand = executeCommand = function( req, res, connection, command, cb ) {
 
-	var oConn, errString, alldata = '',
+	var oConn, errString,
 		username = req.session.pub.username,
-		oConnections = oUserConnections[ username ],
-		conn = {};
+		oConnections = oUserConnections[ username ];
 
 	console.log( 'Processing user "' + username + '"s request: ',  command );
 	errString = 'Command "%s" failed for user "%s": ';
@@ -212,15 +212,9 @@ exports.executeCommand = executeCommand = function( req, res, connection, comman
 		oConn = oConnections[ connection ];
 		if( oConn && oConn[ '_state' ] === 'authenticated' ) {
 
-			//if is a workflow command, add source of environment variables
-			if ( wrkcmd ) {
-				conn = req.session.pub.configurations[ connection ];
-				command = 'source ' + path.join( conn.workhome, 'util', 'SetupEnv.sh' )	
-					+ ' ' + conn.workspace + '; ' + command;
-			}
-
 			oConn.exec( command, function( err, stream ) {
 				oConn.on( 'close', function(){
+					cb( null, 'Connection closed' );
 					stream.end();
 					console.log('Deleting stream');
 				});
@@ -234,10 +228,10 @@ exports.executeCommand = executeCommand = function( req, res, connection, comman
 				} else {
 					stream.on( 'data', function( data ) {
 						// Add chunks to data string and wait until the end of the stream
-						alldata += data;
+						cb( null, data );
 					}).on( 'end', function() {
 						//send all data back through Callback Function
-						cb( null, alldata );
+						cb( null, false );
 					}).on( 'error', function(e) {
 						console.error(e);
 					});
@@ -266,15 +260,47 @@ exports.executeCommand = executeCommand = function( req, res, connection, comman
 	}
 };
 
-exports.execWorkComm = function( req, res, connection, command, cb ) {
-	executeCommand( req, res, connection, command, true, cb );
+exports.executeCommandSync = executeCommandSync = function( req, res, connection, command, cb ) {
+
+	var alldata = '';
+
+	executeCommand( req, res, connection, command, function( err, data ) {
+		if ( !err ) {
+			if ( data )
+				alldata += data;
+			else
+				cb( null, alldata);
+		} else {
+			cb( err, alldata );
+		}
+	});
+};
+
+exports.execWorkCommSync = execWorkCommSync = function( req, res, connection, command, cb ) {
+	
+	var conn = req.session.pub.configurations[ connection ];
+				
+	command = 'source ' + path.join( conn.workhome, 'util', 'SetupEnv.sh' )	
+			+ ' ' + conn.workspace + '; ' + command;
+
+	executeCommandSync( req, res, connection, command, cb );
+};
+
+exports.execWorkComm = execWorkComm = function( req, res, connection, command, cb ) {
+	
+	var conn = req.session.pub.configurations[ connection ];
+				
+	command = 'source ' + path.join( conn.workhome, 'util', 'SetupEnv.sh' )	
+			+ ' ' + conn.workspace + '; ' + command;
+
+	executeCommand( req, res, connection, command, cb );
 };
 
 // IMPORTANT: If callback function 'cb' receives an error as an argument
 //            no further response can be sent to the client!!!
 exports.getRemoteJSON = function( req, res, connection, filename, cb ) {
-	var workflowCommand = false;
-	executeCommand( req, res, connection, 'cat ' + filename, workflowCommand, function( err, data ) {
+	
+	executeCommandSync( req, res, connection, 'cat ' + filename, function( err, data ) {
 		if( !err ) {
 			try {
 				cb( null, JSON.parse( data ) );
@@ -289,8 +315,8 @@ exports.getRemoteJSON = function( req, res, connection, filename, cb ) {
 };
 
 exports.getRemoteFile = function( req, res, connection, filename, cb ) {
-	var workflowCommand = false;
-	executeCommand( req, res, connection, 'cat ' + filename, workflowCommand, function( err, data ) {
+	
+	executeCommandSync( req, res, connection, 'cat ' + filename, function( err, data ) {
 		if( !err ) {
 			cb( null, data );
 		}
@@ -298,8 +324,8 @@ exports.getRemoteFile = function( req, res, connection, filename, cb ) {
 };
 
 exports.setRemoteFile = function( req, res, connection, filename, content, cb ) {
-	var workflowCommand = false;
-	executeCommand( req, res, connection, 'echo "' + content + '" > ' + filename, workflowCommand, function( err, data ) {
+	
+	executeCommandSync( req, res, connection, 'echo "' + content + '" > ' + filename, function( err, data ) {
 		if( !err ) {
 			cb( null, data );
 		}
@@ -310,8 +336,8 @@ exports.setRemoteFile = function( req, res, connection, filename, content, cb ) 
 // IMPORTANT: If callback function 'cb' receives an error as an argument
 //            no further response can be sent to the client!!!
 exports.getRemoteList = function( req, res, connection, command, cb ) {
-	var workflowCommand = true;
-	executeCommand( req, res, connection, command, workflowCommand, function( err, data ) {
+	
+	execWorkCommSync( req, res, connection, command, function( err, data ) {
 		var pos, list = '';
 
 		if( !err ) {

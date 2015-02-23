@@ -89,9 +89,15 @@ function manage_project( action ) {
 
 $(document).ready(function() {
 
-	updateConfigurationsList( updateProjectForm );
+	updateConfigurationsList( 
+		null, 
+		updateProjectForm 
+	);
 
-	$( '#configs' ).change( cleanProjectForm );
+	$( '#configs' ).change( function() {
+		$( '#resp_textarea' ).val( '' );
+		cleanProjectForm();
+	});
 
 	$( '#configs' ).change( updateConfigurationForm );
 

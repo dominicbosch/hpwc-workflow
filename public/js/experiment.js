@@ -1,208 +1,171 @@
 "use strict";
 
+oPub.updateProject = true;
 
+//OK
+function addToList( name ) {
+	var string = '', 
+		value = $( '#' + name ).val().trim();
 
+	if ( value !== '' ) {
+		if ( $( '#experiment_setup td[name="' + name + '"] input[value="' 
+			+ value + '"]' ).val() ) {
+			alert("Value already in the list, just check it!");
+		} else {
+			string = createListItem( value, true, false );
+			$( '#experiment_setup td[name="' + name + '"]' ).append( string );
+		}
+	} else {
+		alert( 'First select a value' );
+	}
+}
 
+//OK
+function cleanProjectForm() {
+	$( '#experiment_setup td[name="par_list"]' ).empty();
+	$( '#experiment_setup td[name="par_val"]' ).empty();
+	$( '#experiment_setup td[name="nthreads"] input' ).prop( 'checked', false );
+	$( '#experiment_setup td[name="hosts"]' ).empty();
+}
 
+//OK
+function setProjectForm( project ) {
+	$( '#experiment_setup td[name="par_list"]' ).text(project.parameters.list);
+	$( '#experiment_setup td[name="par_val"]' ).html(
+		createListItem( project.parameters.default, true, false ) );
+	$( '#experiment_setup td[name="nthreads"] input[value="' 
+		+ project.threads + '"]' ).prop( 'checked', true );
+	$( '#experiment_setup td[name="hosts"]' ).html(
+		createListItem( 'localhost', true, true ) );
+
+}
+
+function cleanOutputForm() {
+	$( '.fixed' ).prop( 'checked', true );
+	$( '.fixed' ).prop( 'disabled', true );
+	$( '#exp_details td[name="parameters"]' ).text( '--' );
+	$( '#exp_details td[name="methods"]' ).text( '--' );
+	$( '#exp_details td[name="nthreads"]' ).text( '--' );
+	$( '#exp_details td[name="nexecs"]' ).text( '--' );
+}
+
+//OK
+function updateProjectFormInExp() {
+
+	var config_name = $( '#configs' ).val(),
+		project_name = $( '#projects' ).val();
+
+	if ( project_name === '' ) {
+		$.get( '/services/session/cleanProject', function( data ) {
+
+			oPub.selectedConn.projectName = '';
+
+			//clean information related to the project
+			cleanProjectForm();
+
+			//clean method list
+			$("#experiment_setup td[name='methods']").empty();
+
+			//clean output list
+			$("#experiments").html("<option value=''>Choose An Experiment</option>");
+
+		});
+	} else {
+		//fill project form
+		$.get( '/services/project/get/' 
+			+ config_name + '/' 
+			+ project_name, function( project ) {
+
+			oPub.selectedConn.projectName = project_name;
+
+			setProjectForm( project );
+
+			//update methods list
+			getAndSetMethodsList( config_name, project_name );
+
+			//update experiment list
+			getAndSetExperiments( config_name, project_name );
+		});
+	}
+}
+
+//OK
+function getAndSetMethodsList( config_name, project_val ) {
+
+	if( ( config_name !== '' ) && ( project_val !== '' ) ) {
+		//read the projects for an open connection and set the values
+		$.get( '/services/method/getAll/' 
+			+ config_name + '/'
+			+ project_val, function( methods ) {
+
+			var string_html = '';
+
+			//fill list
+			for ( var i in methods ) {
+				string_html += createListItem( methods[i], false, false );
+			}
+			$("#experiment_setup td[name='methods']").html(string_html);
+
+		}).fail(function( xhr ) {
+			console.log( xhr.responseText );
+		});
+	} else {
+		//clean method list
+		$("#experiment_setup td[name='methods']").empty();
+	}
+}
 
 $(document).ready(function() {
 
+	//OK
+	updateConfigurationsList( 
+		null, 
+		updateProjectFormInExp
+	);
 
+	//get data
+	$("#experiments").change( function() {
 
-	
+		//updateOutputForm( );
+	});
 
+	//when the project selected change, we read the value of parameters (user change)
+	$("#projects").change( function() {
+
+		//clean output list
+		$("#experiments").html("<option value=''>Choose An Experiment</option>");
+
+		updateProjectFormInExp( );
+	});
+
+	//OK
 	//create handler for changing of configuraton
 	$("#configs").change( function() {
 
-		//clean method list
-//		$("#methods").html("<option value=''>Choose A Method</option>");
-
-//		cleanMethodForm();
-
-		//clean method type
-//		$("#method_types").html("<option value=''>Choose A Method Type</option>");
-
 		//clean project list
-//		$("#projects").html("<option value=''>Choose A Project</option>");
+		$( '#projects' ).html( '<option value="">Choose A Project</option>' );
 
-		var conf_file = $(this).val();
-		if (conf_file == "") {
-			$("#conf_table td[name='hostname']").html("--");
-			$("#conf_table td[name='host']").html("--");
-			$("#conf_table td[name='username']").html("--");
-			$("#conf_table td[name='workflow']").html("--");
-			$("#conf_table td[name='workspace']").html("--");
+		//clean information related to the project
+		if ( oPub.selectedConn.projectName && ( oPub.selectedConn.projectName !== '' ) )
+			updateProjectFormInExp();
 
-			//close the connection
-			$.get('/services/gen/ssh/close', function( data ) {
-				alert( data );
-			});
-		} else {
-			$.get('/services/gen/getConfigs?conf=' + conf_file, function( data ) {
-				var obj = data;
-				$("#conf_table td[name='hostname']").html(obj.hostname);
-				$("#conf_table td[name='host']").html(obj.url);
-				$("#conf_table td[name='username']").html(obj.username);
-				$("#conf_table td[name='workflow']").html(obj.workhome);
-				$("#conf_table td[name='workspace']").html(obj.workspace);
-
-				//when the configuration change, we read again the project
-//				$.get('/services/project/getProjects', function( data ) {
-
-//					var projects_string = '<option value="">Choose A Project</option>';
-
-//					if (data !== "") {
-//						data.forEach(function(project) {
-//							projects_string += '<option value="' + project + '">' + project + '</option>';
-//						});
-//					}
-//					$('#projects').html(projects_string);
-//				});
-
-//				$.get('/services/method/getInstalled', function( data ) {
-
-//					var types_string = '<option value="">Choose A Method Type</option>';
-
-//					if (data !== "") {
-//						data.forEach(function(type) {
-//							types_string += '<option value="' + type + '">' + type + '</option>';
-//						});
-//					}
-//					$('#method_types').html(types_string);
-//				});
-			});
-		}
-	});
-/*
-	//get method
-	$("#methods").change( function() {
-
-		var method = $(this).val();
-		$("#resp_textarea").val("");
-		update_method( method );
+		//update the right part of the page and read the project list
+		updateConfigurationForm();
 	});
 
-	//when the project selected change, we read the modules implemented
-	$("#projects").change( function() {
-		var conf_file = $("#configs").val();
-		if (conf_file == "") {
-			alert("Select A Configuration");
-			return;
-		}
+	$( '#connectButton' ).on( 'click', function() {
 
-		$("#methods").html("<option value=''>Choose A Method</option>");
+		//when disconnect, the project has to be deleted but this doesn't influence the functioning
+		//oPub.selectedConn.projectName = '';
 
-		cleanMethodForm();
+		//clean information related to the project
+		cleanProjectForm();
 
-		var project = $(this).val();
+		//clean method list
+		$("#experiment_setup td[name='methods']").empty();
 
-		if (project == "") {
-			$.get('/services/session/cleanProject', function( data ) {
-				
-			});
-		} else {
-			$.get('/services/project/getDescriptor?project=' + project, function( ) {
-				$.get('/services/method/get', function( data ) {
-					var methods_string = '<option value="">Choose A Method</option>';
-					if (data !== "") {
-						data.forEach(function(method) {
-							methods_string += '<option value="' + method + '">' + method + '</option>';
-						});
-					}
-					$('#methods').html(methods_string);
-				});
-			});
-		}
+		//clean output list
+		$("#experiments").html("<option value=''>Choose An Experiment</option>");
 	});
-*/
+
 });
-/*
-function cleanMethodForm() {
-	$("#edit_method input[name='method_type']").val("");
-	$("#edit_method textarea[name='comment']").val("");
-}
-
-function update_method( method ) {
-	if (method == "") {
-		cleanMethodForm();
-	} else {
-		//getDescriptor
-		$.get('/services/method/getDescriptor?&method=' + method, function( data ) {
-			var desc = data;
-			$("#edit_method input[name='method_type']").val(desc.type);
-			$("#edit_method textarea[name='comment']").val(desc.comment);
-		});
-	}
-}
-
-function manage_method( action ) {
-
-	var id = "";
-	var	method = {
-			action: action
-		};
-	var	conf_file = $("#configs").val();
-	var project_name = $("#projects").val();
-
-	if (conf_file === "") {
-		alert("Select A Configuration");
-		return;
-	}
-
-	if (project_name === "") {
-		alert("Select A Project");
-		return;
-	}
-
-	if (action == "delete") {
-		method.name = $("#methods").val();
-	} else {
-		if (action == "create") {
-			id="new_method";
-			method.name = $("#new_method input[name='method_name']").val();
-			method.type = $("#method_types").val();
-		} else if (action == "edit") {
-			alert ("to be implemented on the script");
-			return;
-			id="edit_method";
-			method.name = $("#methods").val();
-			method.type = $("#"+id+" input[name='method_type']").val();
-		}
-
-		method.comment = $("#"+id+" textarea[name='comment']").val();
-	}
-
-	$.post('/services/method/manage', method, function( data ) {
-		$("#resp_textarea").val( data );
-		
-		//update method list
-		$.get('/services/method/get', function( data ) {
-
-			var methods_string = '<option value="">Choose A Method</option>';
-			var	method_val = "";
-
-			if (data !== "") {
-				data.forEach(function(method) {
-					methods_string += '<option value="' + method + '">' + method + '</option>';
-				});
-			}
-
-			$('#methods').html(methods_string);
-
-			//if edit, select again the method
-			if ((method.action === "edit")) {
-				method_val = method.name;
-			} else if ((method.action === "create")) {
-				//clean creation form
-				$("#new_method input[name='method_name']").val("");
-				$("#method_types").val("");
-				$("#new_method textarea[name='comment']").val("");
-			}
-
-			$("#methods").val(method_val);
-
-			update_method(method_val);
-
-		});
-	});
-}*/

@@ -15,7 +15,7 @@ function showGraph() {
 
 	var config_name = $( '#configs' ).val(),
 		project_name = $( '#projects' ).val(),
-		experiment_name = $( '#graphs' ).val(),
+		experiment_name = $( '#experiments' ).val(),
 		experiment;
 
 	if ( experiment_name === '' )
@@ -71,43 +71,13 @@ function updateProjectFormInViz( cb ) {
 	}
 }
 
-function getAndSetExperiments( config_name, project_val, cb ) {
-
-	if( ( config_name !== '' ) && ( project_val !== '' ) ) {
-		
-		$.get( '/services/experiment/getAll/' 
-			+ config_name + '/'
-			+ project_val, function( experiments ) {
-
-			var year, month, day, hour, minute, output;
-
-			for ( var i in experiments ) {
-				year = experiments[i].substring(0,4);
-				month = experiments[i].substring(4,6);
-				day = experiments[i].substring(6,8);
-				hour = experiments[i].substring(9,11);
-				minute = experiments[i].substring(11,13);
-				output = day + '/' + month + '/' + year + ' at ' + hour + ':' + minute;
-				$( '#graphs' ).append($( '<option>' ).attr( 'value', experiments[i] ).text( output ) );
-			}
-		}).fail(function( xhr ) {
-			console.log( xhr.responseText );
-		});
-
-		if ( typeof(cb) === 'function' ) 
-			cb( );
-
-	} else {
-		//clean graphs list
-		$( '#graphs' ).html( '<option value="">Choose An Experiment</option>' );
-	}
-}
-
 function cleanOutputForm() {
-	$("#exp_details td[name='parameters']").text("--");
-	$("#exp_details td[name='methods']").text("--");
-	$("#exp_details td[name='nthreads']").text("--");
-	$("#exp_details td[name='nexecs']").text("--");
+	$( '.fixed' ).prop( 'checked', true );
+	$( '.fixed' ).prop( 'disabled', true );
+	$( '#exp_details td[name="parameters"]' ).text( '--' );
+	$( '#exp_details td[name="methods"]' ).text( '--' );
+	$( '#exp_details td[name="nthreads"]' ).text( '--' );
+	$( '#exp_details td[name="nexecs"]' ).text( '--' );
 }
 
 function setOutputForm( experiment ) {
@@ -115,19 +85,7 @@ function setOutputForm( experiment ) {
 	var params = experiment.parameters,
 		methods = experiment.methods,
 		nthreads = experiment.nthreads,
-		string_html, i;
-
-	//fill parameters
-	var createListItem = function( item, isChecked, isDisabled ) {
-		return '<label>'
-				+ '<input type="checkbox" value="' 
-					+ item + '" ' 
-					+ (isChecked ? 'checked ' : '') 
-					+ (isDisabled ? 'disabled ' : '') 
-				+ '>' 
-				+ item 
-			+ '</label>';
-	};
+		string_html;
 
 	$( '#fix_par' ).prop( 'disabled', params.length === 1 );
 	$( '#fix_met' ).prop( 'disabled', methods.length === 1 );
@@ -135,33 +93,39 @@ function setOutputForm( experiment ) {
 
 	//fill parameters
 	string_html = '';
-	for (i = 0; i < params.length; i++) {
-		string_html += createListItem( params[ i ], (i===0), true );
+	for ( var i in params ) {
+		string_html += createListItem( params[i], (i==0), false );
 	}
-	$("#exp_details td[name='parameters']").html(string_html);
+	$( '#exp_details td[name="parameters"]' ).html(string_html);
+
+	$( '#exp_details td[name="parameters"] input' ).on( 'change', addChecksToList);
 
 	//fill methods
 	string_html = '';
-	for (i = 0; i < methods.length; i++) {
-		string_html += createListItem( methods[ i ], (i===0), true );
+	for ( var i in methods ) {
+		string_html += createListItem( methods[i], (i==0), false );
 	}
-	$("#exp_details td[name='methods']").html(string_html);
+	$( '#exp_details td[name="methods"]' ).html(string_html);
+
+	$( '#exp_details td[name="methods"] input' ).on( 'change', addChecksToList);
 
 	//fill number of threads
 	string_html = '';
-	for (i = 0; i < nthreads.length; i++) {
-		string_html += createListItem( nthreads[ i ], (i===0), true );
+	for ( var i in nthreads ) {
+		string_html += createListItem( nthreads[i], (i==0), false );
 	}
-	$("#exp_details td[name='nthreads']").html(string_html);
+	$( '#exp_details td[name="nthreads"]' ).html(string_html);
 
-	$("#exp_details td[name='nexecs']").html(experiment.executions);
+	$( '#exp_details td[name="nthreads"] input' ).on( 'change', addChecksToList);
+
+	$( '#exp_details td[name="nexecs"]' ).html(experiment.executions);
 }
 
 function updateOutputForm( cb ) {
 
 	var config_name = $( '#configs' ).val(),
 		project_name = $( '#projects' ).val(),
-		experiment_name = $( '#graphs' ).val();
+		experiment_name = $( '#experiments' ).val();
 
 	if ( experiment_name === '' ) {
 		cleanOutputForm();
@@ -177,11 +141,28 @@ function updateOutputForm( cb ) {
 	}
 }
 
+function addChecksToList() {
+	var n = 0;
+
+	if ( $(this).is( ':checked' ) ) {
+		if ( $(this).parent().parent( 'td' ).prev( 'td' ).children( '.fixed' ).is( ':checked' ) ) {
+			//uncheck other box 
+			$(this).parent().siblings().children( 'input' ).prop( 'checked', false );
+		}
+	} else {
+		n = $(this).parent().siblings().children( 'input:checked' ).length;
+		if ( n === 0 ) {
+			$(this).prop( 'checked', true );
+			alert("Property can't be empty");
+		} else {
+			if ( n === 1 ) {
+				$(this).parent().parent( 'td' ).prev( 'td' ).children( '.fixed' ).prop( 'checked', true );
+			}
+		}
+	}
+}
+
 $(document).ready(function() {
-
-	$( '#connectButton' ).on( 'click', cleanOutputForm );
-
-	$( '#connectButton' ).on( 'click', cleanProjectForm );
 
 	updateConfigurationsList( 
 		null,
@@ -191,22 +172,26 @@ $(document).ready(function() {
 	//create handler for changing of configuraton
 	$("#configs").change( function() {
 
-		//clean output list
-		$("#graphs").html("<option value=''>Choose An Experiment</option>");
+		//clean image
+		$( '#out_image' ).removeAttr( 'src' );
 
 		cleanOutputForm();
+		
+		//clean output list
+		$("#experiments").html("<option value=''>Choose An Experiment</option>");
 
-		//clean project list
-		$("#projects").html("<option value=''>Choose A Project</option>");
-
+		//clean information related to the project
 		cleanProjectForm();
 
+		//update the right part of the page and the project list
 		updateConfigurationForm( );
-
 	});
 
 	//get outputs
-	$("#graphs").change( function() {
+	$("#experiments").change( function() {
+
+		//clean image
+		$( '#out_image' ).removeAttr( 'src' );
 
 		updateOutputForm( );
 	});
@@ -214,67 +199,42 @@ $(document).ready(function() {
 	//when the project selected change, we read the value of parameters (user change)
 	$("#projects").change( function() {
 
+		//clean image
+		$( '#out_image' ).removeAttr( 'src' );
+
 		//clean output list
-		$("#graphs").html("<option value=''>Choose An Experiment</option>");
+		$("#experiments").html("<option value=''>Choose An Experiment</option>");
 
 		cleanOutputForm();
 
 		updateProjectFormInViz( );
 	});
 
-	
-	$("#fix_par").on( "change", function() {
-		if ($(this).is(":checked")) {
-			var n = $( "#exp_details td[name='parameters'] input:checked" ).length;
+	$( '.fixed' ).on( 'change', function() {
+		var name = '',
+			n = 0;
+
+		if ( $(this).is( ':checked' ) ) {
+			name = $(this).parent().next( 'td' ).attr( 'name' );
+			n = $( '#exp_details td[name="' + name + '"] input:checked' ).length;
 			if ( n !== 1) {
-				$(this).prop('checked', false);
+				$(this).prop( 'checked', false );
 				alert("To fix a property, only 1 correspondent value has to be selected");
-			} else {
-				$("#exp_details td[name='parameters'] input").prop('disabled', true);
 			}
 		} else {
-			if ($("#fix_met").is(":checked") || $("#fix_thr").is(":checked")) {
-				$("#exp_details td[name='parameters'] input").prop('disabled', false);
-			} else {
-				$(this).prop('checked', true);
+			n = $( '.fixed:checked' ).length;
+			if ( n === 0 ) {
+				$(this).prop( 'checked', true );
 				alert("At least one property has to be checked");
 			}
 		}
 	});
-	$("#fix_met").on( "change", function() {
-		if ($(this).is(":checked")) {
-			var n = $( "#exp_details td[name='methods'] input:checked" ).length;
-			if ( n !== 1) {
-				$(this).prop('checked', false);
-				alert("To fix a property, only 1 correspondent value has to be selected");
-			} else {
-				$("#exp_details td[name='methods'] input").prop('disabled', true);
-			}
-		} else {
-			if ($("#fix_par").is(":checked") || $("#fix_thr").is(":checked")) {
-				$("#exp_details td[name='methods'] input").prop('disabled', false);
-			} else {
-				$(this).prop('checked', true);
-				alert("At least one property has to be checked");
-			}
-		}
-	});
-	$("#fix_thr").on( "change", function() {
-		if ($(this).is(":checked")) {
-			var n = $( "#exp_details td[name='nthreads'] input:checked" ).length;
-			if ( n !== 1) {
-				$(this).prop('checked', false);
-				alert("To fix a property, only 1 correspondent value has to be selected");
-			} else {
-				$("#exp_details td[name='nthreads'] input").prop('disabled', true);
-			}
-		} else {
-			if ($("#fix_par").is(":checked") || $("#fix_met").is(":checked")) {
-				$("#exp_details td[name='nthreads'] input").prop('disabled', false);
-			} else {
-				$(this).prop('checked', true);
-				alert("At least one property has to be checked");
-			}
-		}
+
+	$( '#connectButton' ).on( 'click', cleanOutputForm );
+
+	$( '#connectButton' ).on( 'click', cleanProjectForm );
+
+	$( '#connectButton' ).on( 'click', function() {
+		$( '#out_image' ).removeAttr( 'src' );
 	});
 });

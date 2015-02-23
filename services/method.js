@@ -1,6 +1,11 @@
 'use strict';
 
-var express = require( 'express' ),
+var oUserLogs = {}, 
+	commandActive = {
+		status : false,
+		project : ''
+	},
+	express = require( 'express' ),
 	ssh = require( '../modules/ssh' ),
 	path = require( 'path' ),
 	fs = require( 'fs' ),
@@ -37,6 +42,143 @@ router.get( '/get/:connection/:project/:method', function( req, res ) {
 			});
 		}
 	});
+});
+
+// action on method: compile, run, ecc.
+/*router.get( '/:action/:connection/:project/:method', function( req, res ) {	
+	var connection = req.params.connection,
+		project = req.params.project,
+		method = req.params.method,
+		action = req.params.action,
+		command = 'workflow ' + action + ' -p ' + project + ' -n ' + method;
+
+	var alldata = '';
+
+	ssh.execWorkComm( req, res, connection, command, function( err, data ) {
+		console.log( 'Method manage command (' + command + ') got data: ');
+
+		if( !err ) {
+			if ( data ) {
+				console.log( data.toString() );
+				alldata += data;
+				//res.write( data );
+			} else {
+				//res.end();
+				console.log( 'End Of Stream' );
+				res.send( alldata );
+			}
+		} else {
+			res.send( alldata + '...Error' );
+		}
+	});
+});*/
+
+router.get( '/getLog/:connection/:project', function( req, res ) {	
+	var username = req.session.pub.username,
+		connection = req.params.connection,
+		commandActiveTemp = {
+			project : commandActive.project,
+			status : commandActive.status
+		},
+		log = '',
+		project = req.params.project;
+
+	//if log exists
+	if ( oUserLogs[ username ] 
+		&& oUserLogs[ username ][ connection ] 
+		&& oUserLogs[ username ][ connection ][ project ] ) {
+
+		if ( commandActiveTemp.project !== project ) {
+			commandActiveTemp.status = false;
+		}
+		log = oUserLogs[ username ][ connection ][ project ];
+	}
+	else {
+		commandActiveTemp = { project : '', status : false };
+		log = '';
+	}
+	res.send( { 
+		commandActive : commandActiveTemp, 
+		log : log
+	});
+});
+
+router.get( '/:action/:connection/:project/:method', function( req, res ) {	
+	var message = '', err = null,
+		username = req.session.pub.username,
+		connection = req.params.connection,
+		project = req.params.project,
+		method = req.params.method,
+		action = req.params.action,
+		command = 'workflow ' + action + ' -p ' + project + ' -n ' + method;
+
+	if ( commandActive.status ) {
+
+		message = 'Wait until the previous command is finished';
+
+		if ( commandActive.project !== project ) {
+			err = 'Project "' + commandActive.project 
+						+ '" still busy select it to check the status';
+	//		message = 'Project "' + commandActive.project 
+	//					+ '" still busy select it to check the status';
+	//		err = true;
+		}
+	//	else {
+	//		message = 'Wait until the previous command is finished';
+	//	}
+		res.send( { 
+			err : err, 
+			log : message 
+		});
+	} else {
+
+		if ( !oUserLogs[ username ] ) {
+			oUserLogs[ username ] = {};
+		} 
+		if ( !oUserLogs[ username ][ connection ] ) {
+			oUserLogs[ username ][ connection ] = {};
+		}
+
+		oUserLogs[ username ][ connection ][ project ] = '';
+
+		ssh.execWorkComm( req, res, connection, command, function( err, data ) {
+			console.log( 'Method manage command (' + command + ') got data: ');
+
+			if( !err ) {
+				if ( data ) {
+					console.log( data.toString() );
+					
+					//add data to log variable
+					oUserLogs[ username ][ connection ][ project ] += data;
+
+					if ( !commandActive.status ) {
+						commandActive.status = true;
+						commandActive.project = project;
+						res.send( { 
+							err : null, 
+							log : data.toString() 
+						});
+					}
+				} else {
+					console.log( 'End Of Stream' );
+					commandActive.status = false;
+					commandActive.project = '';
+				}
+			} else {
+				if ( !commandActive.status ) {
+					res.send( { 
+						err : err, 
+						log : data.toString() 
+					});
+				} else {
+					commandActive.status = false;
+					commandActive.project = '';
+					oUserLogs[ username ][ connection ][ project ] += err;
+				}
+			}
+		});
+	}
+	
 });
 
 // GET source file list
@@ -107,9 +249,15 @@ router.post( '/manage/:connection/:project', function( req, res ) {
 	}
 
 	ssh.execWorkComm( req, res, conn, arrCommand.join( ' ' ), function( err, data ) {
+		console.log( 'Method manage command (' + arrCommand.join( ' ' ) + ') got data: ');
 		if( !err ) {
-			console.log( 'Method manage command (' + arrCommand.join() + ') got data: ' + data );
-			res.send( data );
+			if ( data ) {
+				console.log( data );
+				res.write( data );
+			} else {
+				console.log( 'End Of Stream' );
+				res.end();
+			}
 		}
 	});
 });
