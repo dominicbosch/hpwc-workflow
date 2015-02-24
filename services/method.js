@@ -119,13 +119,8 @@ router.get( '/:action/:connection/:project/:method', function( req, res ) {
 		if ( commandActive.project !== project ) {
 			err = 'Project "' + commandActive.project 
 						+ '" still busy select it to check the status';
-	//		message = 'Project "' + commandActive.project 
-	//					+ '" still busy select it to check the status';
-	//		err = true;
 		}
-	//	else {
-	//		message = 'Wait until the previous command is finished';
-	//	}
+
 		res.send( { 
 			err : err, 
 			log : message 
@@ -134,7 +129,7 @@ router.get( '/:action/:connection/:project/:method', function( req, res ) {
 
 		if ( !oUserLogs[ username ] ) {
 			oUserLogs[ username ] = {};
-		} 
+		}
 		if ( !oUserLogs[ username ][ connection ] ) {
 			oUserLogs[ username ][ connection ] = {};
 		}

@@ -15,7 +15,11 @@ function setMethodForm( method ) {
 	for ( var i in srcList ) {
 		$( '#src_files' ).append($( '<option>' ).attr( 'value', srcList[i] ).text( srcList[i] ) );
 	}
-	$( '#edit_method textarea[name="comment"]' ).val( method.comment );
+	$( '#edit_method textarea[name="comment"]' )
+		.val( method.comment ).prop( 'scrollTop', function () {
+			return $( this ).prop( 'scrollHeight' );
+		});;
+
 }
 
 function updateMethodForm( cb ) {
@@ -140,7 +144,10 @@ function getLog( config_name, project_name ) {
 			+ config_name + '/'
 			+ project_name, function( data ) {
 
-			$("#resp_textarea").val( data.log );
+			$("#resp_textarea").val( data.log )
+				.prop( 'scrollTop', function () {
+					return $( this ).prop( 'scrollHeight' );
+				});;
 
 			if ( data.commandActive.status ) {
 				getLogTimeout = setTimeout( function() {
@@ -201,7 +208,10 @@ function manage_method( action ) {
 		+ config_name + '/' 
 		+ project_name, method, function( data ) {
 
-		$("#resp_textarea").val( data );
+		$("#resp_textarea").val( data )
+			.prop( 'scrollTop', function () {
+				return $( this ).prop( 'scrollHeight' );
+			});;
 		
 		cleanMethodForm();
 

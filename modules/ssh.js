@@ -5,7 +5,7 @@ var executeCommandSync, oUserConnections = {},
 	execWorkCommSync, execWorkComm,
 	fs = require( 'fs' ),
 	path = require( 'path' ),
-	SSHConnection = require( 'ssh2' ),
+	SSHConnection = require( 'ssh2' ).Client,
 	util = require( 'util' ),
 	persistence = global.persistence;
 
@@ -39,7 +39,7 @@ exports.getFile = function( req, res, connection, remotePath, localPath, cb ) {
 
 	if( oConnections ) {
 		oConn = oConnections[ connection ];
-		if( oConn && oConn[ '_state' ] === 'authenticated' ) {
+		if( oConn ) {
 
 			oConn.sftp( function (err, sftp) {
 				if (err) {
@@ -160,7 +160,7 @@ exports.connectToHost = function( username, connObj, cb ) {
  
 	oConn = oUserConnections[ username ][ connObj.name ];
 
-	if ( !oConn || oConn[ '_state' ] === 'closed' ) {
+	if ( !oConn ) {
 		var oUser = persistence.getUser( username );
 		oConn = new SSHConnection();
 		oConn.on( 'ready', function() {
@@ -170,17 +170,15 @@ exports.connectToHost = function( username, connObj, cb ) {
 			cb( null, 'New SSH connection established for user ' + username);
 			//console.log( 'UTIL: ' + util.inspect(oConn, {showHidden: false, depth: null}));
 		}).on( 'close', function() {
-			console.log(oConn[ '_state' ]);
-			// if ( oConn[ '_state' ] !== 'closed' ) {
-				oConn.end();
-			// }
+			delete oUserConnections[ username ][ connObj.name ];
 			console.log( 'SSH connection closed from "' + connObj.name
 					+ '" for user "' + username + '", #openConnections='+(--connCounter));
-			//console.log( 'CLOSE CONN: ' + oConn[ '_state' ]);
 		}).on( 'end', function() {
+			delete oUserConnections[ username ][ connObj.name ];
 			console.log( 'SSH connection ENDED from "' + connObj.name
 					+ '" for user "' + username + '", #openConnections='+(connCounter));
 		}).on( 'error', function( e ) {
+			delete oUserConnections[ username ][ connObj.name ];
 			console.log( 'Error connecting (#'+(++connCounter)+') "'+connObj.username+'@'+connObj.url+':'+connObj.port+'": ' + e.code );
 			cb( new Error( 'Error connecting "'+connObj.username+'@'+connObj.url+':'+connObj.port+'": ' + e.code ) );
 		}).connect({
@@ -210,7 +208,8 @@ exports.executeCommand = executeCommand = function( req, res, connection, comman
 
 	if( oConnections ) {
 		oConn = oConnections[ connection ];
-		if( oConn && oConn[ '_state' ] === 'authenticated' ) {
+
+		if( oConn ) {
 
 			oConn.exec( command, function( err, stream ) {
 				oConn.on( 'close', function(){
@@ -364,7 +363,7 @@ exports.closeConnection = function( username, confName ) {
 		oConn = oConns[ confName ];
 		if( oConn ) {
 			oConn.end();
-			delete oUserConnections[  username ][ confName ];
+			delete oUserConnections[ username ][ confName ];
 			return true;
 		}
 		else return false;
