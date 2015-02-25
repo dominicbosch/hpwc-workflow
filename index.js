@@ -1,14 +1,15 @@
 'use strict';
 
 var config, arrViews, isValidRequest, ssh,
+	https = require( 'https' ),
 	express = require( 'express' ),
 	session = require( 'express-session' ),
 	bodyParser = require( 'body-parser' ),
 	path = require( 'path' ),
 	swig = require( 'swig' ),
 	fs = require( 'fs' ),
+	socketio = require( './modules/socket' ),
 	app = express();
-
 
 // Load the configuration file.
 // This will throw an error if the configuration file is invalid.
@@ -25,7 +26,7 @@ isValidRequest = function( req ) {
 };
 
 exports.init = function( args ) {
-	var servicePath, fileName, renderingObject,
+	var server, options, servicePath, fileName, renderingObject,
 		arrServices = fs.readdirSync( __dirname + '/services' ).filter(function( d ) {
 			return ( d.substring( d.length - 3 ) === '.js' );
 		});
@@ -94,10 +95,28 @@ exports.init = function( args ) {
 	if( !args.development ) app.use( function ( req, res ) { res.render( 'index' ) });
 
 	// Start the server
-	var server = app.listen( parseInt( args.port ) || 3000, function() {
-		var addr = server.address(),
-			mode = args.development ? 'OFF' : 'ON',
-			str = 'HPWC SSH Interface Server listening at "http://%s:%s" with CACHING %s';
-		console.log( str, addr.address, addr.port, mode.toUpperCase() );
-	});
+	// If no key and certificate are provided we start a normal server
+	if( !args.keyfile || !args.certfile ) {
+		server = app.listen( parseInt( args.port ) || 8080, function() {
+			var addr = server.address(),
+				mode = args.development ? 'OFF' : 'ON',
+				str = 'HPWC SSH Interface Server listening at "http://%s:%s" with CACHING %s';
+			console.log( str, addr.address, addr.port, mode.toUpperCase() );
+		});
+
+	// Else we are starting a HTTPS server
+	} else {
+		options = {
+			key: fs.readFileSync( args.keyfile ),
+			cert: fs.readFileSync( args.certfile )
+		};
+		server = https.createServer( options, app ).listen( parseInt( args.port ) || 443, function() {
+			var addr = server.address(),
+				mode = args.development ? 'OFF' : 'ON',
+				str = 'HPWC SSH Interface Server listening at "https://%s:%s" with CACHING %s';
+			console.log( str, addr.address, addr.port, mode.toUpperCase() );
+		});
+	}
+	// Let socket.io listen for websockets
+	socketio.listen( server );
 };
