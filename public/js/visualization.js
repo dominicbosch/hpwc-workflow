@@ -2,15 +2,6 @@
 
 oPub.updateProject = true;
 
-function buildList( td_name ) {
-	var string = '';
-	$( '#exp_details td[name="' + td_name + '"] input:checked' ).each( function() {
-		string += '"' + $( this ).val() + '" ';
-	});
-
-	return string;
-}
-
 function showGraph() {
 
 	var config_name = $( '#configs' ).val(),
@@ -22,9 +13,9 @@ function showGraph() {
 		return;
 
 	experiment = {
-		dimensions : buildList( 'parameters' ),
-		methods : buildList( 'methods' ),
-		nthreads : buildList( 'nthreads' ),
+		dimensions : buildList( 'exp_details', 'parameters' ),
+		methods : buildList( 'exp_details', 'methods' ),
+		nthreads : buildList( 'exp_details', 'nthreads' ),
 		fixed : $( '.fixed:checked' ).first().val()
 	}
 
@@ -40,6 +31,7 @@ function showGraph() {
 	});
 
 }
+
 function cleanProjectForm() {
 	$( '#project_details td' ).text( '--' );
 }

@@ -115,6 +115,31 @@ function getAndSetMethodsList( config_name, project_val ) {
 	}
 }
 
+function runExp( ) {
+
+	var config_name = $( '#configs' ).val(),
+		project_name = $( '#projects' ).val(),
+		experiment;
+
+	experiment = {
+		dimensions : buildList( 'experiment_setup', 'par_val' ),
+		methods : buildList( 'experiment_setup', 'methods' ),
+		nthreads : buildList( 'experiment_setup', 'nthreads' ),
+		nexecs : '5'
+	}
+
+	$.post( '/services/experiment/run/' 
+		+ config_name + '/' 
+		+ project_name, experiment, function( data ) {
+		
+		$("#resp_textarea").val( data );
+
+	}).fail(function( xhr ) {
+		console.log( xhr.responseText );
+	});
+
+}
+
 $(document).ready(function() {
 
 	//OK

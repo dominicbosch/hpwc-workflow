@@ -42,7 +42,7 @@ router.post( '/buildAndGet/:connection/:project/:experiment', function( req, res
 
 					command = 'base64 ' + remotePath;
 
-					ssh.executeCommandSync( req, res, confName, command, false, function( err, encImage ) {
+					ssh.executeCommandSync( req, res, confName, command, function( err, encImage ) {
 						console.log( 'Encode Image: ' + encImage);
 						res.send( encImage);
 					});

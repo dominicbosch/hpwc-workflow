@@ -33,4 +33,40 @@ router.get( '/get/:connection/:project/:experiment', function( req, res ) {
 	}
 });
 
+// run experiment
+router.post( '/run/:connection/:project', function( req, res ) {
+	var arrCommand, oConn = {},
+		confName = req.params.connection,
+		projName = req.params.project,
+		experiment = req.body;
+
+	if ( req.session.pub ) {
+		oConn = req.session.pub.configurations[ confName ];
+
+		arrCommand = [
+			'workflow', 'run_exp',
+			'-p', '"' + projName + '"',
+			'-e', experiment.nexecs,
+			'-d', experiment.dimensions,
+			'-m', experiment.methods,
+			'-t', experiment.nthreads
+		];
+		
+		ssh.execWorkComm( req, res, confName, arrCommand.join( ' ' ), function( err, data ) {
+
+			if( !err ) {
+				console.log( 'Project manage command (' + arrCommand.join(' ') + ') got data: ' + data );
+				
+				if ( data )
+					res.write(data)
+				else 
+					res.end();
+			}
+		});
+
+	} else {
+		res.send( '' );
+	}
+});
+
 module.exports = router;
