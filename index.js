@@ -1,55 +1,55 @@
 'use strict';
 
-var config, arrViews, isValidRequest, ssh,
-	https = require( 'https' ),
-	express = require( 'express' ),
-	session = require( 'express-session' ),
-	bodyParser = require( 'body-parser' ),
-	path = require( 'path' ),
-	swig = require( 'swig' ),
-	fs = require( 'fs' ),
-	socketio = require( './modules/socket' ),
-	app = express();
+module.exports = exports = function( args ) {
+	process.env.NODE_ENV = args.production ? 'production' : 'development';
 
-// Load the configuration file.
-// This will throw an error if the configuration file is invalid.
-config = JSON.parse( fs.readFileSync( __dirname + '/config/system.json' ) );
-arrViews = fs.readdirSync( __dirname + '/views' );
-global.persistence = require( './persistence_handlers/' + config.persistence.method );
-ssh = require( './modules/ssh' ); // We need to load this after setting the persistence handler
+	// Now let's get to twerk:
+	var socketio, config, isValidRequest,
+		server, options, servicePath, fileName,
+		runAsHTTPS = args.keyfile && args.certfile,
+		arrServices, arrViews,
+		oUserSessions = {},
+		fs = require( 'fs' ),
+		path = require( 'path' ),
+		swig = require( 'swig' ),
+		https = require( 'https' ),
+		express = require( 'express' ),
+		session = require( 'express-session' ),
+		bodyParser = require( 'body-parser' ),
+		app = express();
 
-isValidRequest = function( req ) {
-	var name = req.params[ 0 ];
-	for( var i = 0; i < arrViews.length; i++ ) {
-		if( arrViews[ i ] === name + '.html' ) return true;
-	}	
-};
+	// Let's fetch the configuration first before we do anything else
+	// This will throw an error if the configuration file is invalid.
+	config = JSON.parse( fs.readFileSync( __dirname + '/config/system.json' ) );
 
-exports.init = function( args ) {
-	var server, options, servicePath, fileName, renderingObject,
-		arrServices = fs.readdirSync( __dirname + '/services' ).filter(function( d ) {
-			return ( d.substring( d.length - 3 ) === '.js' );
-		});
+	// Define a global persistence handler according to the configuration
+	global.persistence = require( './persistence_handlers/' + config.persistence.method );
+	// For consistency reasons we should only load our modules after setting the persistence module
+	socketio = require( './modules/socket' );
 
 	// We disable caching for development environments
-	if( args.development ) {
-		app.set( 'view cache', false );
-		swig.setDefaults({ cache: false });
-	} else {
+	if( args.production ) {
 		process.on( 'uncaughtException', function( e ) {
 			console.log( 'This is a general exception catcher, but should really be removed in the future!' );
 			console.log( 'Error: ', e );
 		});
+	} else {
+		app.set( 'view cache', false );
+		swig.setDefaults({ cache: false });
 	}
 
 	app.engine( 'html', swig.renderFile );
 	app.set( 'view engine', 'html' );
 	app.set( 'views', __dirname + '/views' );
+	if( runAsHTTPS ) app.set( 'trust proxy', 1 ) // required for secure cookies
 
 	app.use(session({
 		secret: config.session.secret,
 		resave: false,
-		saveUninitialized: true
+		saveUninitialized: true,
+		cookie: {
+			secure: runAsHTTPS ? true : false // We can only use secure cookies on a HTTPS server
+		}
 	}));
 
 	app.use( bodyParser.json() );      
@@ -57,13 +57,26 @@ exports.init = function( args ) {
 	app.use( express.static( path.join( __dirname, 'public' ) ) );
 
 	app.use( function( req, res, next ) {
-		var allowedRoutes = [
+		var username, allowedRoutes = [
 			'/views/login',
 			'/views/register',
 			'/services/session/login',
 			'/services/users/create'
 		];
-		if( req.session.pub ) next();
+		if( req.session.pub ) {
+			username = req.session.pub.username;
+
+			// We need to be sure that we do some garbage collecting after the user session expired
+			if( oUserSessions[ username ] ) clearTimeout( oUserSessions[ username ] );
+			oUserSessions[ username ] = setTimeout( function() {
+				// since the session is still existing (user still on webpage in browser) we destroy it, right?
+				if( req.session.pub ) req.session.destroy();
+				console.log('TODO: cleaning up session of user "' + username + '"!');
+				// TODO CLEANUP
+			}, config.session.timeout ); // Session expiration time is defined in the config
+			
+			next(); // User is logged in and allowed to do whatever he wants 
+		}
 		else {
 			if( allowedRoutes.indexOf( req.url ) > -1 ) next();
 			else if( req.method === 'GET' ) {
@@ -75,6 +88,14 @@ exports.init = function( args ) {
 		}
 	});
 
+	// Load all existing views
+	arrViews = fs.readdirSync( __dirname + '/views' );
+	isValidRequest = function( req ) {
+		var name = req.params[ 0 ];
+		for( var i = 0; i < arrViews.length; i++ ) {
+			if( arrViews[ i ] === name + '.html' ) return true;
+		}	
+	};
 	// Redirect the views that will be loaded by the swig templating engine
 	app.get( '/views/*', function ( req, res ) {
 		var view = 'index';		
@@ -84,6 +105,9 @@ exports.init = function( args ) {
 	
 	// Dynamically load all services from the services folder
 	console.log( 'LOADING WEB SERVICES: ' );
+	arrServices = fs.readdirSync( __dirname + '/services' ).filter(function( d ) {
+		return ( d.substring( d.length - 3 ) === '.js' );
+	});
 	for( var i = 0; i < arrServices.length; i++ ) {
 		fileName = arrServices[ i ];
 		console.log( '  -> ' + fileName );
@@ -92,14 +116,14 @@ exports.init = function( args ) {
 	}
 
 	// Redirect if no routing applied so far
-	if( !args.development ) app.use( function ( req, res ) { res.render( 'index' ) });
+	if( args.production ) app.use( function ( req, res ) { res.render( 'index' ) });
 
 	// Start the server
 	// If no key and certificate are provided we start a normal server
-	if( !args.keyfile || !args.certfile ) {
+	if( !runAsHTTPS ) {
 		server = app.listen( parseInt( args.port ) || 8080, function() {
 			var addr = server.address(),
-				mode = args.development ? 'OFF' : 'ON',
+				mode = args.production ? 'ON' : 'OFF',
 				str = 'HPWC SSH Interface Server listening at "http://%s:%s" with CACHING %s';
 			console.log( str, addr.address, addr.port, mode.toUpperCase() );
 		});
@@ -112,7 +136,7 @@ exports.init = function( args ) {
 		};
 		server = https.createServer( options, app ).listen( parseInt( args.port ) || 443, function() {
 			var addr = server.address(),
-				mode = args.development ? 'OFF' : 'ON',
+				mode = args.production ? 'ON' : 'OFF',
 				str = 'HPWC SSH Interface Server listening at "https://%s:%s" with CACHING %s';
 			console.log( str, addr.address, addr.port, mode.toUpperCase() );
 		});

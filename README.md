@@ -15,16 +15,13 @@ Used Libraries:
 Starting the Server:
 --------------------
 
-    var server = require( 'hpwc-workflow' );
+    var workflow = require( 'hpwc-workflow' );
 
     // HTTP Server
-	server.init({
-		port: 8080,
-		development: true
-	});
+	workflow({ port: 8080 });
 
     // HTTPS Server
-	server.init({
+	workflow({
 		port: 443,
 		development: true,
 		keyfile: 'config/https-key.pem',
@@ -40,7 +37,7 @@ API:
 Where `options` can contain following optional arguments:
 
 - port: The port on which to run the server
-- development: whether caching on the server side should be turned on or off. Default is development= false which turns on caching
+- production: Set this property and the system will be run in production mode. Sets the process.env.NODE_ENV accordingly, plus disables caching on the server side if in production mode. Default is production=false which turns off caching of web pages through the rendering engine
 - keyfile: The path to the key file in order to run a HTTPS server
 - certfile: The path to the certificate file in order to run a HTTPS server
 
