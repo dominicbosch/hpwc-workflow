@@ -212,11 +212,6 @@ exports.executeCommand = executeCommand = function( req, res, connection, comman
 		if( oConn ) {
 
 			oConn.exec( command, function( err, stream ) {
-				oConn.on( 'close', function(){
-					cb( null, 'Connection closed' );
-					stream.end();
-					console.log('Deleting stream');
-				});
 				if ( err ) {
 					// We do not take any further actions if an error ocurred here
 					console.error( errString + 'Execution error!', command, username );
@@ -230,6 +225,7 @@ exports.executeCommand = executeCommand = function( req, res, connection, comman
 						cb( null, data );
 					}).on( 'end', function() {
 						//send all data back through Callback Function
+						console.log('STREAM ENDED');
 						cb( null, false );
 					}).on( 'error', function(e) {
 						console.error(e);
