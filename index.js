@@ -4,7 +4,7 @@ module.exports = exports = function( args ) {
 	process.env.NODE_ENV = args.production ? 'production' : 'development';
 
 	// Now let's get to twerk:
-	var socketio, config, isValidRequest,
+	var socketio, config, isValidRequest, sessionMiddleware,
 		server, options, servicePath, fileName,
 		runAsHTTPS = args.keyfile && args.certfile,
 		arrServices, arrViews,
@@ -43,14 +43,15 @@ module.exports = exports = function( args ) {
 	app.set( 'views', __dirname + '/views' );
 	if( runAsHTTPS ) app.set( 'trust proxy', 1 ) // required for secure cookies
 
-	app.use(session({
+	sessionMiddleware = session({
 		secret: config.session.secret,
 		resave: false,
 		saveUninitialized: true,
 		cookie: {
 			secure: runAsHTTPS ? true : false // We can only use secure cookies on a HTTPS server
 		}
-	}));
+	});
+	app.use( sessionMiddleware );
 
 	app.use( bodyParser.json() );      
 	app.use( bodyParser.urlencoded({ extended: true }) );
@@ -148,5 +149,5 @@ module.exports = exports = function( args ) {
 		});
 	}
 	// Let socket.io listen for websockets
-	socketio.listen( server );
+	socketio.listen( server, sessionMiddleware );
 };

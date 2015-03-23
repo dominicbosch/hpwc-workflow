@@ -52,15 +52,16 @@ router.post( '/run/:connection/:project', function( req, res ) {
 			'-t', experiment.nthreads
 		];
 		
-		ssh.execWorkComm( req, res, confName, arrCommand.join( ' ' ), function( err, data ) {
-
+		ssh.execWorkCommSync( req, res, confName, arrCommand.join( ' ' ), function( err, data ) {
+			console.log( 'Run experiment command (' + arrCommand.join() + ') got data: ');
 			if( !err ) {
-				console.log( 'Project manage command (' + arrCommand.join(' ') + ') got data: ' + data );
-				
-				if ( data )
-					res.write(data)
-				else 
-					res.end();
+				if ( data ) {
+					console.log( data );
+					res.send( data );
+				} else {
+					console.log( 'No data' );
+					res.send( '' );
+				}
 			}
 		});
 

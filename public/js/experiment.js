@@ -131,8 +131,8 @@ function runExp( ) {
 	$.post( '/services/experiment/run/' 
 		+ config_name + '/' 
 		+ project_name, experiment, function( data ) {
-		
-		$("#resp_textarea").val( data );
+
+		setTextAndScroll( 'resp_textarea', data );
 
 	}).fail(function( xhr ) {
 		console.log( xhr.responseText );

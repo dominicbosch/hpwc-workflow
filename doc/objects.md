@@ -19,6 +19,7 @@ Users Object:
               "workhome": "~/workhome"
             }
           },
+          "socketID" : "[username]_[timestamp]",
           "console": "Welcome to the HPWC Workflow Manager!\n\n"
         },
         "password": "[SHA-3 hashed password]",

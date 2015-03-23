@@ -64,7 +64,7 @@ function manage_project( action ) {
 	$.post( '/services/project/manage/' 
 		+ config_name, project, function( data ) {
 
-		$( '#resp_textarea' ).val( data );
+		setTextAndScroll( 'resp_textarea', data );
 
 		cleanProjectForm();
 
@@ -95,7 +95,7 @@ $(document).ready(function() {
 	);
 
 	$( '#configs' ).change( function() {
-		$( '#resp_textarea' ).val( '' );
+		setTextAndScroll( 'resp_textarea', '' );
 		cleanProjectForm();
 	});
 
@@ -105,7 +105,7 @@ $(document).ready(function() {
 
 	//when the project selected change, we read the value of parameters (user change)
 	$( '#projects' ).change( function() {
-		$( '#resp_textarea' ).val( '' );
+		setTextAndScroll( 'resp_textarea', '' );
 		updateProjectForm( );
 	});
 

@@ -1,12 +1,15 @@
 'use strict';
 
-var executeCommandSync, oUserConnections = {},
-	executeCommand, tempConnCounter = 0, connCounter = 0,
-	execWorkCommSync, execWorkComm,
+var oUserConnections = {}, oUserLogs = {},
+	getLog, executeCommand, 
+	executeCommandSync, executeCommandAndEmit,
+	execWorkCommSync, execWorkCommAndEmit,
+	tempConnCounter = 0, connCounter = 0,
 	fs = require( 'fs' ),
 	path = require( 'path' ),
 	SSHConnection = require( 'ssh2' ).Client,
 	util = require( 'util' ),
+	socketio = require( './socket' ),
 	persistence = global.persistence;
 
 exports.getOpenConnections = function( username ) {
@@ -156,7 +159,8 @@ exports.connectToHost = function( username, connObj, cb ) {
 
 	if ( !oUserConnections[ username ] ) {
 		oUserConnections[ username ] = {};
-	} 
+		oUserLogs[ username ] = {};
+	}
  
 	oConn = oUserConnections[ username ][ connObj.name ];
 
@@ -167,6 +171,10 @@ exports.connectToHost = function( username, connObj, cb ) {
 			console.log( 'New SSH connection established to "' + connObj.name
 					+ '" for user "' + username + '", #openConnections='+(++connCounter));
 			oUserConnections[ username ][ connObj.name ] = oConn;
+
+			//create object to store log information
+			oUserLogs[ username ][ connObj.name ]= {};
+
 			cb( null, 'New SSH connection established for user ' + username);
 			//console.log( 'UTIL: ' + util.inspect(oConn, {showHidden: false, depth: null}));
 		}).on( 'close', function() {
@@ -197,9 +205,10 @@ exports.connectToHost = function( username, connObj, cb ) {
 // to handle them all in the services.
 // IMPORTANT: This means if callback function 'cb' receives an error as an argument
 //            no further response can be sent to the client!!!
-exports.executeCommand = executeCommand = function( req, res, connection, command, cb ) {
+executeCommand = function( req, res, connection, command, project, cb ) {
 
-	var oConn, errString,
+	var oConn, errString, alldata = '', objToSend = {},
+		processData,
 		username = req.session.pub.username,
 		oConnections = oUserConnections[ username ];
 
@@ -220,16 +229,63 @@ exports.executeCommand = executeCommand = function( req, res, connection, comman
 					res.send( 'Execution of remote command failed!' );
 					cb( err );
 				} else {
-					stream.on( 'data', function( data ) {
-						// Add chunks to data string and wait until the end of the stream
-						cb( null, data );
-					}).on( 'end', function() {
+					if ( project ) {
+						//set activeProject
+						oUserLogs[ username ][ connection ][ 'activeProject' ] = project;
+						//create log object
+						oUserLogs[ username ][ connection ][ project ] = {
+							content: '',
+							count: 0
+						};
+						console.log( 'IN if and project: ' + project );
+						cb( null, true );
+					}
+					
+					processData = function( data ) {
+						console.log( 'Received data for project' );
+						if ( project ) {
+							//add to log
+							oUserLogs[ username ][ connection ][ project ][ 'content' ] += data;
+							objToSend = {
+								project: project,
+								type: 'data',
+								msg: data.toString(),
+								count: ++oUserLogs[ username ][ connection ][ project ][ 'count' ]
+							}
+							console.log( 'Send in Room: ' + data + '\n COUNT: ' + oUserLogs[ username ][ connection ][ project ][ 'count' ] );
+							//send to client
+							socketio.sendInRoom( req.session.pub.socketID, connection, objToSend );
+						} else {
+							// Add chunks to data string and wait until the end of the stream
+							alldata += data;
+						}
+					};
+
+					stream.on( 'data', processData )
+					.on( 'end', function() {
 						//send all data back through Callback Function
 						console.log('STREAM ENDED');
-						cb( null, false );
+						if ( project ) {
+
+							objToSend = {
+								project: project,
+								type: 'endData',
+								msg: '',
+								count: oUserLogs[ username ][ connection ][ project ][ 'count' ]
+							}
+							//send null number
+							socketio.sendInRoom( req.session.pub.socketID, connection, objToSend );
+							
+							//empty activeProject
+							delete oUserLogs[ username ][ connection ][ 'activeProject' ];
+
+						} else {
+							cb( null, alldata);
+						}
 					}).on( 'error', function(e) {
 						console.error(e);
-					});
+					}).stderr.on( 'data', processData);
+
 					// // TODO: Since we do not handle these cases we can delete all event listeners here below
 					// .on( 'close', function() {
 					// 	console.log( 'Stream :: close for command "' + command + '"' );
@@ -257,18 +313,28 @@ exports.executeCommand = executeCommand = function( req, res, connection, comman
 
 exports.executeCommandSync = executeCommandSync = function( req, res, connection, command, cb ) {
 
-	var alldata = '';
+	executeCommand( req, res, connection, command, null, cb );
+};
 
-	executeCommand( req, res, connection, command, function( err, data ) {
-		if ( !err ) {
-			if ( data )
-				alldata += data;
-			else
-				cb( null, alldata);
-		} else {
-			cb( err, alldata );
+exports.executeCommandAndEmit = executeCommandAndEmit = function( req, res, connection, project, command, cb ) {
+
+	var message = '',
+		username = req.session.pub.username;
+
+	console.log('Project: ' + project + ' - Active: ' + oUserLogs[ username ][ connection ][ 'activeProject' ] );
+	if ( project && oUserLogs[ username ][ connection ][ 'activeProject' ] ) {
+		console.log('IN!!!!!!sadasdas');
+		message = 'Wait until the previous command is finished\n';
+
+		if ( oUserLogs[ username ][ connection ][ 'activeProject' ] !== project ) {
+			message += 'Project "' + oUserLogs[ username ][ connection ][ 'activeProject' ]
+						+ '" still busy select it to check the status';
 		}
-	});
+		//activeProject for the connection... re-try later
+		cb( null, message );
+	} else {
+		executeCommand( req, res, connection, command, project, cb );
+	}
 };
 
 exports.execWorkCommSync = execWorkCommSync = function( req, res, connection, command, cb ) {
@@ -281,14 +347,40 @@ exports.execWorkCommSync = execWorkCommSync = function( req, res, connection, co
 	executeCommandSync( req, res, connection, command, cb );
 };
 
-exports.execWorkComm = execWorkComm = function( req, res, connection, command, cb ) {
+exports.execWorkCommAndEmit = execWorkCommAndEmit = function( req, res, connection, project, command, cb ) {
 	
 	var conn = req.session.pub.configurations[ connection ];
 				
 	command = 'source ' + path.join( conn.workhome, 'util', 'SetupEnv.sh' )	
 			+ ' ' + conn.workspace + '; ' + command;
 
-	executeCommand( req, res, connection, command, cb );
+	executeCommandAndEmit( req, res, connection, project, command, cb );
+};
+
+exports.getLog = getLog = function( username, connection, project, cb ) {
+
+	var log = {
+		content: '',
+		active: false,
+		count: 0
+	};
+
+	//if log exists
+	if ( oUserLogs[ username ] 
+		&& oUserLogs[ username ][ connection ] 
+		&& oUserLogs[ username ][ connection ][ project ] ) {
+
+		log = oUserLogs[ username ][ connection ][ project ];
+
+		//activeProject not exist or it's different
+		if ( project === oUserLogs[ username ][ connection ][ 'activeProject' ] ) {
+			log.active = true;
+		} else {
+			log.active = false;
+		}
+	}
+
+	cb( log );
 };
 
 // IMPORTANT: If callback function 'cb' receives an error as an argument
@@ -320,6 +412,8 @@ exports.getRemoteFile = function( req, res, connection, filename, cb ) {
 
 exports.setRemoteFile = function( req, res, connection, filename, content, cb ) {
 	
+	content = content.replace( /"/g, '\\"');
+
 	executeCommandSync( req, res, connection, 'echo "' + content + '" > ' + filename, function( err, data ) {
 		if( !err ) {
 			cb( null, data );

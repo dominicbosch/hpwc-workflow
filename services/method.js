@@ -9,6 +9,7 @@ var oUserLogs = {},
 	ssh = require( '../modules/ssh' ),
 	path = require( 'path' ),
 	fs = require( 'fs' ),
+	socketio = require( '../modules/socket' ),
 	router = express.Router();
 
 // GET methods list. 
@@ -73,7 +74,7 @@ router.get( '/get/:connection/:project/:method', function( req, res ) {
 	});
 });*/
 
-router.get( '/getLog/:connection/:project', function( req, res ) {	
+/*router.get( '/getLog/:connection/:project', function( req, res ) {	
 	var username = req.session.pub.username,
 		connection = req.params.connection,
 		commandActiveTemp = {
@@ -175,6 +176,31 @@ router.get( '/:action/:connection/:project/:method', function( req, res ) {
 	}
 	
 });
+*/
+
+router.get( '/getLog/:connection/:project', function( req, res ) {	
+	var username = req.session.pub.username,
+		connection = req.params.connection,
+		project = req.params.project;
+
+	ssh.getLog( username, connection, project, function( log ) {
+		res.send( log );
+	});
+});
+
+router.get( '/:action/:connection/:project/:method', function( req, res ) {	
+	var connection = req.params.connection,
+		project = req.params.project,
+		method = req.params.method,
+		action = req.params.action,
+		command = 'workflow ' + action + ' -p ' + project + ' -n ' + method;
+
+	ssh.execWorkCommAndEmit( req, res, connection, project, command, function( err, data ) {
+		if( !err ) {
+			res.send( data );
+		}
+	});
+});
 
 // GET source file list
 router.get( '/getSrcList/:connection/:project/:method', function( req, res ) {	
@@ -243,15 +269,15 @@ router.post( '/manage/:connection/:project', function( req, res ) {
 		];
 	}
 
-	ssh.execWorkComm( req, res, conn, arrCommand.join( ' ' ), function( err, data ) {
-		console.log( 'Method manage command (' + arrCommand.join( ' ' ) + ') got data: ');
+	ssh.execWorkCommSync( req, res, conn, arrCommand.join( ' ' ), function( err, data ) {
+		console.log( 'Method manage command (' + arrCommand.join() + ') got data: ');
 		if( !err ) {
 			if ( data ) {
 				console.log( data );
-				res.write( data );
+				res.send( data );
 			} else {
-				console.log( 'End Of Stream' );
-				res.end();
+				console.log( 'No data' );
+				res.send( '' );
 			}
 		}
 	});

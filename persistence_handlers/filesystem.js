@@ -44,6 +44,7 @@ exports.storeUser = function( username, password, privKey, pubKey ) {
 	oUsers[ username ] = {
 		pub: {
 			username: username,
+			socketID: username + '_' + (new Date()).getTime(),
 			console: 'Welcome to the HPWC Workflow Manager!\n\n',
 			configurations: {}
 		},
