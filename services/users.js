@@ -30,4 +30,21 @@ router.post( '/create', function( req, res ) {
 	}
 });
 
+router.post( '/edit', function( req, res ) {
+	var oUser = persistence.getUser( req.session.username );
+	if( !oUser ) {
+		res.status( 400 );
+		res.send( 'You are not existing!??' );
+	} else {
+		if( req.body.oldpassword !== oUser.password ) {
+			res.status( 403 );
+			res.send( 'Password incorrect!' );
+		} else {
+			req.session.password = req.body.newpassword;
+			persistence.changeUserPassword( oUser.username, req.body.newpassword );
+			res.send( 'Password changed!' );
+		}
+	}
+});
+
 module.exports = router;

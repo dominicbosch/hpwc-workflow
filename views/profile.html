@@ -1,0 +1,79 @@
+{% extends 'layout.html' %}
+
+{% block title %}User Profile{% endblock %}
+
+{% block head %}
+	<script type="text/javascript" src="../js/lib/sha3.js"></script>
+	<script type="text/javascript">
+		var setInfo = function( text, fail ) {
+			$( '#info' )
+				.addClass( fail ? 'wrong' : 'right' )
+				.removeClass( fail ? 'right' : 'wrong' )
+				.text( text );
+		};
+		var submit = function() {
+			var hpold = CryptoJS.SHA3( $( '#po' ).val(), { outputLength: 512 }),
+				hpnew = CryptoJS.SHA3( $( '#pn1' ).val(), { outputLength: 512 }),
+				oBody = {
+					oldpassword: hpold.toString(),
+					newpassword: hpnew.toString()
+				};
+			if(  $( '#po' ).val() ===  '' || $( '#pn1' ).val() ===  '' || $( '#pn2' ).val() ===  '' ) {
+				alert( 'Please fill all password fields!' );
+				return;
+			}
+			if( $( '#pn1' ).val() !==  $( '#pn2' ).val() ) {
+				alert( 'Passwords do not match!' );
+				return;	
+			}
+			$.post( '/services/users/edit', oBody, function( answ ) {
+				setInfo( answ );
+			})
+			.fail( function( req ) {
+				if( req.status === 403 ) {
+					setInfo( 'Password wrong!', true );
+				} else {
+					setInfo( req.statusText, true );
+				}
+			});
+		};
+		$( document ).ready( function() {
+			$( ':password' ).on( 'input',function() {
+				if( $( '#pn1' ).val() ===  $( '#pn2' ).val() ) {
+					setInfo( '* Passwords match!' );
+				} else {
+					setInfo( '* Passwords do not match!', true );
+				}
+			});
+		});
+	</script>
+{% endblock %}
+
+
+{% block content_left %}
+	<h1>Change Password</h1>
+	<table>
+		<tr>
+			<td>Old Password</td>
+			<td> : </td>
+			<td><input type="password" id="po" autofocus></td>
+		</tr>
+		<tr>
+			<td>Password</td>
+			<td> : </td>
+			<td><input type="password" id="pn1"></td>
+		</tr>
+		<tr>
+			<td>Confirm Password</td>
+			<td> : </td>
+			<td><input type="password" id="pn2"></td>
+		</tr>
+		<tr>
+			<td colspan="3" class="threecol"><button onclick="submit()">Change</button></td>
+		</tr>
+	</table>
+{% endblock %}
+
+{% block content_right %}
+	<p id="info"></p>
+{% endblock %}

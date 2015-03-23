@@ -8,7 +8,7 @@ function getAllConfigurations( cb ) {
 		if( typeof(cb) === 'function' ) cb( null, data );
 	})
 	.fail( function( xhr ) {
-		if( typeof(cb) === 'function' ) cb( new Error( xhr.statusText ) );
+		if( typeof(cb) === 'function' ) cb( new Error( xhr.responseText ) );
 	});
 };
 
@@ -113,11 +113,11 @@ function updateConfigurationsList( cb, cb2 ) {
 
 	//Get the possible configuration and check for the current configuration reading the project
 	getAllConfigurations(function( err, data ) {
-
-		if ( data.configurations ) {
+		if ( err ) alert( err );
+		else if ( data.configurations ) {
 			//put data inside "configs" element
 			for ( var config in data.configurations ) {
-				$( '#configs' ).append($( '<option>' ).attr( 'value', config ).text( config ) );
+				$( '#configs' ).append( $( '<option>' ).attr( 'value', config ).text( config ) );
 			}
 
 			//Current configuration not empty

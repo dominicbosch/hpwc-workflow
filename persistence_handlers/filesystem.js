@@ -1,10 +1,10 @@
 'use strict';
 
-var persist, loadUser, oUsers = {},
+var persistUser, loadUser, oUsers = {},
 	fs = require( 'fs' ),
 	path = require( 'path' );
 
-persist = function( username ) {
+persistUser = function( username ) {
 	var pathToFile = path.resolve( __dirname, 'store_' + username + '.json' );
 
 	if( !oUsers[ username ] ) {
@@ -34,6 +34,12 @@ exports.getUser = function( username ) {
 	return oUsers[ username ];
 };
 
+exports.changeUserPassword = function( username, password ) {
+	oUsers[ username ].password = password;
+	console.log( 'User "' + username + '" password changed' );
+	persistUser( username );
+};
+
 exports.storeUser = function( username, password, privKey, pubKey ) {
 	oUsers[ username ] = {
 		pub: {
@@ -46,7 +52,7 @@ exports.storeUser = function( username, password, privKey, pubKey ) {
 		publicKey: pubKey
 	};
 	console.log( 'User "' + username + '" registered' );
-	persist( username );
+	persistUser( username );
 };
 
 exports.getConfiguration = function( username, confname ) {
@@ -59,7 +65,7 @@ exports.storeConfiguration = function( username, args ) {
 	delete args.password;
 	oUser.pub.configurations[ args.name ] = args;
 	console.log( 'Configuration "' + args.name + '" for user "' + username + '" stored' );
-	persist( username );
+	persistUser( username );
 	return args;
 }
 
@@ -67,5 +73,5 @@ exports.deleteConfiguration = function( username, confName ) {
 	var oUser = exports.getUser( username );
 	delete oUser.pub.configurations[ confName ];
 	console.log( 'Configuration "' + confName + '" for user "' + username + '" deleted!' );
-	persist( username );
+	persistUser( username );
 }
