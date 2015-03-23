@@ -151,6 +151,9 @@ function getLogSocketIO( config_name, project_name ) {
 
 	if( config_name !== '' && project_name !== '') {
 
+		//clean msgList
+		msgList = {};
+		
 		waitLog = true;
 
 		subscribe( config_name );
@@ -159,21 +162,26 @@ function getLogSocketIO( config_name, project_name ) {
 			+ config_name + '/'
 			+ project_name, function( log ) {
 
-			addTextAndScroll( 'resp_textarea', log.content );
+			setTextAndScroll( 'resp_textarea', log.content );
+			//addTextAndScroll( 'resp_textarea', log.content );
 
 			if ( log.active ) {
 				//read from list and update log if necessary
 				count = log.count;
 				console.log( 'still active' );
-				while ( msgList[ ++count ] ) {
+				while ( msgList[ count + 1 ] ) {
+					count++;
 					addTextAndScroll( 'resp_textarea', msgList[ count ] );
 				}
-				//no more message in msgList, last message written is (count--)
-				count--;
-				//clean msgList
-				msgList = {};
-
-			} else { //log written and command not active anymore
+				/*
+					No more ordered message in msgList.
+					From now on we let the socket process the future messages
+				*/
+			} else { 
+				/*
+					Command not active anymore,
+					full log already written!
+				*/
 
 				//unsubscribe
 				unsubscribe( '' );
