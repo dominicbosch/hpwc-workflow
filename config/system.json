@@ -1,6 +1,7 @@
 {
 	"session": {
-		"secret": "[TODO] Change in production environment"
+		"secret": "[TODO] Change in production environment",
+		"timeout": 60
 	},
 	"persistence": {
 		"method": "filesystem"

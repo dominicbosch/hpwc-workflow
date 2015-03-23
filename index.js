@@ -57,13 +57,9 @@ module.exports = exports = function( args ) {
 	app.use( bodyParser.urlencoded({ extended: true }) );
 	app.use( express.static( path.join( __dirname, 'public' ) ) );
 
+	// Apply our own session expiration handler
 	app.use( function( req, res, next ) {
-		var username, allowedRoutes = [
-			'/views/login',
-			'/views/register',
-			'/services/session/login',
-			'/services/users/create'
-		];
+		var username;
 		if( req.session.pub ) {
 			username = req.session.pub.username;
 
@@ -74,18 +70,28 @@ module.exports = exports = function( args ) {
 				if( req.session.pub ) req.session.destroy();
 				console.log('TODO: cleaning up session of user "' + username + '"!');
 				// TODO CLEANUP
-			}, config.session.timeout ); // Session expiration time is defined in the config
-			
-			next(); // User is logged in and allowed to do whatever he wants 
+			}, config.session.timeout * 60 * 1000 ); // Session expiration time is defined in minutes in the config
 		}
+		next(); // Continue with the other handlers
+	});
+
+	app.get( '/views/*', function( req, res, next ) {
+		var allowedRoutes = [
+			'/views/login',
+			'/views/register'
+		];
+		if( req.session.pub || allowedRoutes.indexOf( req.url ) > -1 ) next();
+		else res.render( 'index' );
+	});
+	app.get( '/services/*', function( req, res, next ) {
+		var allowedRoutes = [
+			'/services/session/login',
+			'/services/users/create'
+		];
+		if( req.session.pub || allowedRoutes.indexOf( req.url ) > -1 ) next();
 		else {
-			if( allowedRoutes.indexOf( req.url ) > -1 ) next();
-			else if( req.method === 'GET' ) {
-				res.render( 'index' );
-			} else {
-				res.status( 401 );
-				res.send( 'Login first!' );
-			}
+			res.status( 401 );
+			res.send( 'Login first!' );
 		}
 	});
 
