@@ -23,6 +23,7 @@
     "gulp": "^3.8.11",
     "gulp-jshint": "^1.9.2",
     "gulp-nodemon": "^1.0.5",
+    "request": "^2.53.0",
     "socket.io": "^1.3.4",
     "ssh-keygen": "^0.2.1",
     "ssh2": "^0.4.4",
