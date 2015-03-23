@@ -32,8 +32,14 @@ function setSrc() {
 
 	var source_name = $( '#src_files' ).val();
 
+	var content = editor.getSession().getValue();
+
+	//alert( 'last: ' + content.lastIndexOf( '\n' ) + 'length: ' + content.length );
+	if ( content.lastIndexOf( '\n' ) == content.length - 1 )
+		content = content.substring( 0, content.length - 1 );
+	
 	var file = {
-		content : editor.getSession().getValue()
+		content: content
 	};
 
 	$.post( '/services/method/setSrcFile/' 

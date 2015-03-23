@@ -62,14 +62,14 @@ router.post( '/manage/:connection', function( req, res ) {
 	}
 
 	ssh.execWorkCommSync( req, res, conn, arrCommand.join( ' ' ), function( err, data ) {
-		console.log( 'Method manage command (' + arrCommand.join() + ') got data: ');
+		console.log( 'Project manage command (' + arrCommand.join() + ') got data: ');
 		if( !err ) {
 			if ( data ) {
 				console.log( data );
 				res.send( data );
 			} else {
-				console.log( 'End Of Stream' );
-				res.send('Fuck');
+				console.log( 'No data' );
+				res.send( '' );
 			}
 		}
 	});

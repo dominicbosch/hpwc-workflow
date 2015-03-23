@@ -103,11 +103,21 @@
 				<button class="action" onclick="actionOnMethod('compile');">Compile</button>
 				<button class="action" onclick="actionOnMethod('run');">Run</button>
 			</div>
+			<div class="centered-text">
+				<button class="action" onclick="actionOnMethodSocketIO('compile');">Compile w/SockIO</button>
+				<button class="action" onclick="actionOnMethodSocketIO('run');">Run w/SockIO</button>
+			</div>
 		</div>
 	</div>
 </div>		
 {% endblock %}
 {% block content_right %}
+<div id="info_area">
+	<h3>
+		Info
+	</h3>
+	<textarea id="info_textarea" readonly></textarea>
+</div>
 <div id="cmd_response">
 	<h3>
 		Command Response

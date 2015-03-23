@@ -14,7 +14,8 @@
 		// The public object
 		var oPub = {
 			selectedConn: {},
-			updateProject: false
+			updateProject: false,
+			socketID: '{{ socketID }}'
 		};
 		{% if selectedConnection %}
 			oPub.selectedConn = {

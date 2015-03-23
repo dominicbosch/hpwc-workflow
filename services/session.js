@@ -2,13 +2,17 @@
 
 var express = require( 'express' ),
 	router = express.Router(),
-	persistence = global.persistence;
+	persistence = global.persistence,
+	socketio = require( '../modules/socket' );
 
 router.post( '/login', function( req, res ) {
 	var oUser = persistence.getUser( req.body.username );
 
 	if( oUser && oUser.password === req.body.password ) {
 		req.session.pub = oUser.pub;
+		// Let socket.io listen for websockets of this user
+		console.log('SOCKETID: ' + req.session.pub.socketID );
+		socketio.openSocket( req.session.pub.socketID );
 		res.send( 'Login successful!' );
 	} else {
 		res.status( 401 );

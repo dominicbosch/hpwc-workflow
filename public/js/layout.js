@@ -200,3 +200,93 @@ function createListItem( item, isChecked, isDisabled ) {
 		+ '</label>';
 };
 
+function addTextAndScroll( id, text ) {
+	var obj = $( '#' + id );
+	var txt = document.createTextNode( text );
+	obj.append( txt ).prop( 'scrollTop', function () {
+		return $( this ).prop( 'scrollHeight' );
+	});
+}
+
+function setTextAndScroll( id, text ) {
+	var obj = $( '#' + id );
+	var txt = document.createTextNode( text );
+	obj.empty().append( txt ).prop( 'scrollTop', function () {
+		return $( this ).prop( 'scrollHeight' );
+	});
+}
+
+function connectToSocket( sockeID ) {
+
+	var port = (location.port === '') ? '' : ':' + location.port;
+
+	socket = io.connect( port + '/' + sockeID );
+
+	console.log( socket, 'connectionTo ' + port );
+
+	socket.on( 'connect', function () {
+		console.log( 'Connected to socket' );
+	});
+
+	socket.on( 'data', function( data ) {
+		//console.log( 'Received MSG ' + data.msg + ' from Server' );
+
+		/*
+			check if the information received is the one of the selected project
+			in this case, show it in the textarea
+		*/
+		if ( data.project == $( '#projects' ).val() ) {
+			if ( !waitLog ) {
+				if ( data.count > count ) {
+					count++;
+					//console.log( 'ADD TEXT NOW! ' + data.msg + ' COUNT: ' + count );
+					addTextAndScroll( 'resp_textarea', data.msg );
+				} else if ( data.count <= count ) {
+					//console.log( 'msg skipped: ' + data.msg );
+				}
+			} else {
+				//console.log( 'add msg: ' + data.msg + ' to list!');
+				msgList[ data.count ] = data.msg;
+			}
+		}
+	});
+
+	socket.on( 'endData', function( data ) {
+		//console.log( 'Received End MSG ' + data.project + ' from Server' );
+		/*
+			check if the information received is the one of the selected project
+			in this case, show it in the textarea
+		*/
+		if ( data.project == $( '#projects' ).val() ) {
+			//unsubscribe
+			unsubscribe( '' );
+			count = 0;
+
+			//clean wait image
+			$( '#respWait' ).removeAttr( 'src' );
+
+			$( '.action' ).prop( 'disabled', false );
+		}
+	});
+
+	socket.on( 'disconnect', function () {
+		console.log( 'DAMMIT! Status: ' + socket.connected);
+		socket.disconnect();
+	});
+}
+
+function subscribe( room ) {
+
+	socket.emit( 'subscribe', { room : room });
+}
+
+function change( room ) {
+
+	socket.emit( 'change', { room : room });
+}
+
+function unsubscribe( room ) {
+
+	socket.emit( 'unsubscribe', { room : room });
+
+}

@@ -1,7 +1,9 @@
 "use strict";
 
 oPub.updateProject = true;
-var getLogTimeout = null;
+var getLogTimeout = null,
+	waitLog = false, msgList = {},
+	socket, count = 0;
 
 function cleanMethodForm() {
 	$( '#edit_method input[name="method_type"]' ).val( '' );
@@ -68,7 +70,7 @@ function getAndSetMethods( config_name, project_name, method_val, cb ) {
 	}
 }
 
-function getInstalledMethod( config_name ) {
+function getInstalledMethod( config_name, cb ) {
 
 	//clean method list
 	$( '#method_types' ).html( '<option value="">Choose A Method Type</option>' );
@@ -84,10 +86,13 @@ function getInstalledMethod( config_name ) {
 		}).fail(function( xhr ) {
 			console.log( xhr.responseText );
 		});
+
+		if ( typeof(cb) === 'function' ) 
+			cb( config_name );
 	}
 }
 
-function actionOnMethod( cmd ) {
+function actionOnMethodSocketIO( action ) {
 
 	var	config_name = $( '#configs' ).val(),
 		project_name = $( '#projects' ).val(),
@@ -108,62 +113,86 @@ function actionOnMethod( cmd ) {
 		return;
 	}
 
+	$( '.action' ).prop( 'disabled', true );
+
 	$( '#respWait' ).attr( 'src', '../img/ajax-loader.gif' );
 
+	subscribe( config_name );
+
 	$.get('/services/method/' 
-		+ cmd + '/'
+		+ action + '/'
 		+ config_name + '/' 
 		+ project_name + '/' 
 		+ method_name, function( data ) {
-	
-		if ( !data.err ) {
-			$( '.action' ).prop( 'disabled', true );
 
-			$("#resp_textarea").val( data.log );
+		var msg = data;
 
-			getLogTimeout = setTimeout( function() {
-				getLog( config_name, project_name );
-			}, 2000 );
-
+		if ( data === true ) {
+			msg = 'Command Fired!\nThe output will be shown in the respose area';
 		} else {
+			//unsubscribe
+			unsubscribe( '' );
+			count = 0;
+
 			//clean wait image
 			$( '#respWait' ).removeAttr( 'src' );
 
-			$("#resp_textarea").val( data.err + '\n' + data.log );
+			$( '.action' ).prop( 'disabled', false );
 		}
+
+		addTextAndScroll( 'info_textarea', msg );
+
 	}).fail(function( xhr ) {
 		console.log( xhr.responseText );
 	});
 }
 
-function getLog( config_name, project_name ) {
+function getLogSocketIO( config_name, project_name ) {
 
 	if( config_name !== '' && project_name !== '') {
 
+		waitLog = true;
+
+		subscribe( config_name );
+
 		$.get('/services/method/getLog/' 
 			+ config_name + '/'
-			+ project_name, function( data ) {
+			+ project_name, function( log ) {
 
-			$("#resp_textarea").val( data.log )
-				.prop( 'scrollTop', function () {
-					return $( this ).prop( 'scrollHeight' );
-				});;
+			addTextAndScroll( 'resp_textarea', log.content );
 
-			if ( data.commandActive.status ) {
-				getLogTimeout = setTimeout( function() {
-					getLog( config_name, project_name );
-				}, 2000 );
-			} else {
+			if ( log.active ) {
+				//read from list and update log if necessary
+				count = log.count;
+				console.log( 'still active' );
+				while ( msgList[ ++count ] ) {
+					addTextAndScroll( 'resp_textarea', msgList[ count ] );
+				}
+				//no more message in msgList, last message written is (count--)
+				count--;
+				//clean msgList
+				msgList = {};
+
+			} else { //log written and command not active anymore
+
+				//unsubscribe
+				unsubscribe( '' );
+				count = 0;
+
 				//clean wait image
 				$( '#respWait' ).removeAttr( 'src' );
 
 				$( '.action' ).prop( 'disabled', false );
 			}
+
+			waitLog = false;
+
 		}).fail(function( xhr ) {
 			console.log( xhr.responseText );
 		});
 	}
 }
+
 function manage_method( action ) {
 
 	var id = '' ;
@@ -208,11 +237,8 @@ function manage_method( action ) {
 		+ config_name + '/' 
 		+ project_name, method, function( data ) {
 
-		$("#resp_textarea").val( data )
-			.prop( 'scrollTop', function () {
-				return $( this ).prop( 'scrollHeight' );
-			});;
-		
+		setTextAndScroll( 'resp_textarea', data );
+
 		cleanMethodForm();
 
 		//clean method list
@@ -237,9 +263,10 @@ function manage_method( action ) {
 $(document).ready(function() {
 
 	var config_name = oPub.selectedConn.name, 
-		project_name = oPub.selectedConn.projectName;
+		project_name = oPub.selectedConn.projectName,
+		socketID = oPub.socketID;
 
-	updateConfigurationsList( 
+/*	updateConfigurationsList( 
 		function() {
 			getInstalledMethod( config_name );
 		}, 
@@ -249,6 +276,20 @@ $(document).ready(function() {
 			$( '#respWait' ).attr( 'src', '../img/ajax-loader.gif' );
 			getLog( config_name, project_name ); 
 		}
+	);*/
+
+	connectToSocket( socketID );
+
+	updateConfigurationsList( 
+		function() {
+			getInstalledMethod( config_name );
+		}, 
+		function() {
+			getAndSetMethods( config_name, project_name );
+			$( '.action' ).prop( 'disabled', true );
+			$( '#respWait' ).attr( 'src', '../img/ajax-loader.gif' );
+			getLogSocketIO( config_name, project_name ); 
+		}
 	);
 
 	$( '#connectButton' ).on( 'click', cleanMethodForm );
@@ -257,10 +298,11 @@ $(document).ready(function() {
 
 		var config_name = $( '#configs' ).val();
 
-		//clean getLog timeout, wait image and response area
-		clearTimeout( getLogTimeout );
+		//unsubscribe from previous
+		unsubscribe( '' );
+
 		$( '#respWait' ).removeAttr( 'src' );
-		$( '#resp_textarea' ).val( '' );
+		setTextAndScroll( 'resp_textarea', '' );
 		
 		//clean method list
 		$( '#methods' ).html( '<option value="">Choose A Method</option>' );
@@ -272,11 +314,16 @@ $(document).ready(function() {
 
 		updateConfigurationForm( getInstalledMethod );
 
+		/*updateConfigurationForm( 
+			function( data ) {
+				getInstalledMethod( data, subscribe ); //subscribe to new
+			}
+		);*/
 	});
 
 	//get method
 	$("#methods").change( function() {
-		//$( '#resp_textarea' ).val( '' );
+		//setTextAndScroll( 'resp_textarea', '' );
 		updateMethodForm( );
 	});
 
@@ -291,10 +338,17 @@ $(document).ready(function() {
 			return;
 		}
 
-		//clean getLog timeout, wait image and response area
-		clearTimeout( getLogTimeout );
+		//unsubscribe
+		unsubscribe( '' );
+		count = 0;
+
+		//clean wait image
 		$( '#respWait' ).removeAttr( 'src' );
-		$( '#resp_textarea' ).val( '' );
+
+		$( '.action' ).prop( 'disabled', false );
+
+		//clean response area
+		setTextAndScroll( 'resp_textarea', '' );
 
 		$( '#methods' ).html( '<option value="">Choose A Method</option>' );
 
@@ -313,8 +367,7 @@ $(document).ready(function() {
 				getAndSetMethods( config_name, project_name, null);
 				$( '.action' ).prop( 'disabled', true );
 				$( '#respWait' ).attr( 'src', '../img/ajax-loader.gif' );
-				getLog( config_name, project_name ); 
-
+				getLogSocketIO( config_name, project_name ); 
 			});
 		}
 	});
