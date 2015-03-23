@@ -237,11 +237,18 @@ function connectToSocket( sockeID ) {
 		*/
 		if ( data.project == $( '#projects' ).val() ) {
 			if ( !waitLog ) {
-				if ( data.count > count ) {
+
+				//The message received is the one we were waiting for
+				if ( data.count === ( count + 1 ) ) {
 					count++;
 					//console.log( 'ADD TEXT NOW! ' + data.msg + ' COUNT: ' + count );
 					addTextAndScroll( 'resp_textarea', data.msg );
-				} else if ( data.count <= count ) {
+
+				//We received a message but not the previous
+				} else if ( data.count > count ) {
+					//ask again for the log
+					getLogSocketIO( oPub.selectedConn.name, data.project );
+				} else {
 					//console.log( 'msg skipped: ' + data.msg );
 				}
 			} else {
@@ -258,14 +265,20 @@ function connectToSocket( sockeID ) {
 			in this case, show it in the textarea
 		*/
 		if ( data.project == $( '#projects' ).val() ) {
-			//unsubscribe
-			unsubscribe( '' );
-			count = 0;
-
-			//clean wait image
-			$( '#respWait' ).removeAttr( 'src' );
-
-			$( '.action' ).prop( 'disabled', false );
+			//last msg already received
+			if ( data.count === count ) {
+				//unsubscribe
+				unsubscribe( '' );
+				count = 0;
+	
+				//clean wait image
+				$( '#respWait' ).removeAttr( 'src' );
+	
+				$( '.action' ).prop( 'disabled', false );
+			} else {
+				//ask again for the log
+				getLogSocketIO( oPub.selectedConn.name, data.project );
+			}
 		}
 	});
 
