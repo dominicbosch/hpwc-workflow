@@ -23,7 +23,7 @@ Starting the Server:
     // HTTPS Server
 	workflow({
 		port: 443,
-		development: true,
+		production: true,
 		keyfile: 'config/https-key.pem',
 		certfile: 'config/https-cert.pem'
 	});
