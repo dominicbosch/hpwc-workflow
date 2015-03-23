@@ -75,4 +75,14 @@ router.post( '/manage/:connection', function( req, res ) {
 	});
 });
 
+router.get( '/getLog/:connection/:project', function( req, res ) {	
+	var username = req.session.pub.username,
+		connection = req.params.connection,
+		project = req.params.project;
+
+	ssh.getLog( username, connection, project, function( log ) {
+		res.send( log );
+	});
+});
+
 module.exports = router;

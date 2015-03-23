@@ -50,7 +50,7 @@ function cleanOutputForm() {
 }
 
 //OK
-function updateProjectFormInExp() {
+function updateProjectFormInExp( cb ) {
 
 	var config_name = $( '#configs' ).val(),
 		project_name = $( '#projects' ).val();
@@ -85,6 +85,9 @@ function updateProjectFormInExp() {
 
 			//update experiment list
 			getAndSetExperiments( config_name, project_name );
+
+			if ( typeof(cb) === 'function' ) 
+				cb();
 		});
 	}
 }
@@ -121,6 +124,22 @@ function runExp( ) {
 		project_name = $( '#projects' ).val(),
 		experiment;
 
+	if ( config_name === '' ) {
+		alert( 'Select A Configuration' );
+		return;
+	}
+
+	if ( project_name === '' ) {
+		alert( 'Select A Project' );
+		return;
+	}
+
+	$( '.action' ).prop( 'disabled', true );
+
+	$( '#respWait' ).attr( 'src', '../img/ajax-loader.gif' );
+
+	subscribe( config_name );
+
 	experiment = {
 		dimensions : buildList( 'experiment_setup', 'par_val' ),
 		methods : buildList( 'experiment_setup', 'methods' ),
@@ -132,7 +151,22 @@ function runExp( ) {
 		+ config_name + '/' 
 		+ project_name, experiment, function( data ) {
 
-		setTextAndScroll( 'resp_textarea', data );
+		var msg = data;
+		
+		if ( data === true ) {
+			msg = 'Experiment Started!\nThe output will be shown in the respose area';
+		} else {
+			//unsubscribe
+			unsubscribe( '' );
+			count = 0;
+
+			//clean wait image
+			$( '#respWait' ).removeAttr( 'src' );
+
+			$( '.action' ).prop( 'disabled', false );
+		}
+
+		addTextAndScroll( 'info_textarea', msg );
 
 	}).fail(function( xhr ) {
 		console.log( xhr.responseText );
@@ -142,41 +176,22 @@ function runExp( ) {
 
 $(document).ready(function() {
 
+	var config_name = oPub.selectedConn.name, 
+		project_name = oPub.selectedConn.projectName,
+		socketID = oPub.socketID;
+
+	connectToSocket( socketID );
+
 	//OK
 	updateConfigurationsList( 
-		null, 
-		updateProjectFormInExp
-	);
-
-	//get data
-	$("#experiments").change( function() {
-
-		//updateOutputForm( );
-	});
-
-	//when the project selected change, we read the value of parameters (user change)
-	$("#projects").change( function() {
-
-		//clean output list
-		$("#experiments").html("<option value=''>Choose An Experiment</option>");
-
-		updateProjectFormInExp( );
-	});
-
-	//OK
-	//create handler for changing of configuraton
-	$("#configs").change( function() {
-
-		//clean project list
-		$( '#projects' ).html( '<option value="">Choose A Project</option>' );
-
-		//clean information related to the project
-		if ( oPub.selectedConn.projectName && ( oPub.selectedConn.projectName !== '' ) )
+		null,
+		function() {
 			updateProjectFormInExp();
-
-		//update the right part of the page and read the project list
-		updateConfigurationForm();
-	});
+			$( '.action' ).prop( 'disabled', true );
+			$( '#respWait' ).attr( 'src', '../img/ajax-loader.gif' );
+			getLogSocketIO( config_name, project_name ); 
+		}
+	);
 
 	$( '#connectButton' ).on( 'click', function() {
 
@@ -193,4 +208,66 @@ $(document).ready(function() {
 		$("#experiments").html("<option value=''>Choose An Experiment</option>");
 	});
 
+	//OK
+	//create handler for changing of configuraton
+	$("#configs").change( function() {
+
+		//clean project list
+		$( '#projects' ).html( '<option value="">Choose A Project</option>' );
+
+		//clean information related to the project
+		if ( oPub.selectedConn.projectName && ( oPub.selectedConn.projectName !== '' ) )
+			updateProjectFormInExp();
+
+		//update the right part of the page and read the project list
+		updateConfigurationForm();
+
+		//unsubscribe
+		unsubscribe( '' );
+		count = 0;
+
+		//clean wait image
+		$( '#respWait' ).removeAttr( 'src' );
+
+		$( '.action' ).prop( 'disabled', false );
+	});
+
+	//get data
+	$("#experiments").change( function() {
+
+		//updateOutputForm( );
+	});
+
+	//when the project selected change, we read the value of parameters (user change)
+	$("#projects").change( function() {
+
+		var config_name = $( '#configs' ).val(),
+			project_name = $(this).val();
+
+		if ( config_name === '' ) {
+			alert( 'Select A Configuration' );
+			return;
+		}
+
+		//unsubscribe
+		unsubscribe( '' );
+		count = 0;
+
+		//clean wait image
+		$( '#respWait' ).removeAttr( 'src' );
+
+		$( '.action' ).prop( 'disabled', false );
+
+		//clean response area
+		setTextAndScroll( 'resp_textarea', '' );
+
+		//clean output list
+		$("#experiments").html("<option value=''>Choose An Experiment</option>");
+
+		updateProjectFormInExp( function(){
+			$( '.action' ).prop( 'disabled', true );
+			$( '#respWait' ).attr( 'src', '../img/ajax-loader.gif' );
+			getLogSocketIO( config_name, project_name ); 
+		});
+	});
 });

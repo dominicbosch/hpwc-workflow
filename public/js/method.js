@@ -1,9 +1,6 @@
 "use strict";
 
 oPub.updateProject = true;
-var getLogTimeout = null,
-	waitLog = false, msgList = {},
-	socket, count = 0;
 
 function cleanMethodForm() {
 	$( '#edit_method input[name="method_type"]' ).val( '' );
@@ -147,60 +144,6 @@ function actionOnMethodSocketIO( action ) {
 	});
 }
 
-function getLogSocketIO( config_name, project_name ) {
-
-	if( config_name !== '' && project_name !== '') {
-
-		//clean msgList
-		msgList = {};
-		
-		waitLog = true;
-
-		subscribe( config_name );
-
-		$.get('/services/method/getLog/' 
-			+ config_name + '/'
-			+ project_name, function( log ) {
-
-			setTextAndScroll( 'resp_textarea', log.content );
-			//addTextAndScroll( 'resp_textarea', log.content );
-
-			if ( log.active ) {
-				//read from list and update log if necessary
-				count = log.count;
-				console.log( 'still active' );
-				while ( msgList[ count + 1 ] ) {
-					count++;
-					addTextAndScroll( 'resp_textarea', msgList[ count ] );
-				}
-				/*
-					No more ordered message in msgList.
-					From now on we let the socket process the future messages
-				*/
-			} else { 
-				/*
-					Command not active anymore,
-					full log already written!
-				*/
-
-				//unsubscribe
-				unsubscribe( '' );
-				count = 0;
-
-				//clean wait image
-				$( '#respWait' ).removeAttr( 'src' );
-
-				$( '.action' ).prop( 'disabled', false );
-			}
-
-			waitLog = false;
-
-		}).fail(function( xhr ) {
-			console.log( xhr.responseText );
-		});
-	}
-}
-
 function manage_method( action ) {
 
 	var id = '' ;
@@ -274,18 +217,6 @@ $(document).ready(function() {
 		project_name = oPub.selectedConn.projectName,
 		socketID = oPub.socketID;
 
-/*	updateConfigurationsList( 
-		function() {
-			getInstalledMethod( config_name );
-		}, 
-		function() {
-			getAndSetMethods( config_name, project_name );
-			$( '.action' ).prop( 'disabled', true );
-			$( '#respWait' ).attr( 'src', '../img/ajax-loader.gif' );
-			getLog( config_name, project_name ); 
-		}
-	);*/
-
 	connectToSocket( socketID );
 
 	updateConfigurationsList( 
@@ -306,11 +237,14 @@ $(document).ready(function() {
 
 		var config_name = $( '#configs' ).val();
 
-		//unsubscribe from previous
+		//unsubscribe
 		unsubscribe( '' );
+		count = 0;
 
+		//clean wait image
 		$( '#respWait' ).removeAttr( 'src' );
-		setTextAndScroll( 'resp_textarea', '' );
+
+		$( '.action' ).prop( 'disabled', false );
 		
 		//clean method list
 		$( '#methods' ).html( '<option value="">Choose A Method</option>' );
@@ -322,11 +256,6 @@ $(document).ready(function() {
 
 		updateConfigurationForm( getInstalledMethod );
 
-		/*updateConfigurationForm( 
-			function( data ) {
-				getInstalledMethod( data, subscribe ); //subscribe to new
-			}
-		);*/
 	});
 
 	//get method

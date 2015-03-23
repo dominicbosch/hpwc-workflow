@@ -1,5 +1,8 @@
 "use strict";
 
+var waitLog = false, msgList = {},
+	socket, count = 0;
+	
 // Fetch the latest state of the configurations and store it in the public object
 function getAllConfigurations( cb ) {
 	$.get( '/services/configuration/getAll', function( data ) {
@@ -286,6 +289,60 @@ function connectToSocket( sockeID ) {
 		console.log( 'DAMMIT! Status: ' + socket.connected);
 		socket.disconnect();
 	});
+}
+
+function getLogSocketIO( config_name, project_name ) {
+
+	if( config_name !== '' && project_name !== '') {
+
+		//clean msgList
+		msgList = {};
+		
+		waitLog = true;
+
+		subscribe( config_name );
+
+		$.get('/services/project/getLog/' 
+			+ config_name + '/'
+			+ project_name, function( log ) {
+
+			setTextAndScroll( 'resp_textarea', log.content );
+			//addTextAndScroll( 'resp_textarea', log.content );
+
+			if ( log.active ) {
+				//read from list and update log if necessary
+				count = log.count;
+				console.log( 'still active' );
+				while ( msgList[ count + 1 ] ) {
+					count++;
+					addTextAndScroll( 'resp_textarea', msgList[ count ] );
+				}
+				/*
+					No more ordered message in msgList.
+					From now on we let the socket process the future messages
+				*/
+			} else { 
+				/*
+					Command not active anymore,
+					full log already written!
+				*/
+
+				//unsubscribe
+				unsubscribe( '' );
+				count = 0;
+
+				//clean wait image
+				$( '#respWait' ).removeAttr( 'src' );
+
+				$( '.action' ).prop( 'disabled', false );
+			}
+
+			waitLog = false;
+
+		}).fail(function( xhr ) {
+			console.log( xhr.responseText );
+		});
+	}
 }
 
 function subscribe( room ) {
