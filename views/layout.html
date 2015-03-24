@@ -55,9 +55,9 @@
 		<div class="left">
 			{% block content_left %}{% endblock %}
 		</div>
-		{% if username %}
-		{% block shared_content_right %}
-			<div class="right">
+		<div class="right">
+			{% if username %}
+			{% block shared_content_right %}
 				<div id="preview">
 					<div id="conf_title">
 						<h3>Current connection settings</h3>
@@ -130,10 +130,10 @@
 							{% if !selectedConnection %}disabled="true"{% endif %}>Connect</button>
 					</div>
 				</div>
+			{% endblock %}
+			{% endif %}
 			{% block content_right %}{% endblock %}
-			</div>
-		{% endblock %}
-		{% endif %}
+		</div>
 		<div class="bottom">
 			{% block bottom %}{% endblock %}
 		</div>
