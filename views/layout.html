@@ -40,17 +40,14 @@
 		<div></div>
 	</header>
 	<nav>
-		<a href="/views/configuration">Configurations</a>
 		<a href="/views/project">Project</a>
 		<a href="/views/method">Method</a>
 		<a href="/views/experiment">Experiment</a>
 		<a href="/views/visualization">Visualization</a>
 		{% if username %}
-			<a href="/views/profile">Profile</a>
 			<a href="/views/logout">Logout</a>
 		{% else %}
 			<a href="/views/login">Login</a>
-			<a href="/views/register">Register</a>
 		{% endif %}
 	</nav>
 	<section>
