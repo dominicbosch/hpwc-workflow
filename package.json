@@ -1,6 +1,6 @@
 {
   "name": "hpwc-workflow",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A server architecture to allow users to manage high performance experiments on a super computer via SSH",
   "main": "index.js",
   "scripts": {

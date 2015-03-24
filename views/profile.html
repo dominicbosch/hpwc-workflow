@@ -38,6 +38,7 @@
 			});
 		};
 		$( document ).ready( function() {
+			$( '#preview' ).remove();
 			$( ':password' ).on( 'input',function() {
 				if( $( '#pn1' ).val() ===  $( '#pn2' ).val() ) {
 					setInfo( '* Passwords match!' );
@@ -52,20 +53,25 @@
 
 {% block content_left %}
 	<h1>Change Password</h1>
-	<table>
+	<table class="form">
+		<tr>
+			<td>Username</td>
+			<td class="colon">:</td>
+			<td>{{ username }}</td>
+		</tr>
 		<tr>
 			<td>Old Password</td>
-			<td> : </td>
+			<td class="colon">:</td>
 			<td><input type="password" id="po" autofocus></td>
 		</tr>
 		<tr>
 			<td>Password</td>
-			<td> : </td>
+			<td class="colon">:</td>
 			<td><input type="password" id="pn1"></td>
 		</tr>
 		<tr>
 			<td>Confirm Password</td>
-			<td> : </td>
+			<td class="colon">:</td>
 			<td><input type="password" id="pn2"></td>
 		</tr>
 		<tr>

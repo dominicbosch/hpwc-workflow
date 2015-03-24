@@ -107,6 +107,11 @@ td.threecol {
 	text-align: center;
 }
 
+.form .colon {
+	padding-left: 10px;
+	padding-right: 15px;
+}
+
 @media (max-width: 930px) {
 	section > div.left {
 		width: 100%;

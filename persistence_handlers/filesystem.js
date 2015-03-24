@@ -35,8 +35,8 @@ exports.getUser = function( username ) {
 };
 
 exports.changeUserPassword = function( username, password ) {
+	console.log( 'User "' + username + '" changed password' );
 	oUsers[ username ].password = password;
-	console.log( 'User "' + username + '" password changed' );
 	persistUser( username );
 };
 
