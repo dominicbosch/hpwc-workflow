@@ -113,8 +113,8 @@ td.threecol {
 }
 
 .form .colon {
-	padding-left: 10px;
-	padding-right: 15px;
+	padding-left: 7px;
+	padding-right: 12px;
 }
 
 @media (max-width: 930px) {
