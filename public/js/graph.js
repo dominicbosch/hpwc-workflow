@@ -5,7 +5,7 @@ function buildList( tab_id, td_name ) {
 	$( '#' + tab_id + ' [name="' + td_name + '"] input:checked' ).each( function() {
 		string += '"' + $( this ).val() + '" ';
 	});
-	console.log('BUILD LIST:', string);
+	//console.log('BUILD LIST:', string);
 	return string;
 }
 

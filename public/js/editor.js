@@ -74,12 +74,18 @@ function getRemoteSrc( event ) {
 		alert( 'First select a method' );
 		return;
 	}
+	var folder_name = $( '#folders' ).val();
+	if ( folder_name === '' ) {
+		alert( 'First select a folder' );
+		return;
+	}
 
 	var source_name = $( '#src_files' ).val();
 	$.get( '/services/method/getSrcFile/' 
 		+ config_name + '/' 
 		+ project_name + '/' 
 		+ method_name + '/'
+		+ folder_name + '/'
 		+ source_name, function( source ) {
 		editor.getSession().setValue(source);
 		event.preventDefault();

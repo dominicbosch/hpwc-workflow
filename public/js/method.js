@@ -18,7 +18,6 @@ function setMethodForm( method ) {
 		.val( method.comment ).prop( 'scrollTop', function () {
 			return $( this ).prop( 'scrollHeight' );
 		});;
-
 }
 
 function updateMethodForm( cb ) {
@@ -261,7 +260,30 @@ $(document).ready(function() {
 	//get method
 	$("#methods").change( function() {
 		//setTextAndScroll( 'resp_textarea', '' );
+
+		$( '#folders' ).val('src');
 		updateMethodForm( );
+	});
+
+	$( '#folders' ).change( function() {
+		var config_name = $( '#configs' ).val(),
+			project_name = $( '#projects' ).val(),
+			method_name = $( '#methods' ).val(),
+			folder_name = $(this).val();
+		
+		if ( method_name !== '' ) {
+			$.get( '/services/method/get/' 
+				+ config_name + '/' 
+				+ project_name + '/' 
+				+ method_name + '/' 
+				+ folder_name, function( srcList ) {
+
+				$( '#src_files' ).empty();
+				for ( var i in srcList ) {
+					$( '#src_files' ).append($( '<option>' ).attr( 'value', srcList[i] ).text( srcList[i] ) );
+				}
+			});
+		}
 	});
 
 	//when the project selected change, we read the modules implemented
