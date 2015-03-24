@@ -178,16 +178,6 @@ router.get( '/:action/:connection/:project/:method', function( req, res ) {
 });
 */
 
-router.get( '/getLog/:connection/:project', function( req, res ) {	
-	var username = req.session.pub.username,
-		connection = req.params.connection,
-		project = req.params.project;
-
-	ssh.getLog( username, connection, project, function( log ) {
-		res.send( log );
-	});
-});
-
 router.get( '/:action/:connection/:project/:method', function( req, res ) {	
 	var connection = req.params.connection,
 		project = req.params.project,

@@ -110,13 +110,22 @@
 	</tr>
 </table>
 <div class="centered-text">
-	<button onclick="runExp();" >Run Experiment</button>
+	<button class="action" onclick="runExp();" >Run Experiment</button>
 </div>
 {% endblock %}
 
 {% block content_right %}
+<div id="info_area">
+	<h3>
+		Info
+	</h3>
+	<textarea id="info_textarea" readonly></textarea>
+</div>
 <div id="cmd_response">
-	<h3>Command Response</h3>
+	<h3>
+		Command Response
+		<img id="respWait" style="float:right"/>
+	</h3>
 	<textarea id="resp_textarea" readonly></textarea>
 </div>
 {% endblock %}
