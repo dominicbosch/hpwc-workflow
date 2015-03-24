@@ -6,6 +6,7 @@
 <script type="text/javascript" src="/js/tab.js"></script>
 <script type="text/javascript" src="/js/method.js"></script>
 <script type="text/javascript" src="/js/editor.js"></script>
+<script type="text/javascript" src="/js/lib/socket.io-1.3.4.js"></script>
 <script type="text/javascript" src="/js/lib/src-noconflict/ace.js" charset="utf-8"></script>
 
 
@@ -17,7 +18,7 @@
 
 {% block content_left %}
 <h1>Method Configuration</h1>
-<h6>Project Name</h6></br>
+Project Name: 
 <select id="projects" name="project_name">
 	<option value="">Choose A Project</option>
 </select>
@@ -99,8 +100,12 @@
 				</tr>
 			</table>
 			<div class="centered-text">
-				<button class="action" onclick="actionOnMethodSocketIO('compile');">Compile</button>
-				<button class="action" onclick="actionOnMethodSocketIO('run');">Run</button>
+				<button class="action" onclick="actionOnMethod('compile');">Compile</button>
+				<button class="action" onclick="actionOnMethod('run');">Run</button>
+			</div>
+			<div class="centered-text">
+				<button class="action" onclick="actionOnMethodSocketIO('compile');">Compile w/SockIO</button>
+				<button class="action" onclick="actionOnMethodSocketIO('run');">Run w/SockIO</button>
 			</div>
 		</div>
 	</div>
@@ -111,14 +116,14 @@
 	<h3>
 		Info
 	</h3>
-	<textarea id="info_textarea" readonly></textarea>
+	<textarea id="info_textarea" class="scrollarea"></textarea>
 </div>
 <div id="cmd_response">
 	<h3>
 		Command Response
 		<img id="respWait" style="float:right"/>
 	</h3>
-	<textarea id="resp_textarea" readonly></textarea>
+	<textarea id="resp_textarea" class="scrollarea"></textarea>
 </div>
 <div class="overlay" style="display: none;">
 	<div class="edit-wrapper">
@@ -137,4 +142,5 @@
 		</div>
 	</div>
 </div>
+<div id="shadow" style="display: none;"></div>
 {% endblock %}

@@ -5,6 +5,10 @@
 	display: inline-block;
 }
 
+.tabs button {
+	width: 120px;
+}
+
 /*----- Tab Links -----*/
 /* Clearfix */
 .tab-links:after {
@@ -28,7 +32,7 @@
 	display: inline-block;
 	border-radius: 5px 5px 0px 0px;
 	background: #7FB5DA;
-	font-size: 16px;
+	font-size: 1.1em;
 	font-weight: 600;
 	color: #4c4c4c;
 	transition: all linear 0.15s;

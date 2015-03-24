@@ -81,5 +81,6 @@ function getRemoteSrc( event ) {
 		editor.getSession().setValue(source);
 		event.preventDefault();
 		$( '.overlay' ).fadeToggle( 'fast' );
+		$( '#shadow' ).fadeToggle( 'fast' );
 	});
 }
