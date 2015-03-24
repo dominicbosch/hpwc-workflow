@@ -2,10 +2,10 @@
 
 function buildList( tab_id, td_name ) {
 	var string = '';
-	$( '#' + tab_id + ' td[name="' + td_name + '"] input:checked' ).each( function() {
+	$( '#' + tab_id + ' [name="' + td_name + '"] input:checked' ).each( function() {
 		string += '"' + $( this ).val() + '" ';
 	});
-
+	console.log('BUILD LIST:', string);
 	return string;
 }
 

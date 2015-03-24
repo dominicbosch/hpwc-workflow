@@ -2,11 +2,13 @@ $( document ).ready( function() {
 	
 	$( '.close' ).click( function() {
 		$( '.overlay' ).fadeToggle( 'fast' );
+		$( '#shadow' ).fadeToggle( 'fast' );
 	});
 	
 	$( document ).keyup( function(e) {
 		if ( e.keyCode === 27 && $( '.overlay' ).css( 'display' ) !== 'none' ) {
 			$( '.overlay' ).fadeToggle( 'fast' );
+			$( '#shadow' ).fadeToggle( 'fast' );
 		}
 	});
 });
@@ -50,6 +52,7 @@ function setSrc() {
 	//	editor.getSession().setValue(source);
 	//	event.preventDefault();
 		$( '.overlay' ).fadeToggle( 'fast' );
+		$( '#shadow' ).fadeToggle( 'fast' );
 	});
 }
 

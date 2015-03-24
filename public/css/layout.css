@@ -90,6 +90,7 @@ textarea {
 	width: 210px;
 	height: 60px;
 	resize: none;
+	font-size: 0.85em;
 }
 
 td.threecol {
@@ -121,12 +122,22 @@ td.threecol {
 	text-align: left;
 }
 
+#project_preview {
+	margin-top: 20px;
+}
+#project_details th {
+	text-align: right;
+}
+#project_details td {
+	text-align: left;
+}
+
 .scrollarea {
 	font-family: "Lucida Console", Monaco, monospace;
-	font-size: 0.75em;
 	width: 100%;
 	min-height: 20px;
 	max-height: 100px;
+	font-size: 0.75em;
 }
 
 .centered-text {
