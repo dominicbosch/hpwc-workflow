@@ -103,6 +103,11 @@ td.threecol {
 	font-size: 0.95em;
 	text-align: right;
 }
+
+#resp_textarea {
+	width: 100%;
+}
+
 .centered-text {
 	text-align: center;
 }
@@ -137,6 +142,9 @@ td.threecol {
 	nav {
 		padding-bottom: 20px;
 	}
+	input {
+		font-size: 85%;
+	}
 }
 
 @media (max-width: 600px) {
@@ -150,6 +158,9 @@ td.threecol {
 	}
 	nav {
 		padding-bottom: 10px;
+	}
+	input {
+		font-size: 70%;
 	}
 }
 
