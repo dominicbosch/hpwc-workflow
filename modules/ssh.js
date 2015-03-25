@@ -31,50 +31,56 @@ exports.isConnOpen = function( username, connName ) {
 	return false;
 };
 
-exports.getFile = function( req, res, connection, remotePath, localPath, cb ) {
+// exports.getFile = function( req, res, connection, remotePath, localPath, cb ) {
 
-	var oConn, errString,
-		username = req.session.pub.username,
-		oConnections = oUserConnections[ username ];
+// 	var oConn, errString,
+// 		username = req.session.pub.username,
+// 		oConnections = oUserConnections[ username ];
 
-	console.log( 'Processing user "' + username + '"s request: getFile' );
-	errString = 'Command "%s" failed for user "%s": ';
+// 	console.log( 'Processing user "' + username + '"s request: getFile' );
+// 	errString = 'Command "%s" failed for user "%s": ';
 
-	if( oConnections ) {
-		oConn = oConnections[ connection ];
-		if( oConn ) {
+// 	if( oConnections ) {
+// 		oConn = oConnections[ connection ];
+// 		if( oConn ) {
+// 			oConn.sftp( function ( err, sftp ) {
+// 				if( err ) {
+// 					cb({
+// 						code: 0,
+// 						message: err.toString()
+// 					});
+// 				} else {
+// 					sftp.fastGet( remotePath, localPath, function ( err ) {
+// 						if( !err ) cb( null, localPath );
+// 						else cb({
+// 								code: 0,
+// 								message: err.toString()
+// 							});
+// 						console.log( err ? "Could not read. " : "Read." );
+// 					});
+// 				}
+// 			});
+// 		} else {
+// 			console.error( errString + 'Connection "%s" is not ready!', command, username, connection );
+// 			res.status( 400 );
+// 			res.send( 'The connection "' + connection + '" is not ready!' );
+// 			cb({ code: 1, message: 'The connection "' + connection + '" is not ready!' });
+// 		}
+// 	} else {
+// 		console.error( errString + 'No open connections!', command, username );
+// 		res.status( 400 );
+// 		res.send( 'User has no open connections!' );
+// 		cb({ code: 1, message: 'User has no open connections!' });
+// 	}
 
-			oConn.sftp( function (err, sftp) {
-				if (err) {
-					console.log( 'err1' );
-					throw err;
-				}
-				sftp.fastGet( remotePath, localPath, function ( err ) {
-					cb( err ? new Error( "Can't read file" ) : localPath );
-					console.log( err ? "Could not read. " : "Read." );
-				});
-			});
-		} else {
-			console.error( errString + 'Connection "%s" is not ready!', command, username, connection );
-			res.status( 400 );
-			res.send( 'The connection "' + connection + '" is not ready!' );
-			cb( new Error( 'The connection "' + connection + '" is not ready!' ) );
-		}
-	} else {
-		console.error( errString + 'No open connections!', command, username );
-		res.status( 400 );
-		res.send( 'User has no open connections!' );
-		cb( new Error( 'User has no open connections!' ) );
-	}
-
-	return false;
-};
+// 	return false;
+// };
 
 exports.createConfiguration = function( username, args, force, cb ) {
 	var cmd, oUser, oConn = new SSHConnection();
 
 	if( !force && persistence.getConfiguration( username, args.name ) ) {
-		cb( new Error( 'Configuration already existing!' ) );
+		cb({ code: 0, message: 'Configuration already existing!' });
 	} else {
 		oConn.on( 'ready', function() {
 			console.log( 'New temporary SSH connection %s@%s:%s, now: %s', args.username, args.url, args.port, ++tempConnCounter );
@@ -94,20 +100,22 @@ exports.createConfiguration = function( username, args, force, cb ) {
 								oConf = persistence.storeConfiguration( username, args );
 								cb( null, oConf );
 							} else {
-								cb( new Error( data ) );
+								cb({ code: 0, message: data });
 							}
 						})
 						.stderr.on( 'data', function( data ) {
 							// Handles errors that happen on the other end of this connection
 							console.log( 'Error: ' + data );
+							cb({ code: 2, message: data });
 						});
 				}
 			});
 		}).on( 'close', function() {
 			console.log( 'Closed temporary SSH connection %s@%s:%s, now: %s', args.username, args.url, args.port, --tempConnCounter );
 		}).on( 'error', function( e ) {
-			console.log( 'Error connecting "'+args.username+'@'+args.url+':'+args.port+'": ' + e.code );
-			cb( new Error( 'Error connecting "'+args.username+'@'+args.url+':'+args.port+'": ' + e.code ) );
+			var msg = 'Error connecting "'+args.username+'@'+args.url+':'+args.port+'": ' + e.code;
+			console.log( msg );
+			cb({ code: 0, message: msg });
 		}).connect({
 			host: args.url,
 			port: parseInt( args.port ) || 22,
@@ -122,7 +130,7 @@ exports.updateConfiguration = function( username, args, cb ) {
 		conf = persistence.getConfiguration( username, args.name ) ;
 
 	if( !conf ) {
-		cb( new Error( 'Configuration not existing!' ) );
+		cb({ code: 0, message: 'Configuration not existing!' });
 	} else {
 		exports.closeConnection( username, args.name );
 		oUser = persistence.getUser( username );
@@ -144,7 +152,7 @@ exports.deleteConfiguration = function( username, confName, cb ) {
 	var conf = persistence.getConfiguration( username, confName );
 
 	if( !conf ) {
-		cb( new Error( 'Configuration not existing!' ) );
+		cb({ code: 0, message: 'Configuration not existing!' });
 	} else {
 		exports.closeConnection( username, confName );
 		persistence.deleteConfiguration( username, confName );
@@ -154,7 +162,6 @@ exports.deleteConfiguration = function( username, confName, cb ) {
 };
 
 exports.connectToHost = function( username, connObj, cb ) {
-
 	var oConn = {};
 
 	if ( !oUserConnections[ username ] ) {
@@ -188,7 +195,7 @@ exports.connectToHost = function( username, connObj, cb ) {
 		}).on( 'error', function( e ) {
 			delete oUserConnections[ username ][ connObj.name ];
 			console.log( 'Error connecting (#'+(++connCounter)+') "'+connObj.username+'@'+connObj.url+':'+connObj.port+'": ' + e.code );
-			cb( new Error( 'Error connecting "'+connObj.username+'@'+connObj.url+':'+connObj.port+'": ' + e.code ) );
+			cb({ code: 0, message: 'Error connecting "'+connObj.username+'@'+connObj.url+':'+connObj.port+'": ' + e.code });
 		}).connect({
 			host: connObj.url,
 			port: connObj.port,
@@ -197,6 +204,7 @@ exports.connectToHost = function( username, connObj, cb ) {
 			passphrase: oUser.password
 		});
 	} else {
+		// TODO: why is this not returning an error?
 		cb( null, 'Connection already open for user ' + username);
 	}
 };
@@ -206,7 +214,6 @@ exports.connectToHost = function( username, connObj, cb ) {
 // IMPORTANT: This means if callback function 'cb' receives an error as an argument
 //            no further response can be sent to the client!!!
 executeCommand = function( req, res, connection, command, project, cb ) {
-
 	var oConn, errString, alldata = '', objToSend = {},
 		processData, errorHappened = false,
 		username = req.session.pub.username,
@@ -227,7 +234,7 @@ executeCommand = function( req, res, connection, command, project, cb ) {
 					console.error( err );
 					res.status( 400 );
 					res.send( 'Execution of remote command failed!' );
-					cb( err );
+					cb({ code: 1, message: err.toString() });
 				} else {
 					if ( project ) {
 						//set activeProject
@@ -279,11 +286,12 @@ executeCommand = function( req, res, connection, command, project, cb ) {
 							//empty activeProject
 							delete oUserLogs[ username ][ connection ][ 'activeProject' ];
 
-						} else {
-							cb( null, alldata);
 						}
+						else if( errorHappened ) cb({ code: 2, message: alldata });
+						else cb( null, alldata );
 					}).on( 'error', function(e) {
 						console.error(e);
+						cb({ code: 0, message: e.toString() });
 					}).stderr.on( 'data', function( data ) {
 						errorHappened = true;
 						processData( data );
@@ -304,23 +312,21 @@ executeCommand = function( req, res, connection, command, project, cb ) {
 			console.error( errString + 'Connection "%s" is not ready!', command, username, connection );
 			res.status( 400 );
 			res.send( 'The connection "' + connection + '" is not ready!' );
-			cb( new Error( 'The connection "' + connection + '" is not ready!' ) );
+			cb({ code: 1, message: 'The connection "' + connection + '" is not ready!' });
 		}
 	} else {
 		console.error( errString + 'No open connections!', command, username );
 		res.status( 400 );
 		res.send( 'User has no open connections!' );
-		cb( new Error( 'User has no open connections!' ) );
+		cb({ code: 1, message: 'User has no open connections!' });
 	}
 };
 
 exports.executeCommandSync = executeCommandSync = function( req, res, connection, command, cb ) {
-
 	executeCommand( req, res, connection, command, null, cb );
 };
 
 exports.executeCommandAndEmit = executeCommandAndEmit = function( req, res, connection, project, command, cb ) {
-
 	var message = '',
 		username = req.session.pub.username;
 
@@ -341,22 +347,18 @@ exports.executeCommandAndEmit = executeCommandAndEmit = function( req, res, conn
 };
 
 exports.execWorkCommSync = execWorkCommSync = function( req, res, connection, command, cb ) {
-	
 	var conn = req.session.pub.configurations[ connection ];
-				
+
 	command = 'source ' + path.join( conn.workhome, 'util', 'SetupEnv.sh' )	
 			+ ' ' + conn.workspace + '; ' + command;
-
 	executeCommandSync( req, res, connection, command, cb );
 };
 
 exports.execWorkCommAndEmit = execWorkCommAndEmit = function( req, res, connection, project, command, cb ) {
-	
 	var conn = req.session.pub.configurations[ connection ];
 				
 	command = 'source ' + path.join( conn.workhome, 'util', 'SetupEnv.sh' )	
 			+ ' ' + conn.workspace + '; ' + command;
-
 	executeCommandAndEmit( req, res, connection, project, command, cb );
 };
 
@@ -389,39 +391,28 @@ exports.getLog = getLog = function( username, connection, project, cb ) {
 // IMPORTANT: If callback function 'cb' receives an error as an argument
 //            no further response can be sent to the client!!!
 exports.getRemoteJSON = function( req, res, connection, filename, cb ) {
-	
 	executeCommandSync( req, res, connection, 'cat ' + filename, function( err, data ) {
-		if( !err ) {
+		if( err ) cb( err );
+		else {
 			try {
 				cb( null, JSON.parse( data ) );
 			} catch( e ) {
 				console.error( 'JSON corrupt: ' + filename );
 				res.status( 400 );
 				res.send( 'JSON corrupt!' );
-				cb( e );
+				cb({ code: 1, message: e.toString() });
 			}
 		}
 	});
 };
 
 exports.getRemoteFile = function( req, res, connection, filename, cb ) {
-	
-	executeCommandSync( req, res, connection, 'cat ' + filename, function( err, data ) {
-		if( !err ) {
-			cb( null, data );
-		}
-	});
+	executeCommandSync( req, res, connection, 'cat ' + filename, cb );
 };
 
-exports.setRemoteFile = function( req, res, connection, filename, content, cb ) {
-	
+exports.setRemoteFile = function( req, res, connection, filename, content, cb ) {	
 	content = content.replace( /"/g, '\\"');
-
-	executeCommandSync( req, res, connection, 'echo "' + content + '" > ' + filename, function( err, data ) {
-		if( !err ) {
-			cb( null, data );
-		}
-	});
+	executeCommandSync( req, res, connection, 'echo "' + content + '" > ' + filename, cb );
 };
 
 // This is a general handler for retrieved lists of the same format
@@ -432,7 +423,8 @@ exports.getRemoteList = function( req, res, connection, command, cb ) {
 	execWorkCommSync( req, res, connection, command, function( err, data ) {
 		var pos, list = '';
 
-		if( !err ) {
+		if( err ) cb( err );
+		else {
 			pos = data.indexOf( ':' );
 			if( pos !== -1 ) {
 				list = data.substring( pos + 1 ).trim().split( ' ' );
@@ -446,6 +438,10 @@ exports.getRemoteList = function( req, res, connection, command, cb ) {
 exports.getAndSendRemoteList = function( req, res, connection, command ) {
 	exports.getRemoteList( req, res, connection, command, function( err, list ) {
 		if( !err ) res.send( list );
+		else if( err.code !== 1 ) {
+			res.status( 400 );
+			res.send( err.message );
+		}
 	});
 };
 

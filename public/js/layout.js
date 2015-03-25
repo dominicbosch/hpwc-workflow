@@ -11,7 +11,7 @@ function getAllConfigurations( cb ) {
 		if( typeof(cb) === 'function' ) cb( null, data );
 	})
 	.fail( function( xhr ) {
-		if( typeof(cb) === 'function' ) cb( new Error( xhr.responseText ) );
+		if( typeof(cb) === 'function' ) cb({ code: 0, message: xhr.responseText });
 	});
 };
 
@@ -65,7 +65,7 @@ function toggleConnection( doConnect, config, cb ) {
 		if( typeof(cb) === 'function' ) cb();
 	})
 	.fail( function( xhr ) {
-		cb( new Error( xhr.responseText ) );
+		cb({ code: 0, message: xhr.responseText });
 	});
 }
 
@@ -116,7 +116,7 @@ function updateConfigurationsList( cb, cb2 ) {
 
 	//Get the possible configuration and check for the current configuration reading the project
 	getAllConfigurations(function( err, data ) {
-		if ( err ) alert( err );
+		if ( err ) alert( err.message );
 		else if ( data.configurations ) {
 			//put data inside "configs" element
 			for ( var config in data.configurations ) {
