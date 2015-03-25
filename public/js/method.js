@@ -1,6 +1,8 @@
 "use strict";
 
 oPub.updateProject = true;
+//to change also in layout.html and layout.js
+oPub.updateFolder = true;
 
 function cleanMethodForm() {
 	$( '#edit_method input[name="method_type"]' ).val( '' );
@@ -210,6 +212,26 @@ function manage_method( action ) {
 	});
 }
 
+function updateFileList( folder_name ) {
+	var config_name = $( '#configs' ).val(),
+		project_name = $( '#projects' ).val(),
+		method_name = $( '#methods' ).val();
+
+	if ( method_name !== '' ) {
+		$.get( '/services/method/get/' 
+			+ config_name + '/' 
+			+ project_name + '/' 
+			+ method_name + '/' 
+			+ folder_name, function( srcList ) {
+
+			$( '#src_files' ).empty();
+			for ( var i in srcList ) {
+				$( '#src_files' ).append($( '<option>' ).attr( 'value', srcList[i] ).text( srcList[i] ) );
+			}
+		});
+	}
+}
+
 $(document).ready(function() {
 
 	var config_name = oPub.selectedConn.name, 
@@ -261,29 +283,13 @@ $(document).ready(function() {
 	$("#methods").change( function() {
 		//setTextAndScroll( 'resp_textarea', '' );
 
+		$( '#src_files' ).empty();
 		$( '#folders' ).val('src');
 		updateMethodForm( );
 	});
 
 	$( '#folders' ).change( function() {
-		var config_name = $( '#configs' ).val(),
-			project_name = $( '#projects' ).val(),
-			method_name = $( '#methods' ).val(),
-			folder_name = $(this).val();
-		
-		if ( method_name !== '' ) {
-			$.get( '/services/method/get/' 
-				+ config_name + '/' 
-				+ project_name + '/' 
-				+ method_name + '/' 
-				+ folder_name, function( srcList ) {
-
-				$( '#src_files' ).empty();
-				for ( var i in srcList ) {
-					$( '#src_files' ).append($( '<option>' ).attr( 'value', srcList[i] ).text( srcList[i] ) );
-				}
-			});
-		}
+		updateFileList( $(this).val() );
 	});
 
 	//when the project selected change, we read the modules implemented

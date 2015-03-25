@@ -95,11 +95,15 @@ Project Name:
 						</select>
 					</td>
 					<td>
+					<!--
 						<button id="edit_code" onclick="getRemoteSrc( event )">New File</button>
 						<br/>
+						-->
 						<button id="edit_code" onclick="getRemoteSrc( event )">Edit File</button>
+						<!--
 						<br/>
 						<button id="edit_code" onclick="getRemoteSrc( event )">Delete File</button>
+						-->
 					</td>
 				</tr>
 				<tr>
@@ -130,7 +134,11 @@ Project Name:
 		Command Response
 		<img id="respWait" style="float:right"/>
 	</h3>
-	<textarea id="resp_textarea" class="scrollarea" readonly></textarea>
+	<textarea id="resp_textarea" class="scrollarea" readonly style="max-height:150px; height:150px"></textarea>
+	<div class="centered-text">
+		</br>
+		<button class="action" onclick="setTextAndScroll( 'resp_textarea', '' );">Clean</button>
+	</div>
 </div>
 <div id="shadow" style="display: none;"></div>
 <div class="overlay" style="display: none;">

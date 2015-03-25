@@ -30,7 +30,7 @@
 				</tr>
 				<tr>
 					<td>Parameters list: </td>
-					<td name="par_val"></td>
+					<td name="par_list"></td>
 				</tr>
 				<tr>
 					<td>Values: </td>
@@ -38,6 +38,9 @@
 						<input id="par_val" type="text" size="15"> 
 						<button onclick="addToList('par_val')">Add</button>
 					</td>
+				</tr>
+				<tr>
+					<td name="par_val" colspan="2"></td>
 				</tr>
 			</table>
 		</td>
@@ -81,16 +84,28 @@
 
 		</td>
 		<td id="OldExperiment">
+		<!--
 			<h1>Old experiments</h1>
 			<h4>List of existing experiment configuration for this project</h4>
 			<label>Current experiment:</label>
 			<select id="experiments" name="experiment_name">
 				<option value="">Choose An Experiment</option>
 			</select>
+			-->
+			<h1>Repetition</h1>
+			<h4>Number of repetitions</h4>
+			<table>
+				<tr>
+					<td>Number:<br>
+						<input id="repetitions" type="text" size="5">
+					</td>
+				</tr>
+			</table>
 		</td>
 	</tr>
 </table>
 <div class="centered-text">
+	</br>
 	<button class="action" onclick="runExp();" >Run Experiment</button>
 </div>
 {% endblock %}
@@ -107,6 +122,10 @@
 		Command Response
 		<img id="respWait" style="float:right"/>
 	</h3>
-	<textarea id="resp_textarea" class="scrollarea"  readonly></textarea>
+	<textarea id="resp_textarea" class="scrollarea"  readonly style="max-height:150px; height:150px"></textarea>
+	<div class="centered-text">
+		</br>
+		<button class="action" onclick="setTextAndScroll( 'resp_textarea', '' );">Clean</button>
+	</div>
 </div>
 {% endblock %}

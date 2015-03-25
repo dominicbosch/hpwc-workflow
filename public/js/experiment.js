@@ -122,6 +122,7 @@ function runExp( ) {
 
 	var config_name = $( '#configs' ).val(),
 		project_name = $( '#projects' ).val(),
+		nexec = $( '#repetitions' ).val(),
 		experiment;
 
 	if ( config_name === '' ) {
@@ -140,11 +141,14 @@ function runExp( ) {
 
 	subscribe( config_name );
 
+	if ( nexec === '' ) {
+		nexec = 5;
+	}
 	experiment = {
 		dimensions : buildList( 'experiment_setup', 'par_val' ),
 		methods : buildList( 'experiment_setup', 'methods' ),
 		nthreads : buildList( 'experiment_setup', 'nthreads' ),
-		nexecs : '5'
+		nexecs : nexec
 	}
 
 	$.post( '/services/experiment/run/' 
