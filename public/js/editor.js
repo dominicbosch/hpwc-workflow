@@ -2,11 +2,13 @@ $( document ).ready( function() {
 	
 	$( '.close' ).click( function() {
 		$( '.overlay' ).fadeToggle( 'fast' );
+		$( '#shadow' ).fadeToggle( 'fast' );
 	});
 	
 	$( document ).keyup( function(e) {
 		if ( e.keyCode === 27 && $( '.overlay' ).css( 'display' ) !== 'none' ) {
 			$( '.overlay' ).fadeToggle( 'fast' );
+			$( '#shadow' ).fadeToggle( 'fast' );
 		}
 	});
 });
@@ -50,6 +52,7 @@ function setSrc() {
 	//	editor.getSession().setValue(source);
 	//	event.preventDefault();
 		$( '.overlay' ).fadeToggle( 'fast' );
+		$( '#shadow' ).fadeToggle( 'fast' );
 	});
 }
 
@@ -71,15 +74,22 @@ function getRemoteSrc( event ) {
 		alert( 'First select a method' );
 		return;
 	}
+	var folder_name = $( '#folders' ).val();
+	if ( folder_name === '' ) {
+		alert( 'First select a folder' );
+		return;
+	}
 
 	var source_name = $( '#src_files' ).val();
 	$.get( '/services/method/getSrcFile/' 
 		+ config_name + '/' 
 		+ project_name + '/' 
 		+ method_name + '/'
+		+ folder_name + '/'
 		+ source_name, function( source ) {
 		editor.getSession().setValue(source);
 		event.preventDefault();
 		$( '.overlay' ).fadeToggle( 'fast' );
+		$( '#shadow' ).fadeToggle( 'fast' );
 	});
 }

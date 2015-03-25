@@ -1,0 +1,25 @@
+
+label {
+	float: left;
+    white-space:nowrap;
+}
+#experiment_setup {
+	margin-right: 10px;
+	background: #EEE;
+	border-spacing: 0px;
+}
+
+#experiment_setup * {
+	margin: 3px;
+}
+
+#experiment_setup h1 {
+	background-color: lightgrey;
+	margin: 0;
+}
+
+#Problem, #Method, #System, #OldExperiment {
+	vertical-align: top;
+	font-size: 0.9em;
+	border: 3px solid white;
+}

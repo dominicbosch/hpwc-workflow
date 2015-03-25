@@ -34,14 +34,37 @@ router.get( '/get/:connection/:project/:method', function( req, res ) {
 
 	ssh.getRemoteJSON( req, res, connection, filename, function( err, method ) {
 		if( !err ) {
-			var command = 'workflow list_src ' 
+			var command = 'workflow list_src' 
 				+ ' -p ' + req.params.project 
-				+ ' -n ' + req.params.method ;
+				+ ' -n ' + req.params.method
+				+ ' -f src';
 			ssh.getRemoteList( req, res, connection, command, function( err, data ) {
 				method.srcList = data;
 				res.send( method );
 			});
 		}
+	});
+});
+
+// GET file from folder. 
+router.get( '/get/:connection/:project/:method/:folder', function( req, res ) {	
+	var connection = req.params.connection,
+		project = req.params.project,
+		method = req.params.method,
+		folder = req.params.folder,
+		oConn = req.session.pub.configurations[ connection ],
+		filename  = path.join( oConn.workspace, project, method, '.module' ),
+		command = 'workflow list_src'
+			+ ' -p ' + req.params.project 
+			+ ' -n ' + req.params.method
+			+ ' -f ' + folder ;
+
+	ssh.getRemoteList( req, res, connection, command, function( err, data ) {
+		var list = '';
+		if ( !err ) {
+			list = data;
+		}
+		res.send( list );
 	});
 });
 
@@ -201,13 +224,14 @@ router.get( '/getSrcList/:connection/:project/:method', function( req, res ) {
 });
 
 // GET single source file
-router.get( '/getSrcFile/:connection/:project/:method/:source_name', function( req, res ) {	
+router.get( '/getSrcFile/:connection/:project/:method/:folder/:source_name', function( req, res ) {	
 	var connection = req.params.connection,
 		project = req.params.project,
 		method = req.params.method,
+		folder = req.params.folder,
 		source_name = req.params.source_name,
 		oConn = req.session.pub.configurations[ connection ],
-		filename  = path.join( oConn.workspace, project, method, 'src', source_name );
+		filename  = path.join( oConn.workspace, project, method, folder, source_name );
 
 	ssh.getRemoteFile( req, res, connection, filename, function( err, file ) {
 		if( !err ) res.send( file );

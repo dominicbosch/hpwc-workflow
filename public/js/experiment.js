@@ -8,12 +8,12 @@ function addToList( name ) {
 		value = $( '#' + name ).val().trim();
 
 	if ( value !== '' ) {
-		if ( $( '#experiment_setup td[name="' + name + '"] input[value="' 
+		if ( $( '#experiment_setup [name="' + name + '"] input[value="' 
 			+ value + '"]' ).val() ) {
 			alert("Value already in the list, just check it!");
 		} else {
 			string = createListItem( value, true, false );
-			$( '#experiment_setup td[name="' + name + '"]' ).append( string );
+			$( '#experiment_setup [name="' + name + '"]' ).append( string );
 		}
 	} else {
 		alert( 'First select a value' );
@@ -22,20 +22,20 @@ function addToList( name ) {
 
 //OK
 function cleanProjectForm() {
-	$( '#experiment_setup td[name="par_list"]' ).empty();
-	$( '#experiment_setup td[name="par_val"]' ).empty();
-	$( '#experiment_setup td[name="nthreads"] input' ).prop( 'checked', false );
-	$( '#experiment_setup td[name="hosts"]' ).empty();
+	$( '#experiment_setup [name="par_list"]' ).empty();
+	$( '#experiment_setup [name="par_val"]' ).empty();
+	$( '#experiment_setup [name="nthreads"] input' ).prop( 'checked', false );
+	$( '#experiment_setup [name="hosts"]' ).empty();
 }
 
 //OK
 function setProjectForm( project ) {
-	$( '#experiment_setup td[name="par_list"]' ).text(project.parameters.list);
-	$( '#experiment_setup td[name="par_val"]' ).html(
+	$( '#experiment_setup [name="par_list"]' ).text(project.parameters.list);
+	$( '#experiment_setup [name="par_val"]' ).html(
 		createListItem( project.parameters.default, true, false ) );
-	$( '#experiment_setup td[name="nthreads"] input[value="' 
+	$( '#experiment_setup [name="nthreads"] input[value="' 
 		+ project.threads + '"]' ).prop( 'checked', true );
-	$( '#experiment_setup td[name="hosts"]' ).html(
+	$( '#experiment_setup [name="hosts"]' ).html(
 		createListItem( 'localhost', true, true ) );
 
 }
@@ -43,10 +43,10 @@ function setProjectForm( project ) {
 function cleanOutputForm() {
 	$( '.fixed' ).prop( 'checked', true );
 	$( '.fixed' ).prop( 'disabled', true );
-	$( '#exp_details td[name="parameters"]' ).text( '--' );
-	$( '#exp_details td[name="methods"]' ).text( '--' );
-	$( '#exp_details td[name="nthreads"]' ).text( '--' );
-	$( '#exp_details td[name="nexecs"]' ).text( '--' );
+	$( '#exp_details [name="parameters"]' ).text( '--' );
+	$( '#exp_details [name="methods"]' ).text( '--' );
+	$( '#exp_details [name="nthreads"]' ).text( '--' );
+	$( '#exp_details [name="nexecs"]' ).text( '--' );
 }
 
 //OK
@@ -64,7 +64,7 @@ function updateProjectFormInExp( cb ) {
 			cleanProjectForm();
 
 			//clean method list
-			$("#experiment_setup td[name='methods']").empty();
+			$("#experiment_setup [name='methods']").empty();
 
 			//clean output list
 			$("#experiments").html("<option value=''>Choose An Experiment</option>");
@@ -107,14 +107,14 @@ function getAndSetMethodsList( config_name, project_val ) {
 			for ( var i in methods ) {
 				string_html += createListItem( methods[i], false, false );
 			}
-			$("#experiment_setup td[name='methods']").html(string_html);
+			$("#experiment_setup [name='methods']").html(string_html);
 
 		}).fail(function( xhr ) {
 			console.log( xhr.responseText );
 		});
 	} else {
 		//clean method list
-		$("#experiment_setup td[name='methods']").empty();
+		$("#experiment_setup [name='methods']").empty();
 	}
 }
 
@@ -122,6 +122,7 @@ function runExp( ) {
 
 	var config_name = $( '#configs' ).val(),
 		project_name = $( '#projects' ).val(),
+		nexec = $( '#repetitions' ).val(),
 		experiment;
 
 	if ( config_name === '' ) {
@@ -140,11 +141,14 @@ function runExp( ) {
 
 	subscribe( config_name );
 
+	if ( nexec === '' ) {
+		nexec = 5;
+	}
 	experiment = {
 		dimensions : buildList( 'experiment_setup', 'par_val' ),
 		methods : buildList( 'experiment_setup', 'methods' ),
 		nthreads : buildList( 'experiment_setup', 'nthreads' ),
-		nexecs : '5'
+		nexecs : nexec
 	}
 
 	$.post( '/services/experiment/run/' 
@@ -202,7 +206,7 @@ $(document).ready(function() {
 		cleanProjectForm();
 
 		//clean method list
-		$("#experiment_setup td[name='methods']").empty();
+		$("#experiment_setup [name='methods']").empty();
 
 		//clean output list
 		$("#experiments").html("<option value=''>Choose An Experiment</option>");

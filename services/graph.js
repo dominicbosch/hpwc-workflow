@@ -31,11 +31,11 @@ router.post( '/buildAndGet/:connection/:project/:experiment', function( req, res
 			var pos, command, remotePath = '';
 
 			if( !err ) {
-				console.log( 'Project manage command (' + arrCommand.join(' ') + ') got data: ' + data );
+				console.log( 'Project manage command (' + arrCommand.join(' ') + ') got data: \n' + data );
 				
-				pos = data.indexOf( ':' );
+				pos = data.indexOf( 'Graph path:' );
 				if( pos !== -1 ) {
-					remotePath = data.substring( pos + 1 ).trim();
+					remotePath = data.substring( pos + 12 ).trim();
 				}
 				
 				if ( remotePath !== '' ){
@@ -43,7 +43,7 @@ router.post( '/buildAndGet/:connection/:project/:experiment', function( req, res
 					command = 'base64 ' + remotePath;
 
 					ssh.executeCommandSync( req, res, confName, command, function( err, encImage ) {
-						console.log( 'Encode Image: ' + encImage);
+						//console.log( 'Encode Image: ' + encImage);
 						res.send( encImage);
 					});
 				} else {

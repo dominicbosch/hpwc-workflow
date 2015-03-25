@@ -274,6 +274,11 @@ function connectToSocket( sockeID ) {
 				unsubscribe( '' );
 				count = 0;
 	
+				//to change also in layout.html and method.js
+				if ( oPub.updateFolder ) {
+					updateFileList( $( '#folders' ).val() );
+				}
+
 				//clean wait image
 				$( '#respWait' ).removeAttr( 'src' );
 	

@@ -6,6 +6,7 @@
 <script type="text/javascript" src="/js/tab.js"></script>
 <script type="text/javascript" src="/js/method.js"></script>
 <script type="text/javascript" src="/js/editor.js"></script>
+<script type="text/javascript" src="/js/lib/socket.io-1.3.4.js"></script>
 <script type="text/javascript" src="/js/lib/src-noconflict/ace.js" charset="utf-8"></script>
 
 
@@ -17,7 +18,7 @@
 
 {% block content_left %}
 <h1>Method Configuration</h1>
-<h6>Project Name</h6></br>
+Project Name: 
 <select id="projects" name="project_name">
 	<option value="">Choose A Project</option>
 </select>
@@ -76,18 +77,33 @@
 					<td></td>
 				</tr>
 				<tr>
-					<td>Source Files</td>
+					<td></td>
+					<td>
+						Folder :
+						<select id="folders" name="folder_name">
+							<option value="src">sources</option>
+							<option value="out">outputs</option>
+						</select>
+					</td>
+					<td></td>
+				</tr>
+				<tr>
+					<td>Files</td>
 					<td>
 						<select id="src_files" name="src_name" size="5">
 							
 						</select>
 					</td>
 					<td>
+					<!--
 						<button id="edit_code" onclick="getRemoteSrc( event )">New File</button>
 						<br/>
+						-->
 						<button id="edit_code" onclick="getRemoteSrc( event )">Edit File</button>
+						<!--
 						<br/>
 						<button id="edit_code" onclick="getRemoteSrc( event )">Delete File</button>
+						-->
 					</td>
 				</tr>
 				<tr>
@@ -100,7 +116,7 @@
 			</table>
 			<div class="centered-text">
 				<button class="action" onclick="actionOnMethodSocketIO('compile');">Compile</button>
-				<button class="action" onclick="actionOnMethodSocketIO('run');">Run</button>
+				<button class="action" onclick="actionOnMethodSocketIO('compile_run');">Compile&amp;Run</button>
 			</div>
 		</div>
 	</div>
@@ -111,15 +127,20 @@
 	<h3>
 		Info
 	</h3>
-	<textarea id="info_textarea" readonly></textarea>
+	<textarea id="info_textarea" class="scrollarea"></textarea>
 </div>
 <div id="cmd_response">
 	<h3>
 		Command Response
 		<img id="respWait" style="float:right"/>
 	</h3>
-	<textarea id="resp_textarea" readonly></textarea>
+	<textarea id="resp_textarea" class="scrollarea" readonly style="max-height:150px; height:150px"></textarea>
+	<div class="centered-text">
+		</br>
+		<button class="action" onclick="setTextAndScroll( 'resp_textarea', '' );">Clean</button>
+	</div>
 </div>
+<div id="shadow" style="display: none;"></div>
 <div class="overlay" style="display: none;">
 	<div class="edit-wrapper">
 		<div class="edit-content">

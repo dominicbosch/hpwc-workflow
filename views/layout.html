@@ -16,6 +16,8 @@
 		var oPub = {
 			selectedConn: {},
 			updateProject: false,
+			//to change
+			updateFolder: false,
 			socketID: '{{ socketID }}'
 		};
 		{% if selectedConnection %}
@@ -53,6 +55,7 @@
 			{% block content_left %}{% endblock %}
 		</div>
 		<div class="right">
+		<div>
 			{% if username %}
 			{% block shared_content_right %}
 				<div id="preview">
@@ -130,6 +133,7 @@
 			{% endblock %}
 			{% endif %}
 			{% block content_right %}{% endblock %}
+		</div>
 		</div>
 		<div class="bottom">
 			{% block bottom %}{% endblock %}

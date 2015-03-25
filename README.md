@@ -36,6 +36,7 @@ API:
 
 Where `options` can contain following optional arguments:
 
+- loglevel: one of `['fatal'|'error'|'warn'|'info'|'debug'|'trace']`
 - port: The port on which to run the server
 - production: Set this property and the system will be run in production mode. Sets the process.env.NODE_ENV accordingly, plus disables caching on the server side if in production mode. Default is production=false which turns off caching of web pages through the rendering engine
 - keyfile: The path to the key file in order to run a HTTPS server

@@ -5,7 +5,7 @@ module.exports = exports = function( args ) {
 
 	// Now let's get to twerk:
 	var socketio, config, isValidRequest, sessionMiddleware,
-		server, options, servicePath, fileName,
+		server, options, servicePath, fileName, validLevels, ll,
 		runAsHTTPS = args.keyfile && args.certfile,
 		arrServices, arrViews,
 		oUserSessions = {},
@@ -16,11 +16,26 @@ module.exports = exports = function( args ) {
 		express = require( 'express' ),
 		session = require( 'express-session' ),
 		bodyParser = require( 'body-parser' ),
+		log = require( './modules/logger' ),
 		app = express();
 
 	// Let's fetch the configuration first before we do anything else
 	// This will throw an error if the configuration file is invalid.
 	config = JSON.parse( fs.readFileSync( __dirname + '/config/system.json' ) );
+
+	// Set the log level
+	validLevels = [
+		'fatal',
+		'error',
+		'warn',
+		'info',
+		'debug',
+		'trace'
+	];
+	ll = args.loglevel || config.loglevel || 'info';
+	if( validLevels.indexOf( ll ) < 0 ) ll = 'info';
+	log.level( ll );
+	log.info( 'Setting Log level to: ' + ll );
 
 	// Define a global persistence handler according to the configuration
 	global.persistence = require( './persistence_handlers/' + config.persistence.method );

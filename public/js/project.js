@@ -66,14 +66,14 @@ function manage_project( action ) {
 
 		setTextAndScroll( 'resp_textarea', data );
 
-		cleanProjectForm();
-
 		//clean project list
 		$( '#projects' ).html( '<option value="">Choose A Project</option>' );
-		
+		$( '#projects' ).val( '' );
+
 		var	project_val = project.name;
 
 		if( project.action === 'delete' ) {
+			updateProjectForm();
 			project_val = null;
 		} else if ( project.action === 'create' ) {
 			//clean creation form

@@ -208,7 +208,7 @@ exports.connectToHost = function( username, connObj, cb ) {
 executeCommand = function( req, res, connection, command, project, cb ) {
 
 	var oConn, errString, alldata = '', objToSend = {},
-		processData,
+		processData, errorHappened = false,
 		username = req.session.pub.username,
 		oConnections = oUserConnections[ username ];
 
@@ -284,7 +284,10 @@ executeCommand = function( req, res, connection, command, project, cb ) {
 						}
 					}).on( 'error', function(e) {
 						console.error(e);
-					}).stderr.on( 'data', processData);
+					}).stderr.on( 'data', function( data ) {
+						errorHappened = true;
+						processData( data );
+					});
 
 					// // TODO: Since we do not handle these cases we can delete all event listeners here below
 					// .on( 'close', function() {
