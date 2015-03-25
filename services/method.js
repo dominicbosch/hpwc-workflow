@@ -39,9 +39,17 @@ router.get( '/get/:connection/:project/:method', function( req, res ) {
 				+ ' -n ' + req.params.method
 				+ ' -f src';
 			ssh.getRemoteList( req, res, connection, command, function( err, data ) {
-				method.srcList = data;
-				res.send( method );
+				if( !err ) {
+					method.srcList = data;
+					res.send( method );
+				} else if( err.code !== 1 ) {
+					res.status( 400 );
+					res.send( err.message );
+				}
 			});
+		} else if( err.code !== 1 ) {
+			res.status( 400 );
+			res.send( err.message );
 		}
 	});
 });
@@ -209,8 +217,10 @@ router.get( '/:action/:connection/:project/:method', function( req, res ) {
 		command = 'workflow ' + action + ' -p ' + project + ' -n ' + method;
 
 	ssh.execWorkCommAndEmit( req, res, connection, project, command, function( err, data ) {
-		if( !err ) {
-			res.send( data );
+		if( !err ) res.send( data );
+		else if( error.code !== 1 ) {
+			res.status( 400 );
+			res.send( err.message );
 		}
 	});
 });
@@ -235,6 +245,10 @@ router.get( '/getSrcFile/:connection/:project/:method/:folder/:source_name', fun
 
 	ssh.getRemoteFile( req, res, connection, filename, function( err, file ) {
 		if( !err ) res.send( file );
+		else if( error.code !== 1 ) {
+			res.status( 400 );
+			res.send( err.message );
+		}
 	});
 });
 
@@ -293,6 +307,9 @@ router.post( '/manage/:connection/:project', function( req, res ) {
 				console.log( 'No data' );
 				res.send( '' );
 			}
+		} else if( error.code !== 1 ) {
+			res.status( 400 );
+			res.send( err.message );
 		}
 	});
 });

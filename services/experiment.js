@@ -24,8 +24,10 @@ router.get( '/get/:connection/:project/:experiment', function( req, res ) {
 		filename = path.join( oConn.workspace, projName, 'experiments', expName, '.experiment' );
 		
 		ssh.getRemoteJSON( req, res, confName, filename, function( err, experiment ) {
-			if( !err ) {
-				res.send( experiment );
+			if( !err ) res.send( experiment );
+			else if( err.code !== 1 ) {
+				res.status( 400 );
+				res.send( err.message );
 			}
 		});
 	} else {
@@ -53,8 +55,10 @@ router.post( '/run/:connection/:project', function( req, res ) {
 		];
 		
 		ssh.execWorkCommAndEmit( req, res, confName, projName, arrCommand.join( ' ' ), function( err, data ) {
-			if( !err ) {
-				res.send( data );
+			if( !err ) res.send( data );
+			else if( err.code !== 1 ) {
+				res.status( 400 );
+				res.send( err.message );
 			}
 		});
 
