@@ -79,6 +79,8 @@ exports.isConnOpen = function( username, connName ) {
 exports.createConfiguration = function( username, args, force, cb ) {
 	var cmd, oUser, oConn = new SSHConnection();
 
+	//console.log( 'UTIL: ' + util.inspect(args, {showHidden: false, depth: null}));
+
 	if( !force && persistence.getConfiguration( username, args.name ) ) {
 		cb({ code: 0, message: 'Configuration already existing!' });
 	} else {

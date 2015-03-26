@@ -4,73 +4,8 @@ var express = require( 'express' ),
 	fs = require( 'fs' ),
 	path = require( 'path' ),
 	ssh = require( '../modules/ssh' ),
-	router = express.Router(),
-	persistence = global.persistence;
-
-router.post( '/create', function( req, res ) {
-	var args, user = req.session.pub,
-		oBody = req.body;
-
-	if( !oBody.name || !oBody.url || !oBody.port || !oBody.workspace || !oBody.workhome
-			|| !oBody.username || !oBody.password ) {
-		res.status( 400 );
-		res.send( 'Missing Parameters!' );
-	} else {
-		ssh.createConfiguration( req.session.pub.username, oBody, false, function( err, oConf ) {
-			if( !err ) {
-				req.session.pub.configurations[ oConf.name ] = oConf;
-				res.send( 'Connection initialization successful, configuration "' 
-					+ oConf.name + '" created!' );
-			} else if( err.code !== 1 ) {
-				res.status( 400 );
-				res.send( 'Connection "' + oBody.name + '" initialization failed: ' + err.message );
-			}
-		});
-	}
-});
-
-
-router.post( '/update', function( req, res ) {
-	var args, conf, oConf, user = req.session.pub,
-		username = req.session.pub.username,
-		oBody = req.body;
-
-	if( !oBody.name || !oBody.workspace || !oBody.workhome ) {
-		res.status( 400 );
-		res.send( 'Missing Parameters!' );
-	} else {
-		conf = persistence.getConfiguration( username, oBody.name ) ;
-		if( !conf ) {
-			res.status( 400 );
-			res.send( 'Configuration not existing: ' );
-		} else {
-			oConf = persistence.storeConfiguration( username, oBody );
-			req.session.pub.configurations[ oConf.name ] = oConf;
-			res.send( 'Configuration "' + oConf.name + '" update successful!' );
-		}
-	}
-});
-
-router.post( '/delete', function( req, res ) {
-	var args, user = req.session.pub,
-		oBody = req.body;
-
-	if( !oBody.name ) {
-		res.status( 400 );
-		res.send( 'Missing Configuration Name!' );
-	} else {
-		ssh.deleteConfiguration( req.session.pub.username, oBody.name, function( err ) {
-			if( !err ) {
-				delete req.session.pub.configurations[ oBody.name ];
-				res.send( 'Configuration "' + oBody.name + '" deletion successful!' );
-			} else if( err.code !== 1 ) {
-				res.status( 400 );
-				res.send( 'Configuration deletion failed: ' + err.message );
-			}
-		});
-	}
-});
-
+	persistence = global.persistence,
+	router = express.Router();
 
 router.get( '/connect/:name', function( req, res ) {
 	var oUser = req.session.pub;

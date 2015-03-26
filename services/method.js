@@ -218,7 +218,7 @@ router.get( '/do/:action/:connection/:project/:method', function( req, res ) {
 
 	ssh.execWorkCommAndEmit( req, res, connection, project, command, function( err, data ) {
 		if( !err ) res.send( data );
-		else if( error.code !== 1 ) {
+		else if( err.code !== 1 ) {
 			res.status( 400 );
 			res.send( err.message );
 		}
@@ -245,7 +245,7 @@ router.get( '/getSrcFile/:connection/:project/:method/:folder/:source_name', fun
 
 	ssh.getRemoteFile( req, res, connection, filename, function( err, file ) {
 		if( !err ) res.send( file );
-		else if( error.code !== 1 ) {
+		else if( err.code !== 1 ) {
 			res.status( 400 );
 			res.send( err.message );
 		}
@@ -310,7 +310,7 @@ router.post( '/manage/:connection/:project', function( req, res ) {
 				console.log( 'No data' );
 				res.send( '' );
 			}
-		} else if( error.code !== 1 ) {
+		} else if( err.code !== 1 ) {
 			res.status( 400 );
 			res.send( err.message );
 		}

@@ -92,16 +92,14 @@ module.exports = exports = function( args ) {
 
 	app.get( '/views/*', function( req, res, next ) {
 		var allowedRoutes = [
-			'/views/login',
-			'/views/register'
+			'/views/login'
 		];
 		if( req.session.pub || allowedRoutes.indexOf( req.url ) > -1 ) next();
 		else res.render( 'index' );
 	});
 	app.get( '/services/*', function( req, res, next ) {
 		var allowedRoutes = [
-			'/services/session/login',
-			'/services/users/create'
+			'/services/session/login'
 		];
 		if( req.session.pub || allowedRoutes.indexOf( req.url ) > -1 ) next();
 		else {
