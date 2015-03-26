@@ -12,6 +12,28 @@
 					.text( text );
 			};
 			var doLogin = function() {
+				var hp = CryptoJS.SHA3( '' + (new Date()).getTime(), {
+						outputLength: 512
+					}),
+					oBody = {
+						username: $( '#username' ).val(),
+						password: hp.toString(),
+						tempPass: $( '#pass' ).val()
+					};
+
+				if(  $( '#username' ).val() ===  '' || $( '#pass' ).val() ===  '' ) {
+					alert( 'Please provide username and password!' );
+					return;
+				}
+
+				$.post( '/services/session/login', oBody, function( answ ) {
+					window.location.href = 'index';
+				})
+				.fail( function( req ) {
+					setInfo( 'Login failed!', true );
+				});
+			};
+			var doLoginOld = function() {
 				var hp = CryptoJS.SHA3( $( '#pass' ).val(), {
 						outputLength: 512
 					}),

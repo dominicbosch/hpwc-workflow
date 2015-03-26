@@ -27,7 +27,7 @@ router.get( '/get/:connection/:project', function( req, res ) {
 			if( !err ) {
 				req.session.pub.selectedConnection.selectedProject = project.name;	
 				res.send( project );
-			} else if( error.code !== 1 ) {
+			} else if( err.code !== 1 ) {
 				res.status( 400 );
 				res.send( err.message );
 			}
@@ -74,7 +74,7 @@ router.post( '/manage/:connection', function( req, res ) {
 				console.log( 'No data' );
 				res.send( '' );
 			}
-		} else if( error.code !== 1 ) {
+		} else if( err.code !== 1 ) {
 			res.status( 400 );
 			res.send( err.message );
 		}
