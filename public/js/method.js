@@ -39,6 +39,29 @@ function updateMethodForm( cb ) {
 	}
 }
 
+function createZip() {
+
+	var config_name = $( '#configs' ).val(),
+		project_name = $( '#projects' ).val(),
+		method_name = $( '#methods' ).val();
+
+
+	$.get( '/services/method/buildAndGetZip/' 
+		+ config_name + '/' 
+		+ project_name + '/' 
+		+ method_name, function( encZip ) {
+		
+		$( '#zipFile' ).attr( 'download', method_name + '.tar.gz' );
+		$( '#zipFile' ).attr( 'href', 'data:application/zip; base64, ' + encZip );
+
+		$( '#zipFile' ).append( '<img src="../img/archive.png" style="float:right" height="60"/>')
+
+	}).fail(function( xhr ) {
+		console.log( xhr.responseText );
+	});
+
+}
+
 function getAndSetMethods( config_name, project_name, method_val, cb ) {
 
 	if( ( config_name !== '' ) && ( project_name !== '' ) ) {
@@ -117,7 +140,7 @@ function actionOnMethodSocketIO( action ) {
 
 	subscribe( config_name );
 
-	$.get('/services/method/' 
+	$.get('/services/method/do/' 
 		+ action + '/'
 		+ config_name + '/' 
 		+ project_name + '/' 

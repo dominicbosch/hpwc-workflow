@@ -32,6 +32,35 @@ function showGraph() {
 
 }
 
+function deleteExperiment() {
+
+	var config_name = $( '#configs' ).val(),
+		project_name = $( '#projects' ).val(),
+		experiment_name = $( '#experiments' ).val();
+
+	if ( experiment_name === '' ) {
+		alert( 'First select an experiment!' );
+		return;
+	}
+
+	$.get( '/services/experiment/delete/' 
+		+ config_name + '/' 
+		+ project_name + '/' 
+		+ experiment_name, function( data ) {
+		
+		if ( !data.err ) {
+			$( '#experiments' ).val( '' ).change();
+			$( '#experiments option[value=' + experiment_name + ']' ).remove();
+		}
+
+		addTextAndScroll( 'info_textarea', data.msg );
+
+	}).fail(function( xhr ) {
+		console.log( xhr.responseText );
+	});
+
+}
+
 function cleanProjectForm() {
 	$( '#project_details td' ).text( '--' );
 }

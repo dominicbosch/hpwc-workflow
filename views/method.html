@@ -84,6 +84,7 @@ Project Name:
 							<option value="src">sources</option>
 							<option value="out">outputs</option>
 						</select>
+						<button id="create_zip" onclick="createZip()">Create Zip</button>
 					</td>
 					<td></td>
 				</tr>
@@ -91,7 +92,6 @@ Project Name:
 					<td>Files</td>
 					<td>
 						<select id="src_files" name="src_name" size="5">
-							
 						</select>
 					</td>
 					<td>
@@ -111,7 +111,9 @@ Project Name:
 					<td>
 						<textarea name="comment"></textarea>
 					</td>
-					<td></td>
+					<td>
+						<a id="zipFile"/>
+					</td>
 				</tr>
 			</table>
 			<div class="centered-text">

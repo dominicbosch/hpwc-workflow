@@ -23,6 +23,7 @@
 		<select id="experiments" name="experiment_name">
 			<option value="">Choose An Experiment</option>
 		</select>
+		<button onclick="deleteExperiment()">Delete Experiment</button>
 	</div>
 	<table id="exp_details">
 		<tr>
@@ -95,6 +96,12 @@
 			<td name="comment">--</td>
 		</tr>
 	</table>
+</div>
+<div id="info_area">
+	<h3>
+		Info
+	</h3>
+	<textarea id="info_textarea" class="scrollarea" readonly></textarea>
 </div>
 {% endblock %}
 {% block bottom %}

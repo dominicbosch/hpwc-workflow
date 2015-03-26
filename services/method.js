@@ -201,7 +201,7 @@ router.get( '/:action/:connection/:project/:method', function( req, res ) {
 });
 */
 
-router.get( '/:action/:connection/:project/:method', function( req, res ) {	
+router.get( '/do/:action/:connection/:project/:method', function( req, res ) {	
 	var connection = req.params.connection,
 		project = req.params.project,
 		method = req.params.method,
@@ -295,6 +295,52 @@ router.post( '/manage/:connection/:project', function( req, res ) {
 			}
 		}
 	});
+});
+
+router.get( '/buildAndGetZip/:connection/:project/:method', function( req, res ) {
+	var arrCommand, oConn = {},
+		confName = req.params.connection,
+		projName = req.params.project,
+		metName = req.params.method;
+
+	console.log( 'Chiamato2' );
+	if ( req.session.pub ) {
+
+		arrCommand = [
+			'workflow', 'build_zip',
+			'-p', '"' + projName + '"',
+			'-m', metName
+		];
+		console.log( 'Chiamato' );
+		oConn = req.session.pub.configurations[ confName ];
+		
+		ssh.execWorkCommSync( req, res, confName, arrCommand.join( ' ' ), function( err, data ) {
+			var pos, command, remotePath = '';
+
+			if( !err ) {
+				console.log( 'Project manage command (' + arrCommand.join(' ') + ') got data: \n' + data );
+				
+				pos = data.indexOf( 'Zip created!' );
+				if( pos !== -1 ) {
+					remotePath = path.join( oConn.workspace, projName, metName, 'src.tar.gz' );
+				}
+				
+				if ( remotePath !== '' ){
+
+					command = 'base64 ' + remotePath;
+
+					ssh.executeCommandSync( req, res, confName, command, function( err, encZip ) {
+						res.send( encZip);
+					});
+				} else {
+					res.send( '' );
+				}
+			}
+		});
+
+	} else {
+		res.send( '' );
+	}
 });
 
 module.exports = router;

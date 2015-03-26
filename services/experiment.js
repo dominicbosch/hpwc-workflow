@@ -63,4 +63,33 @@ router.post( '/run/:connection/:project', function( req, res ) {
 	}
 });
 
+// Delete Experiment
+router.get( '/delete/:connection/:project/:experiment', function( req, res ) {
+	var arrCommand,
+		confName = req.params.connection,
+		projName = req.params.project,
+		expName = req.params.experiment;
+
+	//get experiment descriptor
+	if ( req.session.pub ) {
+		
+		arrCommand = [
+			'workflow', 'exp', '-d',
+			'-p', '"' + projName + '"',
+			'-x', expName
+		];
+
+		ssh.execWorkCommSync( req, res, confName, arrCommand.join( ' ' ), function( err, data ) {
+			console.log( 'Delete experiment command (' + arrCommand.join( ' ' ) + ') got data: ');
+			if( !err ) {
+				res.send( { msg: data } );
+			} else {
+				res.send( { err: true, msg: err } );
+			}
+		});
+	} else {
+		res.send( { err: true, msg: 'Error: No connection' } );
+	}
+});
+
 module.exports = router;
