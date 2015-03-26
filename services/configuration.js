@@ -17,14 +17,13 @@ router.post( '/create', function( req, res ) {
 		res.send( 'Missing Parameters!' );
 	} else {
 		ssh.createConfiguration( req.session.pub.username, oBody, false, function( err, oConf ) {
-			if( err ) {
-				console.error( err );
-				res.status( 400 );
-				res.send( 'Connection "' + oBody.name + '" initialization failed: ' + err.message );
-			} else {
+			if( !err ) {
 				req.session.pub.configurations[ oConf.name ] = oConf;
 				res.send( 'Connection initialization successful, configuration "' 
 					+ oConf.name + '" created!' );
+			} else if( err.code !== 1 ) {
+				res.status( 400 );
+				res.send( 'Connection "' + oBody.name + '" initialization failed: ' + err.message );
 			}
 		});
 	}
@@ -61,13 +60,12 @@ router.post( '/delete', function( req, res ) {
 		res.send( 'Missing Configuration Name!' );
 	} else {
 		ssh.deleteConfiguration( req.session.pub.username, oBody.name, function( err ) {
-			if( err ) {
-				console.error( err );
-				res.status( 400 );
-				res.send( 'Configuration deletion failed: ' + err.message );
-			} else {
+			if( !err ) {
 				delete req.session.pub.configurations[ oBody.name ];
 				res.send( 'Configuration "' + oBody.name + '" deletion successful!' );
+			} else if( err.code !== 1 ) {
+				res.status( 400 );
+				res.send( 'Configuration deletion failed: ' + err.message );
 			}
 		});
 	}
@@ -77,16 +75,16 @@ router.post( '/delete', function( req, res ) {
 router.get( '/connect/:name', function( req, res ) {
 	var oUser = req.session.pub;
 	ssh.connectToHost( oUser.username, oUser.configurations[ req.params.name ], function( err ) {
-		if( err ) {
-			console.log( err );
-			res.status( 400 );
-			res.send("Connection failed!");
-		} else {
+		if( !err ) {
 			console.log( 'User "' + oUser.username + '" connected to "' + req.params.name + '"' );
 			if (req.session.pub.selectedConnection.name === req.params.name ) {
 				req.session.pub.selectedConnection.status = true;
 			}
-			res.send("Connection Created!");
+			res.send( "Connection Created!" );
+		} else if( err.code !== 1 ) {
+			console.log( err );
+			res.status( 400 );
+			res.send( "Connection failed!" );
 		}
 	});
 });

@@ -6,3 +6,4 @@ The hpwc-workflow project allows the management of experiments, distributed over
 Other documents describing the architecture or parts of it:
 
 - [Object Specifications](objects.md)
+- [Error Handling](error.md)
