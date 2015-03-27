@@ -95,7 +95,7 @@ module.exports = exports = function( args ) {
 			'/views/login'
 		];
 		if( req.session.pub || allowedRoutes.indexOf( req.url ) > -1 ) next();
-		else res.render( 'index' );
+		else res.render( 'login' );
 	});
 	app.get( '/services/*', function( req, res, next ) {
 		var allowedRoutes = [

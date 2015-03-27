@@ -6,7 +6,6 @@ This reference defines the expected format for several objects used within the a
 Users Object:
 
     {
-      "dominic": {
         "pub": {
           "username": "dominic",
           "configurations": {
@@ -25,7 +24,6 @@ Users Object:
         "password": "[SHA-3 hashed password]",
         "privateKey": "[privateKey]",
         "publicKey": "[publicKey]"
-      }
     }
 
 
