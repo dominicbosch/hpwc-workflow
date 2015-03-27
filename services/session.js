@@ -16,7 +16,7 @@ var request = require('request');
 
 authenticateStudent = function( username, password, cb ) {
 
-	var url = 'https://centrald.dmi.unibas.ch/REST/authorizeforcourse/17164/' + username,
+	var url = 'https://central.dmi.unibas.ch/REST/authorizeforcourse/17164/' + username,
     	auth = "Basic " + new Buffer('workflow:w0rkfl0w').toString("base64");
 
 	request.post(
