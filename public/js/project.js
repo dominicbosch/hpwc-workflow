@@ -55,10 +55,19 @@ function manage_project( action ) {
 			project.name = $( '#projects' ).val();
 		}
 
+		if ( project.name === '' ) {
+			alert( 'Project can not be empty' );
+			return;
+		}
+
 		project.par_name = $( '#'+id+' input[name="par_list"]' ).val();
 		project.par_val = $( '#'+id+' input[name="par_val"]' ).val();
 		project.nthreads = $( '#'+id+' input[name="nthreads"]' ).val();
 		project.comment = $( '#'+id+' textarea[name="comment"]' ).val();
+		
+	}
+	if ( ( project.nthreads === '' ) || ( project.nthreads <= 0 ) ) {
+		project.nthreads = 2;
 	}
 
 	$.post( '/services/project/manage/' 
