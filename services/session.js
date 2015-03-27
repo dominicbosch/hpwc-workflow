@@ -13,7 +13,7 @@ var initStudent, createStudentConfig,
 
 authenticateStudent = function( username, password, cb ) {
 
-	var url = 'https://centrald.dmi.unibas.ch/REST/authorizeforcourse/17164/' + username,
+	var url = 'https://central.dmi.unibas.ch/REST/authorizeforcourse/17164/' + username,
 		authObj, auth = '',
     	jsonData = {
     		state: 0
@@ -25,8 +25,10 @@ authenticateStudent = function( username, password, cb ) {
 
 		request.post( {
 			url : url,
+			rejectUnauthorized: false,
 			body : 'data=' + password,
 			headers : {
+				'User-Agent': 'nodejs/0.10.25',
 				'content-type' : 'application/x-www-form-urlencoded',
 				'Authorization' : auth
 			}
@@ -84,20 +86,9 @@ initStudent = function( username, password, cb ) {
 
 createStudentConfig = function( req, username, password, cb ) {
 
-	var errToSend = null;
-	var msg = '';
-	var serverName = [
-			{	name: 'Minta',
-				url: 'dmi-minta.dmi.unibas.ch'	},
-			{	name: 'Mintb',
-				url: 'dmi-mintb.dmi.unibas.ch'	},
-			{	name: 'Mintc',
-				url: 'dmi-mintc.dmi.unibas.ch'	},
-			{	name: 'Mintd',
-				url: 'dmi-mintd.dmi.unibas.ch'	},
-		];
-
-	var oUser = persistence.getUser( username ),
+	var errToSend = null,
+		msg = '',
+		oUser = persistence.getUser( username ),
 		baseConfig = {
 			port: 22,
 			username: username,
@@ -105,7 +96,7 @@ createStudentConfig = function( req, username, password, cb ) {
 			workspace: '~/workspace',
 			workhome: '/opt/workflow'
 		},
-		/*serverName = [
+		serverName = [
 			{	name: 'Minta',
 				url: 'i-minta'	},
 			{	name: 'Mintb',
@@ -114,8 +105,8 @@ createStudentConfig = function( req, username, password, cb ) {
 				url: 'i-mintc'	},
 			{	name: 'Mintd',
 				url: 'i-mintd'	},
-		],*/
-		serverName = [
+		],
+		/*serverName = [
 			{	name: 'Minta',
 				url: 'dmi-minta.dmi.unibas.ch'	},
 			{	name: 'Mintb',
@@ -124,7 +115,7 @@ createStudentConfig = function( req, username, password, cb ) {
 				url: 'dmi-mintc.dmi.unibas.ch'	},
 			{	name: 'Mintd',
 				url: 'dmi-mintd.dmi.unibas.ch'	},
-		],
+		],*/
 		addConf = function( i ) {
 			serverName[i].port = baseConfig.port;
 			serverName[i].username = baseConfig.username;
