@@ -29,6 +29,18 @@ loadUser = function( username ) {
 
 };
 
+exports.getAuth = function() {
+	var auth = null,
+		pathToFile = path.resolve( __dirname, 'auth.json' );
+
+	try {
+		auth = JSON.parse( fs.readFileSync( pathToFile ) );
+	} catch( e ) {
+		console.log( 'Authentication file not existing!' );
+	}
+	return auth;
+};
+
 exports.getUser = function( username ) {
 	if( !oUsers[ username ] ) loadUser( username );
 	return oUsers[ username ];

@@ -5,25 +5,25 @@ var initStudent, createStudentConfig,
 	express = require( 'express' ),
 	persistence = global.persistence,
 	keygen = require( 'ssh-keygen' ),
-	https = require( 'https' ),
-	http = require( 'http' ),
 	socketio = require( '../modules/socket' ),
 	ssh = require( '../modules/ssh' ),
 	persistence = global.persistence,
+	request = require('request'),
 	router = express.Router();
-
-var request = require('request');
 
 authenticateStudent = function( username, password, cb ) {
 
-	var url = 'https://central.dmi.unibas.ch/REST/authorizeforcourse/17164/' + username,
-    	auth = "Basic " + new Buffer('workflow:w0rkfl0w').toString("base64"),
+	var url = 'https://centrald.dmi.unibas.ch/REST/authorizeforcourse/17164/' + username,
+		authObj, auth = '',
     	jsonData = {
     		state: 0
     	};
 
-	request.post(
-		{
+	authObj = persistence.getAuth();
+	if ( authObj && authObj.username && authObj.password ) {
+		auth = "Basic " + new Buffer( authObj.username + ':' + authObj.password ).toString("base64");
+
+		request.post( {
 			url : url,
 			body : 'data=' + password,
 			headers : {
@@ -44,10 +44,11 @@ authenticateStudent = function( username, password, cb ) {
 				console.log( err );
 				cb( err );
 			}
-		}
-	);
+		});
+	} else {
+		cb( 'Authentication failed' );
+	}
 };
-
 
 
 initStudent = function( username, password, cb ) {
