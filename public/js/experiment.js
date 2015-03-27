@@ -141,7 +141,7 @@ function runExp( ) {
 
 	subscribe( config_name );
 
-	if ( nexec === '' ) {
+	if ( ( nexec === '' ) || ( nexec <= 0 ) ) {
 		nexec = 5;
 	}
 	experiment = {
