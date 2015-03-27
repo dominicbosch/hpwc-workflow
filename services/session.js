@@ -12,26 +12,31 @@ var initStudent, createStudentConfig,
 	persistence = global.persistence,
 	router = express.Router();
 
+var request = require('request');
+
 authenticateStudent = function( username, password, cb ) {
 
-	/*var url = 'http://www.thomas-bayer.com/sqlrest/CUSTOMER/'; //build right url
+	var url = 'https://centrald.dmi.unibas.ch/REST/authorizeforcourse/17164/' + username,
+    	auth = "Basic " + new Buffer('workflow:w0rkfl0w').toString("base64");
 
-    var requestREST = http.get( url, function ( response ) {
-  
-		var buffer = '';
-
-		response.on( 'data', function ( chunk ) {
-			buffer += chunk;
-		}); 
-
-		response.on( 'end', function ( err ) {
-			console.log(buffer);
-			console.log("\n");
-			cb( null, 'OK' );
-	    }); 
-	});*/
-	cb( null, 'OK' );
+	request.post(
+		{
+			url : url,
+			body : 'data=' + password,
+			headers : {
+				'content-type' : 'application/x-www-form-urlencoded',
+				'Authorization' : auth
+			}
+		},
+		function ( error, response, data ) {
+	        console.log( 'RESPONSE: ' + data );
+	        var jsonData = JSON.parse( data );
+	       	cb( null, jsonData );
+		}
+	);
 };
+
+
 
 initStudent = function( username, password, cb ) {
 
@@ -149,13 +154,19 @@ router.post( '/login', function( req, res ) {
 
 	authenticateStudent( req.body.username, req.body.tempPass, function( err, data ) {
 
-		if ( !err && data === 'OK' ) {
+		console.log( 'STATE: ' + data.state );
 
-			var oUser = persistence.getUser( req.body.username );
+		if ( !err && (data.state === 1) ) {
+
+			var username = data.shortName;
+
+			console.log( 'USERNAME: ' + username );
+
+			var oUser = persistence.getUser( username );
 
 			if ( oUser ) { 
 				req.session.pub = oUser.pub;
-				createStudentConfig( req, req.body.username, req.body.tempPass, function( err, data ){
+				createStudentConfig( req, username, req.body.tempPass, function( err, data ){
 					if ( !err ) {
 						console.log('SOCKETID: ' + req.session.pub.socketID );
 						socketio.openSocket( req.session.pub.socketID );
@@ -173,15 +184,15 @@ router.post( '/login', function( req, res ) {
 				});
 			} else {
 				//create user
-				initStudent( req.body.username, req.body.password, function( err, data ){
+				initStudent( username, req.body.password, function( err, data ){
 					if ( !err ) {
 
-						oUser = persistence.getUser( req.body.username );
+						oUser = persistence.getUser( username );
 
 						req.session.pub = oUser.pub;
 
 						//create configurations
-						createStudentConfig( req, req.body.username, req.body.tempPass, function( err, data ){
+						createStudentConfig( req, username, req.body.tempPass, function( err, data ){
 							if ( !err ) {
 								res.send( {
 									err: null,
