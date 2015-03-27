@@ -4,8 +4,8 @@ workflow = require( './index' );
 // process.env.VERBOSE = true;
 
 workflow({
-	port: 8080
-	// , production: true
+	port: 8081
+	, production: true
 	// ,
 	// keyfile: 'config/https-key.pem',
 	// certfile: 'config/https-cert.pem'
