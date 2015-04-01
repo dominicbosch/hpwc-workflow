@@ -223,7 +223,7 @@ function connectToSocket( sockeID ) {
 
 	var port = (location.port === '') ? '' : ':' + location.port;
 
-	socket = io.connect( port + '/' + sockeID );
+	socket = io.connect( port + '/' + sockeID, { secure : true } );
 
 	console.log( socket, 'connectionTo ' + port );
 
