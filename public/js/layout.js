@@ -223,8 +223,7 @@ function connectToSocket( sockeID ) {
 
 	var port = (location.port === '') ? '' : ':' + location.port;
 
-	//socket = io.connect( port + '/' + sockeID );
-	socket = io.connect( 'http://localhost:8081/' + sockeID );
+	socket = io.connect( port + '/' + sockeID );
 
 	console.log( socket, 'connectionTo ' + port );
 
