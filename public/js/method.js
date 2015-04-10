@@ -50,11 +50,22 @@ function createZip() {
 		+ config_name + '/' 
 		+ project_name + '/' 
 		+ method_name, function( encZip ) {
-		
-		$( '#zipFile' ).attr( 'download', method_name + '.tar.gz' );
-		$( '#zipFile' ).attr( 'href', 'data:application/zip; base64, ' + encZip );
 
-		$( '#zipFile' ).append( '<img src="../img/archive.png" style="float:right" height="60"/>')
+		if ( encZip !== '' ) {
+			//remove old version
+			//clean image
+			$( '#zipFile' ).empty();
+			$( '#zipFile' ).removeAttr( 'download' );
+			$( '#zipFile' ).removeAttr( 'href' );
+
+			//put new version
+			$( '#zipFile' ).attr( 'download', method_name + '.tar.gz' );
+			$( '#zipFile' ).attr( 'href', 'data:application/zip; base64, ' + encZip );
+
+			$( '#zipFile' ).append( '<img src="../img/archive.png" style="float:right" height="60"/>');
+			$( '#zipFile' ).append( '</br>');
+			$( '#zipFile' ).append( '<label style="float:right" >' + method_name + '.tar.gz</label>' );
+		}
 
 	}).fail(function( xhr ) {
 		console.log( xhr.responseText );
