@@ -52,6 +52,11 @@
 					setInfo( 'Login failed!', true );
 				});
 			};
+			var checkEnter = function( e ){
+				if (e.keyCode == 13) {
+					doLogin();
+				}
+			}
 		</script>
 	{% endblock %}
 
@@ -66,12 +71,12 @@
 			<tr>
 				<td>Username</td>
 				<td class="colon">:</td>
-				<td><input type="text" id="username" autofocus></td>
+				<td><input type="text" id="username" onkeypress="checkEnter(event)" autofocus></td>
 			</tr>
 			<tr>
 				<td>Password</td>
 				<td class="colon">:</td>
-				<td><input type="password" id="pass"></td>
+				<td><input type="password" id="pass" onkeypress="checkEnter(event)" ></td>
 			</tr>
 			<tr>
 				<td colspan="3" class="threecol">

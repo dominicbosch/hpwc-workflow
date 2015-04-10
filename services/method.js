@@ -323,7 +323,6 @@ router.get( '/buildAndGetZip/:connection/:project/:method', function( req, res )
 		projName = req.params.project,
 		metName = req.params.method;
 
-	console.log( 'Chiamato2' );
 	if ( req.session.pub ) {
 
 		arrCommand = [
@@ -331,7 +330,7 @@ router.get( '/buildAndGetZip/:connection/:project/:method', function( req, res )
 			'-p', '"' + projName + '"',
 			'-m', metName
 		];
-		console.log( 'Chiamato' );
+		
 		oConn = req.session.pub.configurations[ confName ];
 		
 		ssh.execWorkCommSync( req, res, confName, arrCommand.join( ' ' ), function( err, data ) {
