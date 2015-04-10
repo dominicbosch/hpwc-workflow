@@ -1,3 +1,4 @@
 node_modules/
 users/
 *.log
+persistence_handlers/auth.json
