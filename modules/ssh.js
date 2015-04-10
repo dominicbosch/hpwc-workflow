@@ -411,8 +411,8 @@ exports.getRemoteFile = function( req, res, connection, filename, cb ) {
 };
 
 exports.setRemoteFile = function( req, res, connection, filename, content, cb ) {	
-	content = content.replace( /"/g, '\\"');
-	executeCommandSync( req, res, connection, 'echo "' + content + '" > ' + filename, cb );
+	content = content.replace( /'/g, "'\"'\"'");//.replace( /"/g, '\\"');
+	executeCommandSync( req, res, connection, "echo '" + content + "' > " + filename, cb );
 };
 
 // This is a general handler for retrieved lists of the same format

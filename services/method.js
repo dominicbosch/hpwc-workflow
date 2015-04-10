@@ -265,6 +265,9 @@ router.post( '/setSrcFile/:connection/:project/:method/:source_name', function( 
 	ssh.setRemoteFile( req, res, connection, filename, file.content, function( err, data ) {
 		if( !err ) {
 			res.send( data );
+		} else {
+			console.log("ERROR: " + err.code + " MSG: " + err.message );
+			res.send( err );
 		}
 	});
 });
