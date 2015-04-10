@@ -63,19 +63,23 @@
 	{% else %}
 		<h1>Login</h1>
 		<table id="loginform" class="form">
-			<tr>
-				<td>Username</td>
-				<td class="colon">:</td>
-				<td><input type="text" id="username" autofocus></td>
-			</tr>
-			<tr>
-				<td>Password</td>
-				<td class="colon">:</td>
-				<td><input type="password" id="pass"></td>
-			</tr>
-			<tr>
-				<td colspan="3" class="threecol"><button onclick="doLogin()">Login</button></td>
-			</tr>
+			<form>
+				<tr>
+					<td>Username</td>
+					<td class="colon">:</td>
+					<td><input type="text" id="username" autofocus></td>
+				</tr>
+				<tr>
+					<td>Password</td>
+					<td class="colon">:</td>
+					<td><input type="password" id="pass"></td>
+				</tr>
+				<tr>
+					<td colspan="3" class="threecol">
+						<button onclick="doLogin()">Login</button>
+					</td>
+				</tr>
+			</form>
 		</table>
 	{% endif %}
 {% endblock %}
