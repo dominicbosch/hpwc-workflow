@@ -84,7 +84,7 @@ router.get( '/delete/:connection/:project/:experiment', function( req, res ) {
 		];
 
 		ssh.execWorkCommSync( req, res, confName, arrCommand.join( ' ' ), function( err, data ) {
-			console.log( 'Delete experiment command (' + arrCommand.join( ' ' ) + ') got data: ');
+			//console.log( 'Delete experiment command (' + arrCommand.join( ' ' ) + ') got data: ');
 			if( !err ) {
 				res.send( { msg: data } );
 			} else {

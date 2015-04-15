@@ -31,7 +31,7 @@ router.post( '/buildAndGet/:connection/:project/:experiment', function( req, res
 			var pos, command, remotePath = '';
 
 			if( !err ) {
-				console.log( 'Project manage command (' + arrCommand.join(' ') + ') got data: \n' + data );
+				//console.log( 'Project manage command (' + arrCommand.join(' ') + ') got data: \n' + data );
 				
 				pos = data.indexOf( 'Graph path:' );
 				if( pos !== -1 ) {

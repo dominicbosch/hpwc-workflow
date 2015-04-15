@@ -246,12 +246,12 @@ executeCommand = function( req, res, connection, command, project, cb ) {
 							content: '',
 							count: 0
 						};
-						console.log( 'IN if and project: ' + project );
+						//console.log( 'IN if and project: ' + project );
 						cb( null, true );
 					}
 					
 					processData = function( data ) {
-						console.log( 'Received data for project' );
+						//console.log( 'Received data for project' );
 						if ( project ) {
 							//add to log
 							oUserLogs[ username ][ connection ][ project ][ 'content' ] += data;
@@ -261,7 +261,7 @@ executeCommand = function( req, res, connection, command, project, cb ) {
 								msg: data.toString(),
 								count: ++oUserLogs[ username ][ connection ][ project ][ 'count' ]
 							}
-							console.log( 'Send in Room: ' + data + '\n COUNT: ' + oUserLogs[ username ][ connection ][ project ][ 'count' ] );
+							//console.log( 'Send in Room: ' + data + '\n COUNT: ' + oUserLogs[ username ][ connection ][ project ][ 'count' ] );
 							//send to client
 							socketio.sendInRoom( req.session.pub.socketID, connection, objToSend );
 						} else {
@@ -273,7 +273,7 @@ executeCommand = function( req, res, connection, command, project, cb ) {
 					stream.on( 'data', processData )
 					.on( 'end', function() {
 						//send all data back through Callback Function
-						console.log('STREAM ENDED');
+						//console.log('STREAM ENDED');
 						if ( project ) {
 
 							objToSend = {
@@ -332,9 +332,9 @@ exports.executeCommandAndEmit = executeCommandAndEmit = function( req, res, conn
 	var message = '',
 		username = req.session.pub.username;
 
-	console.log('Project: ' + project + ' - Active: ' + oUserLogs[ username ][ connection ][ 'activeProject' ] );
+	//console.log('Project: ' + project + ' - Active: ' + oUserLogs[ username ][ connection ][ 'activeProject' ] );
 	if ( project && oUserLogs[ username ][ connection ][ 'activeProject' ] ) {
-		console.log('IN!!!!!!sadasdas');
+		//console.log('IN!!!!!!sadasdas');
 		message = 'Wait until the previous command is finished\n';
 
 		if ( oUserLogs[ username ][ connection ][ 'activeProject' ] !== project ) {
@@ -431,7 +431,7 @@ exports.getRemoteList = function( req, res, connection, command, cb ) {
 			if( pos !== -1 ) {
 				list = data.substring( pos + 1 ).trim().split( ' ' );
 			} 
-			console.log( 'Get list from file "' + command + '": ' + list );
+			//console.log( 'Get list from file "' + command + '": ' + list );
 			cb( null, list );
 		}
 	});

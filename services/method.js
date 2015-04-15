@@ -301,13 +301,13 @@ router.post( '/manage/:connection/:project', function( req, res ) {
 	}
 
 	ssh.execWorkCommSync( req, res, conn, arrCommand.join( ' ' ), function( err, data ) {
-		console.log( 'Method manage command (' + arrCommand.join() + ') got data: ');
+		//console.log( 'Method manage command (' + arrCommand.join() + ') got data: ');
 		if( !err ) {
 			if ( data ) {
-				console.log( data );
+				//console.log( data );
 				res.send( data );
 			} else {
-				console.log( 'No data' );
+				//console.log( 'No data' );
 				res.send( '' );
 			}
 		} else if( err.code !== 1 ) {
@@ -337,7 +337,7 @@ router.get( '/buildAndGetZip/:connection/:project/:method', function( req, res )
 			var pos, command, remotePath = '';
 
 			if( !err ) {
-				console.log( 'Project manage command (' + arrCommand.join(' ') + ') got data: \n' + data );
+				//console.log( 'Project manage command (' + arrCommand.join(' ') + ') got data: \n' + data );
 				
 				pos = data.indexOf( 'Zip created!' );
 				if( pos !== -1 ) {
