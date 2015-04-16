@@ -96,6 +96,7 @@ createStudentConfig = function( req, username, password, cb ) {
 			workspace: '~/workspace',
 			workhome: '/opt/workflow'
 		},
+		/*
 		serverName = [
 			{	name: 'Minta',
 				url: 'i-minta'	},
@@ -105,8 +106,8 @@ createStudentConfig = function( req, username, password, cb ) {
 				url: 'i-mintc'	},
 			{	name: 'Mintd',
 				url: 'i-mintd'	},
-		],
-		/*serverName = [
+		],*/
+		serverName = [
 			{	name: 'Minta',
 				url: 'dmi-minta.dmi.unibas.ch'	},
 			{	name: 'Mintb',
@@ -115,7 +116,7 @@ createStudentConfig = function( req, username, password, cb ) {
 				url: 'dmi-mintc.dmi.unibas.ch'	},
 			{	name: 'Mintd',
 				url: 'dmi-mintd.dmi.unibas.ch'	},
-		],*/
+		],
 		addConf = function( i ) {
 			serverName[i].port = baseConfig.port;
 			serverName[i].username = baseConfig.username;
