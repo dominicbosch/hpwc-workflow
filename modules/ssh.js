@@ -116,6 +116,7 @@ exports.createConfiguration = function( username, args, force, cb ) {
 			console.log( 'Closed temporary SSH connection %s@%s:%s, now: %s', args.username, args.url, args.port, --tempConnCounter );
 		}).on( 'error', function( e ) {
 			var msg = 'Error connecting "'+args.username+'@'+args.url+':'+args.port+'": ' + e.code;
+			console.log( 'Error: ' + e );
 			console.log( msg );
 			cb({ code: 0, message: msg });
 		}).connect({
@@ -197,6 +198,7 @@ exports.connectToHost = function( username, connObj, cb ) {
 		}).on( 'error', function( e ) {
 			delete oUserConnections[ username ][ connObj.name ];
 			console.log( 'Error connecting (#'+(++connCounter)+') "'+connObj.username+'@'+connObj.url+':'+connObj.port+'": ' + e.code );
+			console.log( 'Error: ' + e );
 			cb({ code: 0, message: 'Error connecting "'+connObj.username+'@'+connObj.url+':'+connObj.port+'": ' + e.code });
 		}).connect({
 			host: connObj.url,
