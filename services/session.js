@@ -26,7 +26,9 @@ authenticateStudent = function( username, password, cb ) {
 		request.post( {
 			url : url,
 			rejectUnauthorized: false,
-			body : 'data=' + password,
+			form: { 
+				'data': password
+			},
 			headers : {
 				'User-Agent': 'nodejs/0.10.25',
 				'content-type' : 'application/x-www-form-urlencoded',
