@@ -2,7 +2,7 @@ var bunyan = require( 'bunyan' );
 
 var exports = module.exports = bunyan.createLogger({ 
 	name: 'hpwc-workflow',
-	streams = [{
+	streams: [{
 			level: 'error'
 			stream: process.stdout
 		}, {
