@@ -130,6 +130,7 @@ function runExp( ) {
 	var config_name = $( '#configs' ).val(),
 		project_name = $( '#projects' ).val(),
 		nexec = $( '#repetitions' ).val(),
+		dimensions, methods, nthreads,
 		experiment;
 
 	if ( config_name === '' ) {
@@ -142,19 +143,37 @@ function runExp( ) {
 		return;
 	}
 
+	if ( ( nexec === '' ) || ( nexec <= 0 ) ) {
+		nexec = 5;
+	}
+
+	dimensions = buildList( 'experiment_setup', 'par_val' );
+	if ( dimensions === '' ) {
+		alert( 'Select at least one parameter' );
+		return;
+	}
+
+	methods = buildList( 'experiment_setup', 'methods' );
+	if ( methods === '' ) {
+		alert( 'Select at least one method' );
+		return;
+	}
+	nthreads = buildList( 'experiment_setup', 'nthreads' );
+	if ( nthreads === '' ) {
+		alert( 'Select at least one "nthread"' );
+		return; 
+	}
+
 	$( '.action' ).prop( 'disabled', true );
 
 	$( '#respWait' ).attr( 'src', '../img/ajax-loader.gif' );
 
 	subscribe( config_name );
 
-	if ( ( nexec === '' ) || ( nexec <= 0 ) ) {
-		nexec = 5;
-	}
 	experiment = {
-		dimensions : buildList( 'experiment_setup', 'par_val' ),
-		methods : buildList( 'experiment_setup', 'methods' ),
-		nthreads : buildList( 'experiment_setup', 'nthreads' ),
+		dimensions : dimensions,
+		methods : methods,
+		nthreads : nthreads,
 		nexecs : nexec
 	}
 
