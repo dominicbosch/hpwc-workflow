@@ -143,7 +143,7 @@ function runExp( ) {
 		return;
 	}
 
-	if ( nexec === '' ) {
+	if ( ( nexec === '' ) || ( nexec <= 0 ) ) {
 		nexec = 5;
 	}
 
