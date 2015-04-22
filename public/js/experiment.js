@@ -21,6 +21,13 @@ function addToList( name ) {
 }
 
 //OK
+function editAll( tag, name, val ) {
+
+	$( tag + '[name="' + name + '"] input' ).prop( 'checked', val );
+
+}
+
+//OK
 function cleanProjectForm() {
 	$( '#experiment_setup [name="par_list"]' ).empty();
 	$( '#experiment_setup [name="par_val"]' ).empty();
