@@ -7,16 +7,21 @@ function showGraph() {
 	var config_name = $( '#configs' ).val(),
 		project_name = $( '#projects' ).val(),
 		experiment_name = $( '#experiments' ).val(),
+		metric = $( 'input[name="metric_name"]' ).val(),
 		experiment;
 
 	if ( experiment_name === '' )
 		return;
 
+	if ( metric === '' )
+		metric = 'GFlop/s';
+
 	experiment = {
 		dimensions : buildList( 'exp_details', 'parameters' ),
 		methods : buildList( 'exp_details', 'methods' ),
 		nthreads : buildList( 'exp_details', 'nthreads' ),
-		fixed : $( '.fixed:checked' ).first().val()
+		fixed : $( '.fixed:checked' ).first().val(),
+		metric : metric
 	}
 
 	$.post( '/services/graph/buildAndGet/' 

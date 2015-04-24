@@ -24,7 +24,8 @@ router.post( '/buildAndGet/:connection/:project/:experiment', function( req, res
 			'-d', experiment.dimensions,
 			'-m', experiment.methods,
 			'-t', experiment.nthreads,
-			'-f', experiment.fixed
+			'-f', experiment.fixed,
+			'-M', experiment.metric
 		];
 		
 		ssh.execWorkCommSync( req, res, confName, arrCommand.join( ' ' ), function( err, data ) {
