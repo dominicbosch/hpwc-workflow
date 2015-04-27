@@ -47,7 +47,19 @@
 		<td id="Method"  style="width: 50%;">
 			<h1>Methods</h1>
 			<h4>Select the methods you want to be used in your experiment</h4>
-			<div name="methods" class="paramlist"></div>
+			<table style="width: 100%;">
+				<tr>
+					<td>
+						<div name="methods" class="paramlist"></div>
+					</td>
+				</tr>
+				<tr style="text-align: center;">
+					<td>
+						<button onclick="editAll('div','methods', true )">All</button>
+						<button onclick="editAll('div','methods', false )">Clean</button>
+					</td>
+				</tr>
+			</table>
 		</td>
 	</tr>
 	<tr>
