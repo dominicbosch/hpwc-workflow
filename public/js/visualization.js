@@ -7,16 +7,21 @@ function showGraph() {
 	var config_name = $( '#configs' ).val(),
 		project_name = $( '#projects' ).val(),
 		experiment_name = $( '#experiments' ).val(),
+		metric = $( 'input[name="metric_name"]' ).val(),
 		experiment;
 
 	if ( experiment_name === '' )
 		return;
 
+//	if ( metric === '' )
+//		metric = 'GFlop/s';
+
 	experiment = {
 		dimensions : buildList( 'exp_details', 'parameters' ),
 		methods : buildList( 'exp_details', 'methods' ),
 		nthreads : buildList( 'exp_details', 'nthreads' ),
-		fixed : $( '.fixed:checked' ).first().val()
+		fixed : $( '.fixed:checked' ).first().val(),
+		metric : '"' + metric + '"'
 	}
 
 	$.post( '/services/graph/buildAndGet/' 
@@ -25,6 +30,7 @@ function showGraph() {
 		+ experiment_name, experiment, function( encImage ) {
 		
 		$( '#out_image' ).attr( 'src', 'data:image/png; base64, ' + encImage );
+		$( '#out_image' ).attr( 'style', 'border:2px solid; padding: 10px;' );
 
 	}).fail(function( xhr ) {
 		console.log( xhr.responseText );
@@ -195,6 +201,7 @@ $(document).ready(function() {
 
 		//clean image
 		$( '#out_image' ).removeAttr( 'src' );
+		$( '#out_image' ).removeAttr( 'style' );
 
 		cleanOutputForm();
 		
@@ -213,6 +220,7 @@ $(document).ready(function() {
 
 		//clean image
 		$( '#out_image' ).removeAttr( 'src' );
+		$( '#out_image' ).removeAttr( 'style' );
 
 		updateOutputForm( );
 	});
@@ -222,6 +230,7 @@ $(document).ready(function() {
 
 		//clean image
 		$( '#out_image' ).removeAttr( 'src' );
+		$( '#out_image' ).removeAttr( 'style' );
 
 		//clean output list
 		$("#experiments").html("<option value=''>Choose An Experiment</option>");
@@ -257,5 +266,6 @@ $(document).ready(function() {
 
 	$( '#connectButton' ).on( 'click', function() {
 		$( '#out_image' ).removeAttr( 'src' );
+		$( '#out_image' ).removeAttr( 'style' );
 	});
 });
