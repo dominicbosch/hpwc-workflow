@@ -1,0 +1,42 @@
+#! /bin/sh
+### BEGIN INIT INFO
+# Provides:		  hpwc-server
+# Required-Start:	
+# Required-Stop:	 
+# Default-Start:	 2 3 4 5
+# Default-Stop:	  0 1 6
+# Short-Description: hpwc-server manages workflows over SSH
+# Description:	  hpwc-server manages workflows over SSH
+### END INIT INFO
+
+# INFO: COPY THIS FILE INTO /etc/init.d/ AND REGISTER IT WITH update-rc.d hpwc-server defaults
+# Description:	  hpwc-server manages workflows over SSH
+# Author: Dominic Bosch <dominic.bosch.db@gmail.com>
+NAME=run-hpwc-server.js
+DAEMON_PATH=/usr/local/hpwc-server
+export PATH=$PATH:/usr/local/bin
+export NODE_PATH=$NODE_PATH:/usr/local/lib/node_modules:$DAEMON_PATH/node_modules
+
+case "$1" in
+  start)
+	echo -n "Starting hpwc-server: "
+	mkdir -p /var/run/forever/
+	exec forever start -p /var/run/forever $DAEMON_PATH/$NAME
+	echo "Done!"
+	;;
+  stop)
+	echo -n "Stopping hpwc-server: "
+	exec forever stop $DAEMON_PATH/$NAME
+	echo "Done!"
+	;;
+  restart)
+	echo "Restarting hpwc-server: "
+	exec forever restart $DAEMON_PATH/$NAME
+	echo "Done!"
+	;;
+  *)
+	echo "Usage: /etc/init.d/hpwc-server {start|stop|restart}"
+	exit 1
+	;;
+esac
+exit 0

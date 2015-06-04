@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 workflow = require( './index' );
 
 // If you want ssh-keygen stdoutput:
