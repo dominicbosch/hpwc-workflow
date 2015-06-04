@@ -62,6 +62,7 @@ section > div.right > div {
 section > div.bottom {
 	width: 100%;
 	text-align: center;
+	padding-top: 20px;
 }
 
 section:after { 
@@ -127,6 +128,7 @@ td.threecol {
 }
 #project_details th {
 	text-align: right;
+	width: 50%;
 }
 #project_details td {
 	text-align: left;

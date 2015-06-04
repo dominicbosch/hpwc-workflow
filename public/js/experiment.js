@@ -184,7 +184,7 @@ function runExp( ) {
 		var msg = data;
 		
 		if ( data === true ) {
-			msg = 'Experiment Started!\nThe output will be shown in the respose area';
+			msg = 'Experiment Started!\nThe output will be shown in the response area';
 		} else {
 			//unsubscribe
 			unsubscribe( '' );

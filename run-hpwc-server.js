@@ -1,14 +1,4 @@
-
-process.on( 'SIGINT', function() {
-	console.log( 'Uh-Oh | GOT SIGINT' );
-	process.exit();
-});
-
-process.on( 'SIGTERM', function() {
-	console.log( 'Uh-Oh | GOT SIGTERM' );
-	process.exit();
-});
-
+#!/usr/bin/env node
 workflow = require( './index' );
 
 // If you want ssh-keygen stdoutput:

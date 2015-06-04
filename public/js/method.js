@@ -160,7 +160,7 @@ function actionOnMethodSocketIO( action ) {
 		var msg = data;
 
 		if ( data === true ) {
-			msg = 'Command Fired!\nThe output will be shown in the respose area';
+			msg = 'Command Fired!\nThe output will be shown in the response area';
 		} else {
 			//unsubscribe
 			unsubscribe( '' );
@@ -223,7 +223,7 @@ function manage_method( action ) {
 		+ config_name + '/' 
 		+ project_name, method, function( data ) {
 
-		setTextAndScroll( 'resp_textarea', data );
+		setTextAndScroll( 'info_textarea', data );
 
 		cleanMethodForm();
 
