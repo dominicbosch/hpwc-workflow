@@ -1,7 +1,7 @@
 'use strict';
 
 var oUserConnections = {}, oUserLogs = {},
-	getLog, executeCommand, 
+	getLog, executeCommand, killCommand, //killCommandNode,
 	executeCommandSync, executeCommandAndEmit,
 	execWorkCommSync, execWorkCommAndEmit,
 	tempConnCounter = 0, connCounter = 0,
@@ -214,8 +214,8 @@ exports.connectToHost = function( username, connObj, cb ) {
 // IMPORTANT: This means if callback function 'cb' receives an error as an argument
 //            no further response can be sent to the client!!!
 executeCommand = function( req, res, connection, command, project, cb ) {
-	var oConn, errString, alldata = '', objToSend = {},
-		processData, errorHappened = false,
+	var oConn, errString, alldata = '', objToSend = {}, dataString,
+		processData, errorHappened = false, pos = -1,
 		username = req.session.pub.username,
 		oConnections = oUserConnections[ username ];
 
@@ -226,7 +226,14 @@ executeCommand = function( req, res, connection, command, project, cb ) {
 		oConn = oConnections[ connection ];
 
 		if( oConn ) {
-
+			//add code to store id
+			//start here
+			if ( project ) {
+				command = 'echo "PID: $$"; '
+						+ 'echo "STARTTIME: $(ps -p $$ -o lstart | sed -n \'2p\')"; '
+						+ command;
+			}
+			//end here
 			oConn.exec( command, function( err, stream ) {
 				if ( err ) {
 					// We do not take any further actions if an error ocurred here
@@ -241,8 +248,11 @@ executeCommand = function( req, res, connection, command, project, cb ) {
 						oUserLogs[ username ][ connection ][ 'activeProject' ] = project;
 						//create log object
 						oUserLogs[ username ][ connection ][ project ] = {
-							content: '',
-							count: 0
+							  pid: null
+							, start: null
+							, content: ''
+							, count: -2
+							//, stream: stream //added now
 						};
 						console.log( 'IN if and project: ' + project );
 						cb( null, true );
@@ -251,17 +261,55 @@ executeCommand = function( req, res, connection, command, project, cb ) {
 					processData = function( data ) {
 						console.log( 'Received data for project' );
 						if ( project ) {
-							//add to log
-							oUserLogs[ username ][ connection ][ project ][ 'content' ] += data;
-							objToSend = {
-								project: project,
-								type: 'data',
-								msg: data.toString(),
-								count: ++oUserLogs[ username ][ connection ][ project ][ 'count' ]
+							if ( oUserLogs[ username ][ connection ][ project ][ 'count' ] < 0 ) {
+								//check pid and start time
+								dataString = data.toString();
+								if ( oUserLogs[ username ][ connection ][ project ][ 'count' ] == -2 ) {
+									//SEARCH PID
+									pos = dataString.indexOf( 'PID:' );
+									if ( pos !== -1 ) {
+										//PID found
+										oUserLogs[ username ][ connection ][ project ][ 'pid' ] = parseInt(dataString.substr(pos+4+1));
+										console.log( '-' + dataString + '-' );
+										console.log( '-' + oUserLogs[ username ][ connection ][ project ][ 'pid' ] + '-' );
+									} else {
+										//ERROR SEARCHING PID
+										//oUserLogs[ username ][ connection ][ project ][ 'pid' ] = 'PID not found in reply';
+									}
+									//update count
+									oUserLogs[ username ][ connection ][ project ][ 'count' ] = -1;
+									//reset pos maybe not needed
+									pos = -1;
+								} else {
+									//SEARCH STARTTIME
+									pos = dataString.toString().indexOf( 'STARTTIME:' );
+									if ( pos !== -1 ) {
+										//STARTTIME found
+										oUserLogs[ username ][ connection ][ project ][ 'start' ] = dataString.substr(pos+10+1).trim();
+										console.log( '-' + dataString + '-' );
+										console.log( '-' + oUserLogs[ username ][ connection ][ project ][ 'start' ] + '-' );
+									} else {
+										//ERROR SEARCHING STARTTIME
+										//oUserLogs[ username ][ connection ][ project ][ 'start' ] = 'STARTTIME not found in reply';
+									}
+									//update count
+									oUserLogs[ username ][ connection ][ project ][ 'count' ] = 0;
+									//reset pos maybe not needed
+									pos = -1;
+								}
+							} else {
+								//add to log
+								oUserLogs[ username ][ connection ][ project ][ 'content' ] += data;
+								objToSend = {
+									project: project,
+									type: 'data',
+									msg: data.toString(),
+									count: ++oUserLogs[ username ][ connection ][ project ][ 'count' ]
+								}
+								console.log( 'Send in Room: ' + data + '\n COUNT: ' + oUserLogs[ username ][ connection ][ project ][ 'count' ] );
+								//send to client
+								socketio.sendInRoom( req.session.pub.socketID, connection, objToSend );
 							}
-							console.log( 'Send in Room: ' + data + '\n COUNT: ' + oUserLogs[ username ][ connection ][ project ][ 'count' ] );
-							//send to client
-							socketio.sendInRoom( req.session.pub.socketID, connection, objToSend );
 						} else {
 							// Add chunks to data string and wait until the end of the stream
 							alldata += data;
@@ -362,6 +410,99 @@ exports.execWorkCommAndEmit = execWorkCommAndEmit = function( req, res, connecti
 	executeCommandAndEmit( req, res, connection, project, command, cb );
 };
 
+/*
+exports.killCommand = killCommand = function( req, res, cb ) {
+
+	var arrCommand, killed = false,
+		username = req.session.pub.username,
+		connection = req.params.connection,
+		project = req.params.project;
+
+	if ( oUserLogs[ username ]
+		&& oUserLogs[ username ][ connection ]
+		&& ( oUserLogs[ username ][ connection ][ 'activeProject' ] === project )
+		&& oUserLogs[ username ][ connection ][ project ] ) {
+
+		arrCommand = [
+			'workflow', 'kill_proc_tree',
+			'-g', oUserLogs[ username ][ connection ][ project ][ 'pid' ],
+			'-s', '"' + oUserLogs[ username ][ connection ][ project ][ 'start' ] + '"'
+		];
+
+		console.log("Try to kill command for: " + project );
+
+		execWorkCommSync( req, res, connection, arrCommand.join( ' ' ), cb );
+
+	} else {
+		cb({ code: 0, message: 'No process to kill' });
+	}
+};
+*/
+
+exports.killCommand = killCommand = function( req, res, cb ) {
+
+	var command, killed = false,
+		username = req.session.pub.username,
+		connection = req.params.connection,
+		project = req.params.project,
+		start, pid;
+
+	if ( oUserLogs[ username ]
+		&& oUserLogs[ username ][ connection ]
+		&& ( oUserLogs[ username ][ connection ][ 'activeProject' ] === project )
+		&& oUserLogs[ username ][ connection ][ project ] ) {
+
+		start =  oUserLogs[ username ][ connection ][ project ][ 'start' ].trim();
+		pid = oUserLogs[ username ][ connection ][ project ][ 'pid' ];
+
+		command = 'if [ "' + start + '" == ' + '"$(ps -p ' + pid + ' -o lstart | sed -n \'2p\')" ]; '
+				+ 'then '
+					+ '$(pkill -g ' + pid + '); echo "process killed"; '
+				+ 'else '
+					+ 'echo "cannot kill process"; '
+				+ 'fi';
+
+		console.log("Try to kill command for: " + project );
+
+		executeCommandSync( req, res, connection, command, cb );
+
+	} else {
+		cb({ code: 0, message: 'No process to kill' });
+	}
+};
+
+/*
+exports.killCommandNode = killCommandNode = function( req, res, cb ) {
+
+	var arrCommand, killed = false, stream = {},
+		username = req.session.pub.username,
+		connection = req.params.connection,
+		project = req.params.project;
+
+	if ( oUserLogs[ username ]
+		&& oUserLogs[ username ][ connection ]
+		&& ( oUserLogs[ username ][ connection ][ 'activeProject' ] === project )
+		&& oUserLogs[ username ][ connection ][ project ] ) {
+
+		stream = oUserLogs[ username ][ connection ][ project ][ 'stream' ] //added now
+
+		console.log("Try to kill command for: " + project );
+
+		console.log( 'UTIL: ' + util.inspect(stream, {showHidden: false, depth: null}));
+
+		//killed = stream.signal('KILL');
+
+		stream.write('\x03');
+
+		console.log( 'killed?' + killed );
+
+		cb( false, killed );
+
+	} else {
+		cb({ code: 0, message: 'No process to kill' });
+	}
+};
+*/
 exports.getLog = getLog = function( username, connection, project, cb ) {
 
 	var log = {
@@ -371,8 +512,8 @@ exports.getLog = getLog = function( username, connection, project, cb ) {
 	};
 
 	//if log exists
-	if ( oUserLogs[ username ] 
-		&& oUserLogs[ username ][ connection ] 
+	if ( oUserLogs[ username ]
+		&& oUserLogs[ username ][ connection ]
 		&& oUserLogs[ username ][ connection ][ project ] ) {
 
 		log = oUserLogs[ username ][ connection ][ project ];
@@ -418,16 +559,16 @@ exports.setRemoteFile = function( req, res, connection, filename, content, cb ) 
 // This is a general handler for retrieved lists of the same format
 // IMPORTANT: If callback function 'cb' receives an error as an argument
 //            no further response can be sent to the client!!!
-exports.getRemoteList = function( req, res, connection, command, cb ) {
+exports.getRemoteList = function( req, res, connection, command, type, cb ) {
 	
 	execWorkCommSync( req, res, connection, command, function( err, data ) {
 		var pos, list = '';
 
 		if( err ) cb( err );
 		else {
-			pos = data.indexOf( ':' );
+			pos = data.indexOf( type + ':' );
 			if( pos !== -1 ) {
-				list = data.substring( pos + 1 ).trim().split( ' ' );
+				list = data.substring( pos + type.length + 1 ).trim().split( ' ' );
 			} 
 			console.log( 'Get list from file "' + command + '": ' + list );
 			cb( null, list );
@@ -435,8 +576,8 @@ exports.getRemoteList = function( req, res, connection, command, cb ) {
 	});
 };
 
-exports.getAndSendRemoteList = function( req, res, connection, command ) {
-	exports.getRemoteList( req, res, connection, command, function( err, list ) {
+exports.getAndSendRemoteList = function( req, res, connection, command, type ) {
+	exports.getRemoteList( req, res, connection, command, type, function( err, list ) {
 		if( !err ) res.send( list );
 		else if( err.code !== 1 ) {
 			res.status( 400 );

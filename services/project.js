@@ -9,7 +9,7 @@ var express = require( 'express' ),
 // GET projects list. 
 router.get( '/getAll/:connection', function( req, res ) {
 	var command = 'workflow project -l';
-	ssh.getAndSendRemoteList( req, res, req.params.connection, command );
+	ssh.getAndSendRemoteList( req, res, req.params.connection, command, 'Projects' );
 });
 
 // GET descriptor. 
@@ -91,4 +91,42 @@ router.get( '/getLog/:connection/:project', function( req, res ) {
 	});
 });
 
+router.get( '/kill/:connection/:project', function( req, res ) {
+
+	ssh.killCommand( req, res, function( err, data ) {
+		console.log( 'Project manage command ( kill_proc_tree ) got data: ');
+		if( !err ) {
+			if ( data ) {
+				console.log( data );
+				res.send( data );
+			} else {
+				console.log( 'No error but... No data! Check this!' );
+				res.send( '' );
+			}
+		} else if( err.code !== 1 ) {
+			res.status( 400 );
+			res.send( err.message );
+		}
+	});
+});
+/*
+router.get( '/killNode/:connection/:project', function( req, res ) {
+
+	ssh.killCommandNode( req, res, function( err, data ) {
+		console.log( 'Project manage command ( kill_proc_tree ) got data: ');
+		if( !err ) {
+			if ( data ) {
+				console.log( data );
+				res.send( data );
+			} else {
+				console.log( 'No error but... No data! Check this!' );
+				res.send( '' );
+			}
+		} else if( err.code !== 1 ) {
+			res.status( 400 );
+			res.send( err.message );
+		}
+	});
+});
+*/
 module.exports = router;

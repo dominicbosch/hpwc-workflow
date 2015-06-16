@@ -146,6 +146,7 @@ function actionOnMethodSocketIO( action ) {
 	}
 
 	$( '.action' ).prop( 'disabled', true );
+	$( '.kill' ).prop( 'disabled', false );
 
 	$( '#respWait' ).attr( 'src', '../img/ajax-loader.gif' );
 
@@ -160,7 +161,7 @@ function actionOnMethodSocketIO( action ) {
 		var msg = data;
 
 		if ( data === true ) {
-			msg = 'Command Fired!\nThe output will be shown in the response area';
+			msg = 'Command Fired!\nThe output will be shown in the response area\n';
 		} else {
 			//unsubscribe
 			unsubscribe( '' );
@@ -170,6 +171,7 @@ function actionOnMethodSocketIO( action ) {
 			$( '#respWait' ).removeAttr( 'src' );
 
 			$( '.action' ).prop( 'disabled', false );
+			$( '.kill' ).prop( 'disabled', true );
 		}
 
 		addTextAndScroll( 'info_textarea', msg );
@@ -266,6 +268,24 @@ function updateFileList( folder_name ) {
 	}
 }
 
+function kill_process() {
+	var config_name = $( '#configs' ).val(),
+		project_name = $( '#projects' ).val();
+
+	if (confirm('Are you sure you want to kill the process?')) {
+		killProcess( config_name, project_name );
+	}
+}
+/*
+function kill_process_node() {
+	var config_name = $( '#configs' ).val(),
+		project_name = $( '#projects' ).val();
+
+	if (confirm('Are you sure you want to kill the process?')) {
+		killProcessNode( config_name, project_name );
+	}
+}
+*/
 $(document).ready(function() {
 
 	var config_name = oPub.selectedConn.name, 
@@ -281,6 +301,7 @@ $(document).ready(function() {
 		function() {
 			getAndSetMethods( config_name, project_name );
 			$( '.action' ).prop( 'disabled', true );
+			$( '.kill' ).prop( 'disabled', false );
 			$( '#respWait' ).attr( 'src', '../img/ajax-loader.gif' );
 			getLogSocketIO( config_name, project_name ); 
 		}
@@ -300,6 +321,7 @@ $(document).ready(function() {
 		$( '#respWait' ).removeAttr( 'src' );
 
 		$( '.action' ).prop( 'disabled', false );
+		$( '.kill' ).prop( 'disabled', true );
 		
 		//clean method list
 		$( '#methods' ).html( '<option value="">Choose A Method</option>' );
@@ -346,6 +368,8 @@ $(document).ready(function() {
 
 		$( '.action' ).prop( 'disabled', false );
 
+		$( '.kill' ).prop( 'disabled', true );
+
 		//clean response area
 		setTextAndScroll( 'resp_textarea', '' );
 
@@ -365,6 +389,7 @@ $(document).ready(function() {
 				
 				getAndSetMethods( config_name, project_name, null);
 				$( '.action' ).prop( 'disabled', true );
+				$( '.kill' ).prop( 'disabled', false );
 				$( '#respWait' ).attr( 'src', '../img/ajax-loader.gif' );
 				getLogSocketIO( config_name, project_name ); 
 			});

@@ -283,6 +283,8 @@ function connectToSocket( sockeID ) {
 				$( '#respWait' ).removeAttr( 'src' );
 	
 				$( '.action' ).prop( 'disabled', false );
+
+				$( '.kill' ).prop( 'disabled', true );
 			} else {
 				//ask again for the log
 				getLogSocketIO( oPub.selectedConn.name, data.project );
@@ -296,6 +298,47 @@ function connectToSocket( sockeID ) {
 	});
 }
 
+function killProcess( config_name, project_name ) {
+
+	if( config_name !== '' && project_name !== '') {
+
+		$.get('/services/project/kill/'
+			+ config_name + '/'
+			+ project_name, function( resp ) {
+
+			resp = resp.trim();
+			if ( resp == 'process killed' ) {
+				addTextAndScroll( 'resp_textarea', '\nProcess killed!\n' );
+				addTextAndScroll( 'info_textarea', '\nProcess killed!\n' );
+			} else {
+				addTextAndScroll( 'info_textarea', 'Cannot kill the process: ' + resp );
+			}
+		}).fail(function( xhr ) {
+			console.log( xhr.responseText );
+		});
+	}
+}
+/*
+function killProcessNode( config_name, project_name ) {
+
+	if( config_name !== '' && project_name !== '') {
+
+		$.get('/services/project/killNode/'
+			+ config_name + '/'
+			+ project_name, function( resp ) {
+
+			if ( resp == true ) {
+				addTextAndScroll( 'resp_textarea', '\nProcess killed!\n' );
+				addTextAndScroll( 'info_textarea', '\nProcess killed!\n' );
+			} else {
+				addTextAndScroll( 'info_textarea', 'Cannot kill the process: ' + resp );
+			}
+		}).fail(function( xhr ) {
+			console.log( xhr.responseText );
+		});
+	}
+}
+*/
 function getLogSocketIO( config_name, project_name ) {
 
 	if( config_name !== '' && project_name !== '') {
@@ -340,6 +383,8 @@ function getLogSocketIO( config_name, project_name ) {
 				$( '#respWait' ).removeAttr( 'src' );
 
 				$( '.action' ).prop( 'disabled', false );
+
+				$( '.kill' ).prop( 'disabled', true );
 			}
 
 			waitLog = false;

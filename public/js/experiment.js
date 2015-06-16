@@ -165,6 +165,7 @@ function runExp( ) {
 	}
 
 	$( '.action' ).prop( 'disabled', true );
+	$( '.kill' ).prop( 'disabled', false );
 
 	$( '#respWait' ).attr( 'src', '../img/ajax-loader.gif' );
 
@@ -184,7 +185,7 @@ function runExp( ) {
 		var msg = data;
 		
 		if ( data === true ) {
-			msg = 'Experiment Started!\nThe output will be shown in the response area';
+			msg = 'Experiment Started!\nThe output will be shown in the response area\n';
 		} else {
 			//unsubscribe
 			unsubscribe( '' );
@@ -194,6 +195,7 @@ function runExp( ) {
 			$( '#respWait' ).removeAttr( 'src' );
 
 			$( '.action' ).prop( 'disabled', false );
+			$( '.kill' ).prop( 'disabled', true );
 		}
 
 		addTextAndScroll( 'info_textarea', msg );
@@ -218,6 +220,7 @@ $(document).ready(function() {
 		function() {
 			updateProjectFormInExp();
 			$( '.action' ).prop( 'disabled', true );
+			$( '.kill' ).prop( 'disabled', false );
 			$( '#respWait' ).attr( 'src', '../img/ajax-loader.gif' );
 			getLogSocketIO( config_name, project_name ); 
 		}
@@ -260,6 +263,7 @@ $(document).ready(function() {
 		$( '#respWait' ).removeAttr( 'src' );
 
 		$( '.action' ).prop( 'disabled', false );
+		$( '.kill' ).prop( 'disabled', true );
 	});
 
 	//get data
@@ -288,6 +292,8 @@ $(document).ready(function() {
 
 		$( '.action' ).prop( 'disabled', false );
 
+		$( '.kill' ).prop( 'disabled', true );
+
 		//clean response area
 		setTextAndScroll( 'resp_textarea', '' );
 
@@ -296,6 +302,7 @@ $(document).ready(function() {
 
 		updateProjectFormInExp( function(){
 			$( '.action' ).prop( 'disabled', true );
+			$( '.kill' ).prop( 'disabled', false );
 			$( '#respWait' ).attr( 'src', '../img/ajax-loader.gif' );
 			getLogSocketIO( config_name, project_name ); 
 		});

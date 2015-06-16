@@ -15,13 +15,13 @@ var oUserLogs = {},
 // GET methods list. 
 router.get( '/getAll/:connection/:project', function( req, res ) {
 	var command = 'workflow project_module -l -p ' + req.params.project;
-	ssh.getAndSendRemoteList( req, res, req.params.connection, command );
+	ssh.getAndSendRemoteList( req, res, req.params.connection, command, 'Modules' );
 });
 
 // GET installed module. 
 router.get( '/getInstalled/:connection', function( req, res ) {
 	var command = 'workflow project_module -s inst';
-	ssh.getAndSendRemoteList( req, res, req.params.connection, command );
+	ssh.getAndSendRemoteList( req, res, req.params.connection, command, 'Modules' );
 });
 
 // GET descriptor. 
@@ -38,7 +38,7 @@ router.get( '/get/:connection/:project/:method', function( req, res ) {
 				+ ' -p ' + req.params.project 
 				+ ' -n ' + req.params.method
 				+ ' -f src';
-			ssh.getRemoteList( req, res, connection, command, function( err, data ) {
+			ssh.getRemoteList( req, res, connection, command, 'Sources', function( err, data ) {
 				if( !err ) {
 					method.srcList = data;
 					res.send( method );
@@ -67,7 +67,7 @@ router.get( '/get/:connection/:project/:method/:folder', function( req, res ) {
 			+ ' -n ' + req.params.method
 			+ ' -f ' + folder ;
 
-	ssh.getRemoteList( req, res, connection, command, function( err, data ) {
+	ssh.getRemoteList( req, res, connection, command, 'Sources', function( err, data ) {
 		var list = '';
 		if ( !err ) {
 			list = data;
@@ -230,7 +230,7 @@ router.get( '/getSrcList/:connection/:project/:method', function( req, res ) {
 	var command = 'workflow list_src ' 
 		+ ' -p ' + req.params.project 
 		+ ' -n ' + req.params.method ;
-	ssh.getAndSendRemoteList( req, res, req.params.connection, command );
+	ssh.getAndSendRemoteList( req, res, req.params.connection, command, 'Sources' );
 });
 
 // GET single source file

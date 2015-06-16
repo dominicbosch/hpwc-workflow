@@ -9,7 +9,7 @@ var express = require( 'express' ),
 // GET experiments list. 
 router.get( '/getAll/:connection/:project', function( req, res ) {
 	var command = 'workflow exp -l -p ' + req.params.project;
-	ssh.getAndSendRemoteList( req, res, req.params.connection, command );
+	ssh.getAndSendRemoteList( req, res, req.params.connection, command, 'experiments' );
 });
 
 // GET experiments descriptor. 
