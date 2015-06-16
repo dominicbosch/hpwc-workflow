@@ -318,27 +318,7 @@ function killProcess( config_name, project_name ) {
 		});
 	}
 }
-/*
-function killProcessNode( config_name, project_name ) {
 
-	if( config_name !== '' && project_name !== '') {
-
-		$.get('/services/project/killNode/'
-			+ config_name + '/'
-			+ project_name, function( resp ) {
-
-			if ( resp == true ) {
-				addTextAndScroll( 'resp_textarea', '\nProcess killed!\n' );
-				addTextAndScroll( 'info_textarea', '\nProcess killed!\n' );
-			} else {
-				addTextAndScroll( 'info_textarea', 'Cannot kill the process: ' + resp );
-			}
-		}).fail(function( xhr ) {
-			console.log( xhr.responseText );
-		});
-	}
-}
-*/
 function getLogSocketIO( config_name, project_name ) {
 
 	if( config_name !== '' && project_name !== '') {

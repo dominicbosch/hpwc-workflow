@@ -276,16 +276,7 @@ function kill_process() {
 		killProcess( config_name, project_name );
 	}
 }
-/*
-function kill_process_node() {
-	var config_name = $( '#configs' ).val(),
-		project_name = $( '#projects' ).val();
 
-	if (confirm('Are you sure you want to kill the process?')) {
-		killProcessNode( config_name, project_name );
-	}
-}
-*/
 $(document).ready(function() {
 
 	var config_name = oPub.selectedConn.name, 

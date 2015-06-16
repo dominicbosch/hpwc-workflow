@@ -1,7 +1,7 @@
 'use strict';
 
 var oUserConnections = {}, oUserLogs = {},
-	getLog, executeCommand, killCommand, //killCommandNode,
+	getLog, executeCommand, killCommand,
 	executeCommandSync, executeCommandAndEmit,
 	execWorkCommSync, execWorkCommAndEmit,
 	tempConnCounter = 0, connCounter = 0,
@@ -30,51 +30,6 @@ exports.isConnOpen = function( username, connName ) {
 
 	return false;
 };
-
-// exports.getFile = function( req, res, connection, remotePath, localPath, cb ) {
-
-// 	var oConn, errString,
-// 		username = req.session.pub.username,
-// 		oConnections = oUserConnections[ username ];
-
-// 	console.log( 'Processing user "' + username + '"s request: getFile' );
-// 	errString = 'Command "%s" failed for user "%s": ';
-
-// 	if( oConnections ) {
-// 		oConn = oConnections[ connection ];
-// 		if( oConn ) {
-// 			oConn.sftp( function ( err, sftp ) {
-// 				if( err ) {
-// 					cb({
-// 						code: 0,
-// 						message: err.toString()
-// 					});
-// 				} else {
-// 					sftp.fastGet( remotePath, localPath, function ( err ) {
-// 						if( !err ) cb( null, localPath );
-// 						else cb({
-// 								code: 0,
-// 								message: err.toString()
-// 							});
-// 						console.log( err ? "Could not read. " : "Read." );
-// 					});
-// 				}
-// 			});
-// 		} else {
-// 			console.error( errString + 'Connection "%s" is not ready!', command, username, connection );
-// 			res.status( 400 );
-// 			res.send( 'The connection "' + connection + '" is not ready!' );
-// 			cb({ code: 1, message: 'The connection "' + connection + '" is not ready!' });
-// 		}
-// 	} else {
-// 		console.error( errString + 'No open connections!', command, username );
-// 		res.status( 400 );
-// 		res.send( 'User has no open connections!' );
-// 		cb({ code: 1, message: 'User has no open connections!' });
-// 	}
-
-// 	return false;
-// };
 
 exports.createConfiguration = function( username, args, force, cb ) {
 	var cmd, oUser, oConn = new SSHConnection();
@@ -252,7 +207,6 @@ executeCommand = function( req, res, connection, command, project, cb ) {
 							, start: null
 							, content: ''
 							, count: -2
-							//, stream: stream //added now
 						};
 						console.log( 'IN if and project: ' + project );
 						cb( null, true );
@@ -410,35 +364,6 @@ exports.execWorkCommAndEmit = execWorkCommAndEmit = function( req, res, connecti
 	executeCommandAndEmit( req, res, connection, project, command, cb );
 };
 
-/*
-exports.killCommand = killCommand = function( req, res, cb ) {
-
-	var arrCommand, killed = false,
-		username = req.session.pub.username,
-		connection = req.params.connection,
-		project = req.params.project;
-
-	if ( oUserLogs[ username ]
-		&& oUserLogs[ username ][ connection ]
-		&& ( oUserLogs[ username ][ connection ][ 'activeProject' ] === project )
-		&& oUserLogs[ username ][ connection ][ project ] ) {
-
-		arrCommand = [
-			'workflow', 'kill_proc_tree',
-			'-g', oUserLogs[ username ][ connection ][ project ][ 'pid' ],
-			'-s', '"' + oUserLogs[ username ][ connection ][ project ][ 'start' ] + '"'
-		];
-
-		console.log("Try to kill command for: " + project );
-
-		execWorkCommSync( req, res, connection, arrCommand.join( ' ' ), cb );
-
-	} else {
-		cb({ code: 0, message: 'No process to kill' });
-	}
-};
-*/
-
 exports.killCommand = killCommand = function( req, res, cb ) {
 
 	var command, killed = false,
@@ -471,38 +396,6 @@ exports.killCommand = killCommand = function( req, res, cb ) {
 	}
 };
 
-/*
-exports.killCommandNode = killCommandNode = function( req, res, cb ) {
-
-	var arrCommand, killed = false, stream = {},
-		username = req.session.pub.username,
-		connection = req.params.connection,
-		project = req.params.project;
-
-	if ( oUserLogs[ username ]
-		&& oUserLogs[ username ][ connection ]
-		&& ( oUserLogs[ username ][ connection ][ 'activeProject' ] === project )
-		&& oUserLogs[ username ][ connection ][ project ] ) {
-
-		stream = oUserLogs[ username ][ connection ][ project ][ 'stream' ] //added now
-
-		console.log("Try to kill command for: " + project );
-
-		console.log( 'UTIL: ' + util.inspect(stream, {showHidden: false, depth: null}));
-
-		//killed = stream.signal('KILL');
-
-		stream.write('\x03');
-
-		console.log( 'killed?' + killed );
-
-		cb( false, killed );
-
-	} else {
-		cb({ code: 0, message: 'No process to kill' });
-	}
-};
-*/
 exports.getLog = getLog = function( username, connection, project, cb ) {
 
 	var log = {
