@@ -17,7 +17,6 @@ process.on( 'SIGTERM', function() {
 workflow({
 	port: 8080
 	// , production: true
-	// ,
-	// keyfile: 'config/https-key.pem',
-	// certfile: 'config/https-cert.pem'
+	// , keyfile: 'config/https-key.pem'
+	// , certfile: 'config/https-cert.pem'
 });
