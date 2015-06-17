@@ -17,6 +17,7 @@ module.exports = exports = function( args ) {
 		session = require( 'express-session' ),
 		bodyParser = require( 'body-parser' ),
 		log = require( './modules/logger' ),
+		util = require( 'util' ),
 		app = express();
 
 	// Let's fetch the configuration first before we do anything else
@@ -147,6 +148,8 @@ module.exports = exports = function( args ) {
 			var addr = server.address(),
 				mode = args.production ? 'ON' : 'OFF',
 				str = 'HPWC SSH Interface Server listening at "http://%s:%s" with CACHING %s';
+			
+			console.log( 'UTIL: ' + util.inspect(addr, {showHidden: false, depth: null}));
 			console.log( str, addr.address, addr.port, mode.toUpperCase() );
 		});
 
