@@ -9,6 +9,7 @@ var oUserConnections = {}, oUserLogs = {},
 	path = require( 'path' ),
 	SSHConnection = require( 'ssh2' ).Client,
 	util = require( 'util' ),
+	logger = require( './logger' ),
 	socketio = require( './socket' ),
 	persistence = global.persistence;
 
@@ -35,42 +36,68 @@ exports.createConfiguration = function( username, args, force, cb ) {
 	var cmd, oUser, oConn = new SSHConnection();
 
 	if( !force && persistence.getConfiguration( username, args.name ) ) {
-		cb({ code: 0, message: 'Configuration already existing!' });
+		cb({
+			code: 0,
+			message: 'Configuration already existing!'
+		});
 	} else {
 		oConn.on( 'ready', function() {
-			console.log( 'New temporary SSH connection %s@%s:%s, now: %s', args.username, args.url, args.port, ++tempConnCounter );
+
+			logger.formattedWrite( 'info', username,
+									'New temporary SSH connection %s@%s:%s, now: %s',
+									args.username, args.url, args.port, ++tempConnCounter );
+
 			oUser = persistence.getUser( username );
 			cmd = 'mkdir -p ~/.ssh && echo "' + oUser.publicKey + '" >> ~/.ssh/authorized_keys && echo "OK!"';
 			oConn.exec( cmd, function( err, stream ) {
 				var oConf, data = '';
 				if ( err ) {
-					console.error( err );
-					cb( err );
+					logger.write( 'error', username,
+									'Can\'t execute command: ' + cmd + err );
+					cb({
+						code: 0,
+						message: 'Can\'t execute command: ' + cmd + err
+					});
 				} else {
-					stream.on( 'data', function( chunk ) { data += chunk; })
-						.on( 'end', function() {
-							oConn.end();
-							if( data === 'OK!\n' ) {
-								args.port = parseInt( args.port ) || 22;
-								oConf = persistence.storeConfiguration( username, args );
-								cb( null, oConf );
-							} else {
-								cb({ code: 0, message: data });
-							}
-						})
-						.stderr.on( 'data', function( data ) {
-							// Handles errors that happen on the other end of this connection
-							console.log( 'Error: ' + data );
-							cb({ code: 2, message: data });
+					stream.on( 'data', function( chunk ) {
+						logger.write( 'trace', username,
+									'Command "' + cmd + '" got data: ' + chunk );
+						data += chunk;
+					})
+					.on( 'end', function() {
+						oConn.end();
+						if( data === 'OK!\n' ) {
+							args.port = parseInt( args.port ) || 22;
+							oConf = persistence.storeConfiguration( username, args );
+							cb( null, oConf );
+						} else {
+							cb({
+								code: 0,
+								message: data
+							});
+						}
+					})
+					.stderr.on( 'data', function( data ) {
+						// Handles errors that happen on the other end of this connection
+						logger.write( 'error', username, data );
+						cb({
+							code: 2,
+							message: data
 						});
+					});
 				}
 			});
 		}).on( 'close', function() {
-			console.log( 'Closed temporary SSH connection %s@%s:%s, now: %s', args.username, args.url, args.port, --tempConnCounter );
+			logger.formattedWrite( 'debug', username,
+									'Closed temporary SSH connection %s@%s:%s, now: %s',
+									args.username, args.url, args.port, --tempConnCounter );
 		}).on( 'error', function( e ) {
 			var msg = 'Error connecting "'+args.username+'@'+args.url+':'+args.port+'": ' + e.code;
-			console.log( msg );
-			cb({ code: 0, message: msg });
+			logger.write( 'error', username, msg );
+			cb({
+				code: 0,
+				message: msg
+			});
 		}).connect({
 			host: args.url,
 			port: parseInt( args.port ) || 22,
@@ -85,7 +112,10 @@ exports.updateConfiguration = function( username, args, cb ) {
 		conf = persistence.getConfiguration( username, args.name ) ;
 
 	if( !conf ) {
-		cb({ code: 0, message: 'Configuration not existing!' });
+		cb({
+			code: 0,
+			message: 'Configuration not existing!'
+		});
 	} else {
 		exports.closeConnection( username, args.name );
 		oUser = persistence.getUser( username );
@@ -107,7 +137,10 @@ exports.deleteConfiguration = function( username, confName, cb ) {
 	var conf = persistence.getConfiguration( username, confName );
 
 	if( !conf ) {
-		cb({ code: 0, message: 'Configuration not existing!' });
+		cb({
+			code: 0,
+			message: 'Configuration not existing!'
+		});
 	} else {
 		exports.closeConnection( username, confName );
 		persistence.deleteConfiguration( username, confName );
@@ -130,8 +163,11 @@ exports.connectToHost = function( username, connObj, cb ) {
 		var oUser = persistence.getUser( username );
 		oConn = new SSHConnection();
 		oConn.on( 'ready', function() {
-			console.log( 'New SSH connection established to "' + connObj.name
-					+ '" for user "' + username + '", #openConnections='+(++connCounter));
+
+			logger.write( 'debug', username,
+							'New SSH connection established to "' + connObj.name
+							+ '", #openConnections='+(++connCounter));
+
 			oUserConnections[ username ][ connObj.name ] = oConn;
 
 			//create object to store log information
@@ -141,16 +177,25 @@ exports.connectToHost = function( username, connObj, cb ) {
 			//console.log( 'UTIL: ' + util.inspect(oConn, {showHidden: false, depth: null}));
 		}).on( 'close', function() {
 			delete oUserConnections[ username ][ connObj.name ];
-			console.log( 'SSH connection closed from "' + connObj.name
-					+ '" for user "' + username + '", #openConnections='+(--connCounter));
+			logger.write( 'debug', username,
+							'SSH connection closed from "' + connObj.name
+							+ '", #openConnections='+(--connCounter));
 		}).on( 'end', function() {
 			delete oUserConnections[ username ][ connObj.name ];
-			console.log( 'SSH connection ENDED from "' + connObj.name
-					+ '" for user "' + username + '", #openConnections='+(connCounter));
+			logger.write( 'debug', username,
+							'SSH connection ENDED from "' + connObj.name
+							+ '", #openConnections='+(connCounter));
 		}).on( 'error', function( e ) {
 			delete oUserConnections[ username ][ connObj.name ];
-			console.log( 'Error connecting (#'+(++connCounter)+') "'+connObj.username+'@'+connObj.url+':'+connObj.port+'": ' + e.code );
-			cb({ code: 0, message: 'Error connecting "'+connObj.username+'@'+connObj.url+':'+connObj.port+'": ' + e.code });
+			var msg = 'Error connecting (#'+(++connCounter)+') "' + connObj.username
+						+ '@' + connObj.url + ':' + connObj.port + '": ' + e.code;
+
+			logger.write( 'error', username, msg );
+
+			cb({
+				code: 0,
+				message: msg
+			});
 		}).connect({
 			host: connObj.url,
 			port: connObj.port,
@@ -174,7 +219,8 @@ executeCommand = function( req, res, connection, command, project, cb ) {
 		username = req.session.pub.username,
 		oConnections = oUserConnections[ username ];
 
-	console.log( 'Processing user "' + username + '"s request: ',  command );
+	logger.write( 'debug', username, 'Processing user request: ',  command);
+
 	errString = 'Command "%s" failed for user "%s": ';
 
 	if( oConnections ) {
@@ -192,11 +238,15 @@ executeCommand = function( req, res, connection, command, project, cb ) {
 			oConn.exec( command, function( err, stream ) {
 				if ( err ) {
 					// We do not take any further actions if an error ocurred here
-					console.error( errString + 'Execution error!', command, username );
-					console.error( err );
+					logger.write( 'error', username,
+						'Command "' + command + '" failed!'
+						+ err );
 					res.status( 400 );
 					res.send( 'Execution of remote command failed!' );
-					cb({ code: 1, message: err.toString() });
+					cb({
+						code: 1,
+						message: err.toString()
+					});
 				} else {
 					if ( project ) {
 						//set activeProject
@@ -208,12 +258,13 @@ executeCommand = function( req, res, connection, command, project, cb ) {
 							, content: ''
 							, count: -2
 						};
-						console.log( 'IN if and project: ' + project );
+						logger.write( 'debug', username, 'IN if and project: ' + project );
 						cb( null, true );
 					}
 					
 					processData = function( data ) {
-						console.log( 'Received data for project' );
+						logger.write( 'debug', username, 'Received data for project: ' + data );
+
 						if ( project ) {
 							if ( oUserLogs[ username ][ connection ][ project ][ 'count' ] < 0 ) {
 								//check pid and start time
@@ -224,8 +275,8 @@ executeCommand = function( req, res, connection, command, project, cb ) {
 									if ( pos !== -1 ) {
 										//PID found
 										oUserLogs[ username ][ connection ][ project ][ 'pid' ] = parseInt(dataString.substr(pos+4+1));
-										console.log( '-' + dataString + '-' );
-										console.log( '-' + oUserLogs[ username ][ connection ][ project ][ 'pid' ] + '-' );
+										logger.write( 'debug', username, '-' + dataString + '-' );
+										logger.write( 'debug', username, '-' + oUserLogs[ username ][ connection ][ project ][ 'pid' ] + '-' );
 									} else {
 										//ERROR SEARCHING PID
 										//oUserLogs[ username ][ connection ][ project ][ 'pid' ] = 'PID not found in reply';
@@ -240,8 +291,8 @@ executeCommand = function( req, res, connection, command, project, cb ) {
 									if ( pos !== -1 ) {
 										//STARTTIME found
 										oUserLogs[ username ][ connection ][ project ][ 'start' ] = dataString.substr(pos+10+1).trim();
-										console.log( '-' + dataString + '-' );
-										console.log( '-' + oUserLogs[ username ][ connection ][ project ][ 'start' ] + '-' );
+										logger.write( 'debug', username, '-' + dataString + '-' );
+										logger.write( 'debug', username, '-' + oUserLogs[ username ][ connection ][ project ][ 'start' ] + '-' );
 									} else {
 										//ERROR SEARCHING STARTTIME
 										//oUserLogs[ username ][ connection ][ project ][ 'start' ] = 'STARTTIME not found in reply';
@@ -260,7 +311,9 @@ executeCommand = function( req, res, connection, command, project, cb ) {
 									msg: data.toString(),
 									count: ++oUserLogs[ username ][ connection ][ project ][ 'count' ]
 								}
-								console.log( 'Send in Room: ' + data + '\n COUNT: ' + oUserLogs[ username ][ connection ][ project ][ 'count' ] );
+								logger.write( 'debug', username,
+												'Send in Room: ' + data
+												+ '\n COUNT: ' + oUserLogs[ username ][ connection ][ project ][ 'count' ] );
 								//send to client
 								socketio.sendInRoom( req.session.pub.socketID, connection, objToSend );
 							}
@@ -273,7 +326,7 @@ executeCommand = function( req, res, connection, command, project, cb ) {
 					stream.on( 'data', processData )
 					.on( 'end', function() {
 						//send all data back through Callback Function
-						console.log('STREAM ENDED');
+						logger.write( 'debug', username, 'STREAM ENDED' );
 						if ( project ) {
 
 							objToSend = {
@@ -289,11 +342,19 @@ executeCommand = function( req, res, connection, command, project, cb ) {
 							delete oUserLogs[ username ][ connection ][ 'activeProject' ];
 
 						}
-						else if( errorHappened ) cb({ code: 2, message: alldata });
-						else cb( null, alldata );
+						else if( errorHappened )
+							cb({
+								code: 2,
+								message: alldata
+							});
+						else 
+							cb( null, alldata );
 					}).on( 'error', function(e) {
-						console.error(e);
-						cb({ code: 0, message: e.toString() });
+						logger.write( 'error', username, e );
+						cb({
+							code: 0,
+							message: e.toString()
+						});
 					}).stderr.on( 'data', function( data ) {
 						errorHappened = true;
 						processData( data );
@@ -311,16 +372,26 @@ executeCommand = function( req, res, connection, command, project, cb ) {
 				}
 			});
 		} else {
-			console.error( errString + 'Connection "%s" is not ready!', command, username, connection );
+			logger.write( 'error', username,
+						'Command "' + command + '" failed!'
+						+ 'Connection "' + connection + '" is not ready!' );
 			res.status( 400 );
 			res.send( 'The connection "' + connection + '" is not ready!' );
-			cb({ code: 1, message: 'The connection "' + connection + '" is not ready!' });
+			cb({
+				code: 1,
+				message: 'Connection "' + connection + '" is not ready!'
+			});
 		}
 	} else {
-		console.error( errString + 'No open connections!', command, username );
+		logger.write( 'error', username,
+						'Command "' + command + '" failed!'
+						+ 'No open connections!' );
 		res.status( 400 );
 		res.send( 'User has no open connections!' );
-		cb({ code: 1, message: 'User has no open connections!' });
+		cb({
+			code: 1,
+			message: 'User has no open connections!'
+		});
 	}
 };
 
@@ -332,9 +403,11 @@ exports.executeCommandAndEmit = executeCommandAndEmit = function( req, res, conn
 	var message = '',
 		username = req.session.pub.username;
 
-	console.log('Project: ' + project + ' - Active: ' + oUserLogs[ username ][ connection ][ 'activeProject' ] );
+	logger.write( 'debug', username, 'Project: ' + project
+					+ ' - Active: ' + oUserLogs[ username ][ connection ][ 'activeProject' ] );
+
 	if ( project && oUserLogs[ username ][ connection ][ 'activeProject' ] ) {
-		console.log('IN!!!!!!sadasdas');
+
 		message = 'Wait until the previous command is finished\n';
 
 		if ( oUserLogs[ username ][ connection ][ 'activeProject' ] !== project ) {
@@ -387,12 +460,15 @@ exports.killCommand = killCommand = function( req, res, cb ) {
 					+ 'echo "cannot kill process"; '
 				+ 'fi';
 
-		console.log("Try to kill command for: " + project );
+		logger.write( 'debug', username, 'Try to kill command for: ' + project );
 
 		executeCommandSync( req, res, connection, command, cb );
 
 	} else {
-		cb({ code: 0, message: 'No process to kill' });
+		cb({
+			code: 0,
+			message: 'No process to kill'
+		});
 	}
 };
 
@@ -431,10 +507,13 @@ exports.getRemoteJSON = function( req, res, connection, filename, cb ) {
 			try {
 				cb( null, JSON.parse( data ) );
 			} catch( e ) {
-				console.error( 'JSON corrupt: ' + filename );
+				logger.write( 'error', req.session.pub.username, 'JSON corrupt: ' + filename );
 				res.status( 400 );
 				res.send( 'JSON corrupt!' );
-				cb({ code: 1, message: e.toString() });
+				cb({
+					code: 1,
+					message: e.toString()
+				});
 			}
 		}
 	});
@@ -462,8 +541,8 @@ exports.getRemoteList = function( req, res, connection, command, type, cb ) {
 			pos = data.indexOf( type + ':' );
 			if( pos !== -1 ) {
 				list = data.substring( pos + type.length + 1 ).trim().split( ' ' );
-			} 
-			console.log( 'Get list from file "' + command + '": ' + list );
+			}
+			logger.write( 'debug', req.session.pub.username, 'Get list from file "' + command + '": ' + list );
 			cb( null, list );
 		}
 	});

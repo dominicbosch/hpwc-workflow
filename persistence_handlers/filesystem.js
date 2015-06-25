@@ -2,6 +2,7 @@
 
 var persistUser, loadUser, oUsers = {},
 	fs = require( 'fs' ),
+	logger = require( '../modules/logger' ),
 	path = require( 'path' );
 
 persistUser = function( username ) {
@@ -9,13 +10,15 @@ persistUser = function( username ) {
 
 	if( !oUsers[ username ] ) {
 		loadUser( username );
-		if( !oUsers[ username ] ) console.error( 'You are trying to persist an unregistered user!');
+		if( !oUsers[ username ] )
+			logger.write( 'error', username, 'You are trying to persist an unregistered user!' );
 	}
 	try {
 		fs.writeFile( pathToFile, JSON.stringify( oUsers[ username ], null, 2 ) );
 	} catch( e ) {
-		console.error( 'Persisting failed! Your user object will not be stored!' );
-		console.error( e );
+		logger.write( 'error', username,
+						'Persisting failed! Your user object will not be stored!'
+						+ e );
 	}
 };
 
@@ -24,18 +27,19 @@ loadUser = function( username ) {
 	try {
 		oUsers[ username ] = JSON.parse( fs.readFileSync( pathToFile ) );
 	} catch( e ) {
-		console.log( 'User "' + username + '"\'s persistent file not existing!' );
+		logger.write( 'debug', username, e );
 	}
 
 };
 
 exports.getUser = function( username ) {
-	if( !oUsers[ username ] ) loadUser( username );
+	if( !oUsers[ username ] )
+		loadUser( username );
 	return oUsers[ username ];
 };
 
 exports.changeUserPassword = function( username, password ) {
-	console.log( 'User "' + username + '" changed password' );
+	logger.write( 'info', username, 'Password changed!' );
 	oUsers[ username ].password = password;
 	persistUser( username );
 };
@@ -52,7 +56,8 @@ exports.storeUser = function( username, password, privKey, pubKey ) {
 		privateKey: privKey,
 		publicKey: pubKey
 	};
-	console.log( 'User "' + username + '" registered' );
+	logger.write( 'info', username, 'Registation successful!' );
+
 	persistUser( username );
 };
 
@@ -65,7 +70,7 @@ exports.storeConfiguration = function( username, args ) {
 	var oUser = exports.getUser( username );
 	delete args.password;
 	oUser.pub.configurations[ args.name ] = args;
-	console.log( 'Configuration "' + args.name + '" for user "' + username + '" stored' );
+	logger.write( 'info', username, 'Configuration "' + args.name + '" stored' );
 	persistUser( username );
 	return args;
 }
@@ -73,6 +78,6 @@ exports.storeConfiguration = function( username, args ) {
 exports.deleteConfiguration = function( username, confName ) {
 	var oUser = exports.getUser( username );
 	delete oUser.pub.configurations[ confName ];
-	console.log( 'Configuration "' + confName + '" for user "' + username + '" deleted!' );
+	logger.write( 'info', username, 'Configuration "' + confName + '" deleted!' );
 	persistUser( username );
 }

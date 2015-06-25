@@ -16,7 +16,7 @@ module.exports = exports = function( args ) {
 		express = require( 'express' ),
 		session = require( 'express-session' ),
 		bodyParser = require( 'body-parser' ),
-		log = require( './modules/logger' ),
+		logger = require( './modules/logger' ),
 		util = require( 'util' ),
 		app = express();
 
@@ -24,30 +24,29 @@ module.exports = exports = function( args ) {
 	// This will throw an error if the configuration file is invalid.
 	config = JSON.parse( fs.readFileSync( __dirname + '/config/system.json' ) );
 
-	// Set the log level
-	validLevels = [
-		'fatal',
-		'error',
-		'warn',
-		'info',
-		'debug',
-		'trace'
-	];
 	ll = args.loglevel || config.loglevel || 'info';
-	if( validLevels.indexOf( ll ) < 0 ) ll = 'info';
-	log.level( ll );
-	log.info( 'Setting Log level to: ' + ll );
+
+	//default value for log level
+	if ( logger.validLevels.indexOf( ll ) < 0 )
+		ll = 'info';
+
+	ll = 'debug';
+
+	logger.levels( 'mainlog', ll );
+
+	//logger.levels( 'stdout-log', ll );
 
 	// Define a global persistence handler according to the configuration
 	global.persistence = require( './persistence_handlers/' + config.persistence.method );
+
 	// For consistency reasons we should only load our modules after setting the persistence module
 	socketio = require( './modules/socket' );
 
 	// We disable caching for development environments
-	if( args.production ) {
+	if ( args.production ) {
 		process.on( 'uncaughtException', function( e ) {
-			console.log( 'This is a general exception catcher, but should really be removed in the future!' );
-			console.log( 'Error: ', e );
+			logger.write( 'error', '', 'This is a general exception catcher, but should really be removed in the future!' );
+			logger.write( 'error', '', e );
 		});
 	} else {
 		app.set( 'view cache', false );
@@ -57,7 +56,9 @@ module.exports = exports = function( args ) {
 	app.engine( 'html', swig.renderFile );
 	app.set( 'view engine', 'html' );
 	app.set( 'views', __dirname + '/views' );
-	if( runAsHTTPS ) app.set( 'trust proxy', 1 ) // required for secure cookies
+
+	if( runAsHTTPS )
+		app.set( 'trust proxy', 1 ) // required for secure cookies
 
 	sessionMiddleware = session({
 		secret: config.session.secret,
@@ -67,10 +68,13 @@ module.exports = exports = function( args ) {
 			secure: runAsHTTPS ? true : false // We can only use secure cookies on a HTTPS server
 		}
 	});
+
 	app.use( sessionMiddleware );
 
-	app.use( bodyParser.json() );      
+	app.use( bodyParser.json() );
+
 	app.use( bodyParser.urlencoded({ extended: true }) );
+
 	app.use( express.static( path.join( __dirname, 'public' ) ) );
 
 	// Apply our own session expiration handler
@@ -80,11 +84,15 @@ module.exports = exports = function( args ) {
 			username = req.session.pub.username;
 
 			// We need to be sure that we do some garbage collecting after the user session expired
-			if( oUserSessions[ username ] ) clearTimeout( oUserSessions[ username ] );
+			if( oUserSessions[ username ] )
+				clearTimeout( oUserSessions[ username ] );
+
 			oUserSessions[ username ] = setTimeout( function() {
 				// since the session is still existing (user still on webpage in browser) we destroy it, right?
-				if( req.session.pub ) req.session.destroy();
-				console.log('TODO: cleaning up session of user "' + username + '"!');
+				if( req.session.pub )
+					req.session.destroy();
+
+				logger.write( 'fatal', '', 'TODO: cleaning up session of user "' + username + '"!' );
 				// TODO CLEANUP
 			}, config.session.timeout * 60 * 1000 ); // Session expiration time is defined in minutes in the config
 		}
@@ -96,15 +104,18 @@ module.exports = exports = function( args ) {
 			'/views/login',
 			'/views/register'
 		];
-		if( req.session.pub || allowedRoutes.indexOf( req.url ) > -1 ) next();
-		else res.render( 'index' );
+		if( req.session.pub || allowedRoutes.indexOf( req.url ) > -1 )
+			next();
+		else
+			res.render( 'index' );
 	});
 	app.get( '/services/*', function( req, res, next ) {
 		var allowedRoutes = [
 			'/services/session/login',
 			'/services/users/create'
 		];
-		if( req.session.pub || allowedRoutes.indexOf( req.url ) > -1 ) next();
+		if( req.session.pub || allowedRoutes.indexOf( req.url ) > -1 )
+			next();
 		else {
 			res.status( 401 );
 			res.send( 'Login first!' );
@@ -119,21 +130,24 @@ module.exports = exports = function( args ) {
 			if( arrViews[ i ] === name + '.html' ) return true;
 		}	
 	};
+
 	// Redirect the views that will be loaded by the swig templating engine
 	app.get( '/views/*', function ( req, res ) {
 		var view = 'index';		
-		if( isValidRequest( req ) ) view = req.params[ 0 ];
+		if( isValidRequest( req ) )
+			view = req.params[ 0 ];
 		res.render( view, req.session.pub );
 	});
 	
 	// Dynamically load all services from the services folder
-	console.log( 'LOADING WEB SERVICES: ' );
+	logger.write( 'info', '', 'LOADING WEB SERVICES: ' );
+
 	arrServices = fs.readdirSync( __dirname + '/services' ).filter(function( d ) {
 		return ( d.substring( d.length - 3 ) === '.js' );
 	});
 	for( var i = 0; i < arrServices.length; i++ ) {
 		fileName = arrServices[ i ];
-		console.log( '  -> ' + fileName );
+		logger.write( 'info', '', '  -> ' + fileName );
 		servicePath = '/services/' + fileName.substring( 0, fileName.length - 3 );
 		app.use( servicePath, require( '.' + servicePath ) );
 	}
@@ -149,8 +163,16 @@ module.exports = exports = function( args ) {
 				mode = args.production ? 'ON' : 'OFF',
 				str = 'HPWC SSH Interface Server listening at "http://%s:%s" with CACHING %s';
 			
-			console.log( 'UTIL: ' + util.inspect(addr, {showHidden: false, depth: null}));
-			console.log( str, addr.address, addr.port, mode.toUpperCase() );
+			logger.formattedWrite( 'info', '', str, addr.address, addr.port, mode.toUpperCase() );
+
+		/*		str = 'HPWC SSH Interface Server listening at '
+						+ '"http://' + addr.address + ':' + addr.port
+						+ '" with CACHING ' + mode.toUpperCase();
+
+			logger.write( 'info', '', str );
+
+			//console.log( 'UTIL: ' + util.inspect(addr, {showHidden: false, depth: null}));
+		*/
 		});
 
 	// Else we are starting a HTTPS server
@@ -163,7 +185,8 @@ module.exports = exports = function( args ) {
 			var addr = server.address(),
 				mode = args.production ? 'ON' : 'OFF',
 				str = 'HPWC SSH Interface Server listening at "https://%s:%s" with CACHING %s';
-			console.log( str, addr.address, addr.port, mode.toUpperCase() );
+
+			logger.formattedWrite( 'info', '', str, addr.address, addr.port, mode.toUpperCase() );
 		});
 	}
 	// Let socket.io listen for websockets

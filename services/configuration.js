@@ -4,6 +4,7 @@ var express = require( 'express' ),
 	fs = require( 'fs' ),
 	path = require( 'path' ),
 	ssh = require( '../modules/ssh' ),
+	logger = require( '../modules/logger' ),
 	router = express.Router(),
 	persistence = global.persistence;
 
@@ -76,13 +77,13 @@ router.get( '/connect/:name', function( req, res ) {
 	var oUser = req.session.pub;
 	ssh.connectToHost( oUser.username, oUser.configurations[ req.params.name ], function( err ) {
 		if( !err ) {
-			console.log( 'User "' + oUser.username + '" connected to "' + req.params.name + '"' );
+			logger.write( 'debug', oUser.username, 'Connected to "' + req.params.name + '"' );
 			if (req.session.pub.selectedConnection.name === req.params.name ) {
 				req.session.pub.selectedConnection.status = true;
 			}
 			res.send( "Connection Created!" );
 		} else if( err.code !== 1 ) {
-			console.log( err );
+			logger.write( 'error', oUser.username, err );
 			res.status( 400 );
 			res.send( "Connection failed!" );
 		}
@@ -96,7 +97,7 @@ router.get( '/disconnect/:name', function( req, res ) {
 			//clean selectedProject
 			delete req.session.pub.selectedConnection.selectedProject;
 		}
-		console.log( 'User "' + req.session.pub.username + '" disconnected from "' + req.params.name + '"' );
+		logger.write( 'debug', req.session.pub.username, 'Disconnected from "' + req.params.name + '"' );
 		res.send("Connection Closed!");
 	} else {
 		res.status( 404 );

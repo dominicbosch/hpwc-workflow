@@ -3,6 +3,7 @@
 var express = require( 'express' ),
 	router = express.Router(),
 	persistence = global.persistence,
+	logger = require( '../modules/logger' ),
 	socketio = require( '../modules/socket' );
 
 router.post( '/login', function( req, res ) {
@@ -11,7 +12,7 @@ router.post( '/login', function( req, res ) {
 	if( oUser && oUser.password === req.body.password ) {
 		req.session.pub = oUser.pub;
 		// Let socket.io listen for websockets of this user
-		console.log('SOCKETID: ' + req.session.pub.socketID );
+		logger.write( 'debug', req.session.pub.username, 'SOCKETID: ' + req.session.pub.socketID );
 		socketio.openSocket( req.session.pub.socketID );
 		res.send( 'Login successful!' );
 	} else {

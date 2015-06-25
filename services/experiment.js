@@ -2,6 +2,7 @@
 
 var express = require( 'express' ),
 	ssh = require( '../modules/ssh' ),
+	logger = require( '../modules/logger' ),
 	path = require( 'path' ),
 	fs = require( 'fs' ),
 	router = express.Router();
@@ -84,7 +85,9 @@ router.get( '/delete/:connection/:project/:experiment', function( req, res ) {
 		];
 
 		ssh.execWorkCommSync( req, res, confName, arrCommand.join( ' ' ), function( err, data ) {
-			console.log( 'Delete experiment command (' + arrCommand.join( ' ' ) + ') got data: ');
+			logger.write( 'debug', req.session.pub.username,
+						'Delete experiment command (' + arrCommand.join( ' ' )
+						+ ') got data: \n' + data );
 			if( !err ) {
 				res.send( { msg: data } );
 			} else {

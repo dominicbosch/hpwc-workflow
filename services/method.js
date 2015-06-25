@@ -7,6 +7,7 @@ var oUserLogs = {},
 	},
 	express = require( 'express' ),
 	ssh = require( '../modules/ssh' ),
+	logger = require( '../modules/logger' ),
 	path = require( 'path' ),
 	fs = require( 'fs' ),
 	socketio = require( '../modules/socket' ),
@@ -266,7 +267,7 @@ router.post( '/setSrcFile/:connection/:project/:method/:source_name', function( 
 		if( !err ) {
 			res.send( data );
 		} else {
-			console.log("ERROR: " + err.code + " MSG: " + err.message );
+			logger.write( 'error', req.session.pub.username, 'ERRCODE: ' + err.code + ' MSG: ' + err.message );
 			res.send( err );
 		}
 	});
@@ -301,13 +302,17 @@ router.post( '/manage/:connection/:project', function( req, res ) {
 	}
 
 	ssh.execWorkCommSync( req, res, conn, arrCommand.join( ' ' ), function( err, data ) {
-		console.log( 'Method manage command (' + arrCommand.join() + ') got data: ');
+
 		if( !err ) {
 			if ( data ) {
-				console.log( data );
+				logger.write( 'debug', req.session.pub.username,
+						'Method manage command (' + arrCommand.join()
+						+ ') got data: \n' + data );
 				res.send( data );
 			} else {
-				console.log( 'No data' );
+				logger.write( 'debug', req.session.pub.username,
+						'Method manage command (' + arrCommand.join()
+						+ ') got No data');
 				res.send( '' );
 			}
 		} else if( err.code !== 1 ) {
@@ -337,7 +342,9 @@ router.get( '/buildAndGetZip/:connection/:project/:method', function( req, res )
 			var pos, command, remotePath = '';
 
 			if( !err ) {
-				console.log( 'Project manage command (' + arrCommand.join(' ') + ') got data: \n' + data );
+				logger.write( 'debug', req.session.pub.username,
+						'Project manage command (' + arrCommand.join(' ')
+						+ ') got data: \n' + data );
 				
 				pos = data.indexOf( 'Zip created!' );
 				if( pos !== -1 ) {

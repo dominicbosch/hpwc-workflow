@@ -2,6 +2,7 @@
 
 var express = require( 'express' ),
 	ssh = require( '../modules/ssh' ),
+	logger = require( '../modules/logger' ),
 	path = require( 'path' ),
 	fs = require( 'fs' ),
 	router = express.Router();
@@ -65,13 +66,16 @@ router.post( '/manage/:connection', function( req, res ) {
 	}
 
 	ssh.execWorkCommSync( req, res, conn, arrCommand.join( ' ' ), function( err, data ) {
-		console.log( 'Project manage command (' + arrCommand.join() + ') got data: ');
 		if( !err ) {
 			if ( data ) {
-				console.log( data );
+				logger.write( 'debug', req.session.pub.username,
+						'Project manage command (' + arrCommand.join()
+						+ ') got data: \n' + data );
 				res.send( data );
 			} else {
-				console.log( 'No data' );
+				logger.write( 'debug', req.session.pub.username,
+						'Project manage command (' + arrCommand.join()
+						+ ') got No data');
 				res.send( '' );
 			}
 		} else if( err.code !== 1 ) {
@@ -94,13 +98,15 @@ router.get( '/getLog/:connection/:project', function( req, res ) {
 router.get( '/kill/:connection/:project', function( req, res ) {
 
 	ssh.killCommand( req, res, function( err, data ) {
-		console.log( 'Project manage command ( kill_proc_tree ) got data: ');
+
 		if( !err ) {
 			if ( data ) {
-				console.log( data );
+				logger.write( 'debug', req.session.pub.username,
+						'Project manage command ( kill_proc_tree ) got data: \n' + data );
 				res.send( data );
 			} else {
-				console.log( 'No error but... No data! Check this!' );
+				logger.write( 'debug', req.session.pub.username,
+						'Project manage command ( kill_proc_tree ) got No error but... No data! Check this!' );
 				res.send( '' );
 			}
 		} else if( err.code !== 1 ) {

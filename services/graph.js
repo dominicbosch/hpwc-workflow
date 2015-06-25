@@ -2,6 +2,7 @@
 
 var express = require( 'express' ),
 	ssh = require( '../modules/ssh' ),
+	logger = require( '../modules/logger' ),
 	path = require( 'path' ),
 	fs = require( 'fs' ),
 	router = express.Router();
@@ -31,7 +32,9 @@ router.post( '/buildAndGet/:connection/:project/:experiment', function( req, res
 			var pos, command, remotePath = '';
 
 			if( !err ) {
-				console.log( 'Project manage command (' + arrCommand.join(' ') + ') got data: \n' + data );
+				logger.write( 'debug', req.session.pub.username,
+						'Project manage command (' + arrCommand.join(' ')
+							+ ') got data: \n' + data );
 				
 				pos = data.indexOf( 'Graph path:' );
 				if( pos !== -1 ) {
