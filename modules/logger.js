@@ -10,7 +10,7 @@ exports = module.exports = bunyan.createLogger({
 			name: 'mainlog',
 			level: 'info',
 			type: 'rotating-file',
-			path: __filename + 'asd.log',
+			path: 'logs/hpc-workflow.log',
 			period: '1w',   // week rotation
 			count: 4        // keep 4 back copies
 		}]
