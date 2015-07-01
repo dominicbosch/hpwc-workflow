@@ -3,26 +3,30 @@
 module.exports = exports = function( args ) {
 	process.env.NODE_ENV = args.production ? 'production' : 'development';
 
+	var config = global.config = args;
 	// Now let's get to twerk:
-	var socketio, config, isValidRequest, sessionMiddleware,
+	var socketio, isValidRequest, sessionMiddleware,
 		server, options, servicePath, fileName, validLevels, ll,
 		runAsHTTPS = args.keyfile && args.certfile,
 		arrServices, arrViews,
-		oUserSessions = {},
-		fs = require( 'fs' ),
-		path = require( 'path' ),
-		swig = require( 'swig' ),
-		https = require( 'https' ),
-		express = require( 'express' ),
-		session = require( 'express-session' ),
-		bodyParser = require( 'body-parser' ),
-		logger = require( './modules/logger' ),
-		util = require( 'util' ),
-		app = express();
+		oUserSessions = {}
+		, fs = require( 'fs' )
+		, path = require( 'path' )
+		, swig = require( 'swig' )
+		, https = require( 'https' )
+		, express = require( 'express' )
+		, session = require( 'express-session' )
+		, bodyParser = require( 'body-parser' )
+		, logger = require( './modules/logger' )(module.filename)
+		, util = require( 'util' )
+		, app = express()
+		;
 
+	/*
 	// Let's fetch the configuration first before we do anything else
 	// This will throw an error if the configuration file is invalid.
 	config = JSON.parse( fs.readFileSync( __dirname + '/config/system.json' ) );
+	*/
 
 	ll = args.loglevel || config.loglevel || 'info';
 
@@ -32,9 +36,10 @@ module.exports = exports = function( args ) {
 
 	ll = 'debug';
 
-	logger.levels( 'mainlog', ll );
+	logger.setLevel( 'mainlog', ll );
+	//logger.write( 'error', 'asd', module.filename.split('/') );
 
-	//logger.levels( 'stdout-log', ll );
+	//logger.setLevel( 'stdout-log', ll );
 
 	// Define a global persistence handler according to the configuration
 	global.persistence = require( './persistence_handlers/' + config.persistence.method );

@@ -4,14 +4,15 @@ var oUserConnections = {}, oUserLogs = {},
 	getLog, executeCommand, killCommand,
 	executeCommandSync, executeCommandAndEmit,
 	execWorkCommSync, execWorkCommAndEmit,
-	tempConnCounter = 0, connCounter = 0,
-	fs = require( 'fs' ),
-	path = require( 'path' ),
-	SSHConnection = require( 'ssh2' ).Client,
-	util = require( 'util' ),
-	logger = require( './logger' ),
-	socketio = require( './socket' ),
-	persistence = global.persistence;
+	tempConnCounter = 0, connCounter = 0
+	, fs = require( 'fs' )
+	, path = require( 'path' )
+	, SSHConnection = require( 'ssh2' ).Client
+	, util = require( 'util' )
+	, logger = require( './logger' )(module.filename)
+	, socketio = require( './socket' )
+	, persistence = global.persistence
+	;
 
 exports.getOpenConnections = function( username ) {
 	var arr = [];

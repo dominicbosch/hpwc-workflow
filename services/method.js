@@ -4,14 +4,15 @@ var oUserLogs = {},
 	commandActive = {
 		status : false,
 		project : ''
-	},
-	express = require( 'express' ),
-	ssh = require( '../modules/ssh' ),
-	logger = require( '../modules/logger' ),
-	path = require( 'path' ),
-	fs = require( 'fs' ),
-	socketio = require( '../modules/socket' ),
-	router = express.Router();
+	}
+	, express = require( 'express' )
+	, ssh = require( '../modules/ssh' )
+	, logger = require( '../modules/logger' )(module.filename)
+	, path = require( 'path' )
+	, fs = require( 'fs' )
+	, socketio = require( '../modules/socket' )
+	, router = express.Router()
+	;
 
 // GET methods list. 
 router.get( '/getAll/:connection/:project', function( req, res ) {

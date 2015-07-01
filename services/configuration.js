@@ -1,12 +1,13 @@
 'use strict';
 
-var express = require( 'express' ),
-	fs = require( 'fs' ),
-	path = require( 'path' ),
-	ssh = require( '../modules/ssh' ),
-	logger = require( '../modules/logger' ),
-	router = express.Router(),
-	persistence = global.persistence;
+var express = require( 'express' )
+	, fs = require( 'fs' )
+	, path = require( 'path' )
+	, ssh = require( '../modules/ssh' )
+	, logger = require( '../modules/logger' )(module.filename)
+	, router = express.Router()
+	, persistence = global.persistence
+	;
 
 router.post( '/create', function( req, res ) {
 	var args, user = req.session.pub,

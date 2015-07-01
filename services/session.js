@@ -1,10 +1,11 @@
 'use strict';
 
-var express = require( 'express' ),
-	router = express.Router(),
-	persistence = global.persistence,
-	logger = require( '../modules/logger' ),
-	socketio = require( '../modules/socket' );
+var express = require( 'express' )
+	, router = express.Router()
+	, persistence = global.persistence
+	, logger = require( '../modules/logger' )(module.filename)
+	, socketio = require( '../modules/socket' )
+;
 
 router.post( '/login', function( req, res ) {
 	var oUser = persistence.getUser( req.body.username );

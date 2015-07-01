@@ -1,9 +1,10 @@
 'use strict';
 
-var persistUser, loadUser, oUsers = {},
-	fs = require( 'fs' ),
-	logger = require( '../modules/logger' ),
-	path = require( 'path' );
+var persistUser, loadUser, oUsers = {}
+	, fs = require( 'fs' )
+	, logger = require( '../modules/logger' )(module.filename)
+	, path = require( 'path' )
+	;
 
 persistUser = function( username ) {
 	var pathToFile = path.resolve( __dirname, 'store_' + username + '.json' );

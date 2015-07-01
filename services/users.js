@@ -1,10 +1,11 @@
 'use strict';
 
-var express = require( 'express' ),
-	keygen = require( 'ssh-keygen' ),
-	logger = require( '../modules/logger' ),
-	router = express.Router(),
-	persistence = global.persistence;
+var express = require( 'express' )
+	, keygen = require( 'ssh-keygen' )
+	, logger = require( '../modules/logger' )(module.filename)
+	, router = express.Router()
+	, persistence = global.persistence
+	;
 
 router.post( '/create', function( req, res ) {
 	var username = req.body.username;

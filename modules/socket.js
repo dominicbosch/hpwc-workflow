@@ -1,8 +1,9 @@
 
-var io,
-	logger = require( './logger' ),
-	util = require( 'util' ),
-	socketio = require( 'socket.io' );
+var io
+	, logger = require( './logger' )(module.filename)
+	, util = require( 'util' )
+	, socketio = require( 'socket.io' )
+	;
 
 exports.listen = function( server ) {
 	io = socketio.listen( server );

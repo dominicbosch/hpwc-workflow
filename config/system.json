@@ -1,9 +1,17 @@
 {
-	"session": {
+	"port": 8080
+	, "production": false
+	, "keyfile": false
+	, "certfile": false
+	, "session": {
 		"secret": "[TODO] Change in production environment",
 		"timeout": 60
 	},
 	"persistence": {
 		"method": "filesystem"
+	},
+	"logger": {
+		"name": "bunyanLogger",
+		"args": true
 	}
 }

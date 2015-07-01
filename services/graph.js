@@ -1,11 +1,12 @@
 'use strict';
 
-var express = require( 'express' ),
-	ssh = require( '../modules/ssh' ),
-	logger = require( '../modules/logger' ),
-	path = require( 'path' ),
-	fs = require( 'fs' ),
-	router = express.Router();
+var express = require( 'express' )
+	, ssh = require( '../modules/ssh' )
+	, logger = require( '../modules/logger' )(module.filename)
+	, path = require( 'path' )
+	, fs = require( 'fs' )
+	, router = express.Router()
+	;
 
 // buildAndGet graph
 router.post( '/buildAndGet/:connection/:project/:experiment', function( req, res ) {
