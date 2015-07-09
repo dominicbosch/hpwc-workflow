@@ -93,7 +93,7 @@ exports.createConfiguration = function( username, args, force, cb ) {
 									'Closed temporary SSH connection %s@%s:%s, now: %s',
 									args.username, args.url, args.port, --tempConnCounter );
 		}).on( 'error', function( e ) {
-			var msg = 'Error connecting "'+args.username+'@'+args.url+':'+args.port+'": ' + e.code;
+			var msg = 'Error connecting "'+args.username+'@'+args.url+':'+args.port+'": ' + e;//.code;
 			logger.write( 'error', username, msg );
 			cb({
 				code: 0,
