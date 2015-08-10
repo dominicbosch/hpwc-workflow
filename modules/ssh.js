@@ -49,7 +49,8 @@ exports.createConfiguration = function( username, args, force, cb ) {
 									args.username, args.url, args.port, ++tempConnCounter );
 
 			oUser = persistence.getUser( username );
-			cmd = 'mkdir -p ~/.ssh && echo "' + oUser.publicKey + '" >> ~/.ssh/authorized_keys && echo "OK!"';
+			//cmd = 'grep "' + oUser.publicKey + '" ~/.ssh/authorized_keys';
+			cmd = 'less ~/.ssh/authorized_keys';
 			oConn.exec( cmd, function( err, stream ) {
 				var oConf, data = '';
 				if ( err ) {
@@ -66,15 +67,49 @@ exports.createConfiguration = function( username, args, force, cb ) {
 						data += chunk;
 					})
 					.on( 'end', function() {
-						oConn.end();
-						if( data === 'OK!\n' ) {
+						if ( data.toString().indexOf( oUser.publicKey ) > -1 ) {
+							logger.write( 'trace', username, 'SSH KEY already stored! Let\'s store the configuration!' );
 							args.port = parseInt( args.port ) || 22;
 							oConf = persistence.storeConfiguration( username, args );
 							cb( null, oConf );
-						} else {
-							cb({
-								code: 0,
-								message: data
+						} else { //if ( data === '' ) or different
+							logger.write( 'trace', username, 'SSH KEY not stored yet... Let\'s store it!' );
+							cmd = 'mkdir -p ~/.ssh && echo "' + oUser.publicKey + '" >> ~/.ssh/authorized_keys ';//&& echo "OK!"';
+							oConn.exec( cmd, function( err, stream ) {
+								if ( err ) {
+									logger.write( 'error', username,
+													'Can\'t execute command: ' + cmd + err );
+									cb({
+										code: 0,
+										message: 'Can\'t execute command: ' + cmd + err
+									});
+								} else {
+									stream.on( 'data', function( chunk ) {
+										logger.write( 'trace', username,
+													'Command "' + cmd + '" got data: ' + chunk );
+										data += chunk;
+									})
+									.on( 'end', function() {
+										//if( data === 'OK!\n' ) {
+											args.port = parseInt( args.port ) || 22;
+											oConf = persistence.storeConfiguration( username, args );
+											cb( null, oConf );
+										//} else {
+										//	cb({
+										//		code: 0,
+										//		message: data
+										//	});
+										//}
+									})
+									.stderr.on( 'data', function( data ) {
+										// Handles errors that happen on the other end of this connection
+										logger.write( 'error', username, data );
+										cb({
+											code: 2,
+											message: data
+										});
+									});
+								}
 							});
 						}
 					})

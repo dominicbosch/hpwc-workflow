@@ -34,7 +34,7 @@ module.exports = exports = function( args ) {
 	if ( logger.validLevels.indexOf( ll ) < 0 )
 		ll = 'info';
 
-	ll = 'info';
+	ll = 'trace';
 
 	logger.setLevel( 'mainlog', ll );
 	//logger.write( 'error', 'asd', module.filename.split('/') );

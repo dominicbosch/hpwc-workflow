@@ -206,6 +206,15 @@ function runExp( ) {
 
 }
 
+function kill_process() {
+	var config_name = $( '#configs' ).val(),
+		project_name = $( '#projects' ).val();
+
+	if (confirm('Are you sure you want to kill the process?')) {
+		killProcess( config_name, project_name );
+	}
+}
+
 $(document).ready(function() {
 
 	var config_name = oPub.selectedConn.name, 
