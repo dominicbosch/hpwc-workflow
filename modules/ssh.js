@@ -460,7 +460,7 @@ exports.executeCommandAndEmit = executeCommandAndEmit = function( req, res, conn
 exports.execWorkCommSync = execWorkCommSync = function( req, res, connection, command, cb ) {
 	var conn = req.session.pub.configurations[ connection ];
 
-	command = 'source ' + path.join( conn.workhome, 'util', 'BaseSetup' ) //'BaseSetupS ) //etupEnv.sh' )
+	command = 'source ' + path.join( conn.workhome, 'util', 'BaseSetup.sh' ) //'SetupEnv.sh' )
 			+ ' ' + conn.workspace + '; ' + command;
 	executeCommandSync( req, res, connection, command, cb );
 };
@@ -468,7 +468,7 @@ exports.execWorkCommSync = execWorkCommSync = function( req, res, connection, co
 exports.execWorkCommAndEmit = execWorkCommAndEmit = function( req, res, connection, project, command, cb ) {
 	var conn = req.session.pub.configurations[ connection ];
 				
-	command = 'source ' + path.join( conn.workhome, 'util', 'BaseSetup' ) //'BaseSetupS ) //etupEnv.sh' )
+	command = 'source ' + path.join( conn.workhome, 'util', 'BaseSetup.sh' ) //'SetupEnv.sh' )
 			+ ' ' + conn.workspace + '; ' + command;
 	executeCommandAndEmit( req, res, connection, project, command, cb );
 };
