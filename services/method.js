@@ -16,14 +16,14 @@ var oUserLogs = {},
 
 // GET methods list. 
 router.get( '/getAll/:connection/:project', function( req, res ) {
-	var command = 'workflow project_module -l -p ' + req.params.project;
-	ssh.getAndSendRemoteList( req, res, req.params.connection, command, 'Modules' );
+	var command = 'workflow method -l -p ' + req.params.project;
+	ssh.getAndSendRemoteList( req, res, req.params.connection, command, 'Methods' );
 });
 
-// GET installed module. 
+// GET installed method's type. 
 router.get( '/getInstalled/:connection', function( req, res ) {
-	var command = 'workflow project_module -s inst';
-	ssh.getAndSendRemoteList( req, res, req.params.connection, command, 'Modules' );
+	var command = 'workflow methodType -l installed';
+	ssh.getAndSendRemoteList( req, res, req.params.connection, command, 'MethodTypes' );
 });
 
 // GET descriptor. 
@@ -32,7 +32,7 @@ router.get( '/get/:connection/:project/:method', function( req, res ) {
 		project = req.params.project,
 		method = req.params.method,
 		oConn = req.session.pub.configurations[ connection ],
-		filename  = path.join( oConn.workspace, project, method, '.module' );
+		filename  = path.join( oConn.workspace, project, method, '.method' );
 
 	ssh.getRemoteJSON( req, res, connection, filename, function( err, method ) {
 		if( !err ) {
@@ -63,7 +63,7 @@ router.get( '/get/:connection/:project/:method/:folder', function( req, res ) {
 		method = req.params.method,
 		folder = req.params.folder,
 		oConn = req.session.pub.configurations[ connection ],
-		filename  = path.join( oConn.workspace, project, method, '.module' ),
+		filename  = path.join( oConn.workspace, project, method, '.method' ),
 		command = 'workflow list_src'
 			+ ' -p ' + req.params.project 
 			+ ' -n ' + req.params.method
@@ -283,7 +283,7 @@ router.post( '/manage/:connection/:project', function( req, res ) {
 
 	if( method.action === 'delete' ) {
 		arrCommand = [
-			'workflow', 'project_module', '-d',
+			'workflow', 'method', '-d',
 			'-p', '"' + project + '"',
 			'-n', '"' + method.name + '"'
 		];
@@ -294,7 +294,7 @@ router.post( '/manage/:connection/:project', function( req, res ) {
 			opt = '-e';
 		}
 		arrCommand = [
-			'workflow', 'project_module', opt,
+			'workflow', 'method', opt,
 			'-p', '"' + project + '"',
 			'-m', '"' + method.type + '"',
 			'-n', '"' + method.name + '"',

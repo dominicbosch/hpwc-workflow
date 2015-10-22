@@ -255,7 +255,7 @@ executeCommand = function( req, res, connection, command, project, cb ) {
 		username = req.session.pub.username,
 		oConnections = oUserConnections[ username ];
 
-	logger.write( 'debug', username, 'Processing user request: ',  command);
+	logger.write( 'debug', username, 'Processing user request: ' + command);
 
 	errString = 'Command "%s" failed for user "%s": ';
 
