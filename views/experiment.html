@@ -127,7 +127,25 @@
 </table>
 <div class="centered-text">
 	</br>
-	<button class="action" onclick="runExp();" >Run Experiment</button>
+	<table>
+		<tr>
+			<td style='text-align: left'>
+				Action directly executed:
+			</td>
+			<td>
+				<button class="action" onclick="runExp('run');" >Run Experiment</button>
+			</td>
+		</tr>
+		<tr>
+			<td style='text-align: left'>
+				Action executed using job:
+			</td>
+			<td>
+				<button class="action" onclick="runExp('run_job');" >Run Experiment</button>
+			</td>
+		</tr>
+	</table>
+	
 </div>
 {% endblock %}
 

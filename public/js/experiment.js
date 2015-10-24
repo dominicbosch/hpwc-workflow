@@ -125,7 +125,7 @@ function getAndSetMethodsList( config_name, project_val ) {
 	}
 }
 
-function runExp( ) {
+function runExp( action ) {
 
 	var config_name = $( '#configs' ).val(),
 		project_name = $( '#projects' ).val(),
@@ -178,7 +178,8 @@ function runExp( ) {
 		nexecs : nexec
 	}
 
-	$.post( '/services/experiment/run/' 
+	$.post( '/services/experiment/'
+		+ action + '/' 
 		+ config_name + '/' 
 		+ project_name, experiment, function( data ) {
 

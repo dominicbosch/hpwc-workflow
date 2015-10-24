@@ -227,6 +227,34 @@ router.get( '/do/:action/:connection/:project/:method', function( req, res ) {
 	});
 });
 
+router.get( '/do_job/:sched_type/:sched_part/:action/:connection/:project/:method', function( req, res ) {	
+	var connection = req.params.connection,
+		oConn = req.session.pub.configurations[ connection ],
+		project = req.params.project,
+		method = req.params.method,
+		action = req.params.action,
+		sched_type = req.params.sched_type,
+		sched_part = req.params.sched_part,
+		command = 
+			'workflow job_' + action 
+			+ sched_type // scheduler type
+			+ path.join( oConn.workspace, project, method ) //path to method
+			+ '0' //nodes
+			+ sched_part //scheduler partion
+			+ '0' //walltime
+			+ '0' //memory
+			+ ' -p ' + project 
+			+ ' -n ' + method;
+
+	ssh.execWorkCommAndEmit( req, res, connection, project, command, function( err, data ) {
+		if( !err ) res.send( data );
+		else if( err.code !== 1 ) {
+			res.status( 400 );
+			res.send( err.message );
+		}
+	});
+});
+
 // GET source file list
 router.get( '/getSrcList/:connection/:project/:method', function( req, res ) {	
 	var command = 'workflow list_src ' 

@@ -50,6 +50,7 @@ Project Name:
 				</tr>
 			</table>
 			<div class="centered-text">
+				</br>
 				<button onclick="manage_method('create');">Create Method</button>
 			</div>
 		</div>
@@ -117,8 +118,27 @@ Project Name:
 				</tr>
 			</table>
 			<div class="centered-text">
-				<button class="action" onclick="actionOnMethodSocketIO('compile');">Compile</button>
-				<button class="action" onclick="actionOnMethodSocketIO('compile_run');">Compile&amp;Run</button>
+				</br>
+				<table>
+					<tr>
+						<td style='text-align: left'>
+							Action directly executed:
+						</td>
+						<td>
+							<button class="action" onclick="actionOnMethodSocketIO('compile', '');">Compile</button>
+							<button class="action" onclick="actionOnMethodSocketIO('compile_run', '');">Compile&amp;Run</button>
+						</td>
+					</tr>
+					<tr>
+						<td style='text-align: left'>
+							Action executed using job:
+						</td>
+						<td>
+							<button class="action" onclick="actionOnMethodSocketIO('compile', '_job');">Compile</button>
+							<button class="action" onclick="actionOnMethodSocketIO('compile_run', '_job');">Compile&amp;Run</button>
+						</td>
+					</tr>
+				</table>
 			</div>
 		</div>
 	</div>

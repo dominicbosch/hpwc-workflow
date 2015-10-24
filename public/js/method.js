@@ -124,11 +124,14 @@ function getInstalledMethod( config_name, cb ) {
 	}
 }
 
-function actionOnMethodSocketIO( action ) {
+function actionOnMethodSocketIO( action, job ) {
 
 	var	config_name = $( '#configs' ).val(),
 		project_name = $( '#projects' ).val(),
-		method_name = $( '#methods' ).val();
+		method_name = $( '#methods' ).val(),
+		sched_type = '',//$( '#projects' ).val(),
+		sched_part = '',//$( '#methods' ).val(),
+		job_cmd = '';
 
 	if ( config_name === '' ) {
 		alert( 'Select A Configuration' );
@@ -152,7 +155,15 @@ function actionOnMethodSocketIO( action ) {
 
 	subscribe( config_name );
 
-	$.get('/services/method/do/' 
+	router.get( '/do_job/:sched_type/:sched_part/:action/:connection/:project/:method', function( req, res ) {	
+
+	if ( job !== '' ) {
+		job_cmd = sched_type + '/' + sched_part + '/';
+	}
+
+	$.get('/services/method/'
+		+ 'do' + job + '/' 
+		+ job_cmd
 		+ action + '/'
 		+ config_name + '/' 
 		+ project_name + '/' 
