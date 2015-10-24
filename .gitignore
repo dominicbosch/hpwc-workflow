@@ -1,2 +1,7 @@
 node_modules/
 logs/
+manage/
+users/
+.AppleData/
+*.log
+*.DS_Store
