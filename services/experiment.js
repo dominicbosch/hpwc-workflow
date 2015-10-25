@@ -82,10 +82,10 @@ router.post( '/run_job/:connection/:project', function( req, res ) {
 		arrCommand = [
 			'workflow', 'job_run_exp',
 			experiment.sched_type,
-			path.join( oConn.workspace, 
-				projName, 
-				'experiments', 
-				new Date().getTime().toString() 
+			path.join( oConn.workspace
+				, projName
+				, 'experiments'
+				//, new Date().getTime().toString() 
 			),
 			experiment.nodes,
 			experiment.sched_part,

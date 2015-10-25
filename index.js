@@ -104,6 +104,9 @@ module.exports = exports = function( args ) {
 		next(); // Continue with the other handlers
 	});
 
+	app.get( '/', function( req, res, next ) {
+		res.render( 'index' );
+	});
 	app.get( '/views/*', function( req, res, next ) {
 		var allowedRoutes = [
 			'/views/login',
