@@ -9,6 +9,28 @@ function buildList( tab_id, td_name ) {
 	return string;
 }
 
+function getMax( tab_id, td_name ) {
+	var max = 0;
+	$( '#' + tab_id + ' [name="' + td_name + '"] input:checked' ).each( function() {
+		if ( $( this ).val() > max )
+			max = $( this ).val();
+	});
+	return max;
+}
+
+/*function getMax( stringList ) {
+	alert("Stringa: " + stringList );
+    var arr = stringList.split('" "');
+   	var max = 0;
+	arr.forEach( function( val ) {
+		alert("val: " + val );
+		if ( parseInt(val) > max )
+			max = parseInt(val);
+		alert("max: " + max );
+	});
+    return max;
+}*/
+
 function getAndSetExperiments( config_name, project_val, cb ) {
 
 	if( ( config_name !== '' ) && ( project_val !== '' ) ) {

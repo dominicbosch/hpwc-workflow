@@ -236,13 +236,13 @@ router.get( '/do_job/:sched_type/:sched_part/:action/:connection/:project/:metho
 		sched_type = req.params.sched_type,
 		sched_part = req.params.sched_part,
 		command = 
-			'workflow job_' + action 
-			+ sched_type // scheduler type
-			+ path.join( oConn.workspace, project, method ) //path to method
-			+ '0' //nodes
-			+ sched_part //scheduler partion
-			+ '0' //walltime
-			+ '0' //memory
+			'workflow job_' + action
+			+ ' ' + sched_type // scheduler type
+			+ ' ' + path.join( oConn.workspace, project, method ) + ' ' //path to method
+			+ ' 0' //nodes
+			+ ' ' + sched_part //scheduler partion
+			+ ' 0' //walltime
+			+ ' 0' //memory
 			+ ' -p ' + project 
 			+ ' -n ' + method;
 

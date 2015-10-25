@@ -32,7 +32,7 @@ function cleanProjectForm() {
 	$( '#experiment_setup [name="par_list"]' ).empty();
 	$( '#experiment_setup [name="par_val"]' ).empty();
 	$( '#experiment_setup [name="nthreads"] input' ).prop( 'checked', false );
-	$( '#experiment_setup [name="hosts"]' ).empty();
+	//$( '#experiment_setup [name="hosts"]' ).empty();
 }
 
 //OK
@@ -42,8 +42,8 @@ function setProjectForm( project ) {
 		createListItem( project.parameters.default, true, false ) );
 	$( '#experiment_setup [name="nthreads"] input[value="' 
 		+ project.threads + '"]' ).prop( 'checked', true );
-	$( '#experiment_setup [name="hosts"]' ).html(
-		createListItem( 'localhost', true, true ) );
+	//$( '#experiment_setup [name="hosts"]' ).html(
+	//	createListItem( 'localhost', true, true ) );
 
 }
 
@@ -125,13 +125,17 @@ function getAndSetMethodsList( config_name, project_val ) {
 	}
 }
 
-function runExp( action ) {
+function runExp( ) {
 
 	var config_name = $( '#configs' ).val(),
 		project_name = $( '#projects' ).val(),
 		nexec = $( '#repetitions' ).val(),
+		sched_type = $( '#sched_type' ).val(),
+		sched_part = $( '#sched_part' ).val(),
+		walltime = $( '#walltime' ).val(),
+		memory = $( '#memory' ).val(),
 		dimensions, methods, nthreads,
-		experiment;
+		job_cmd = '', experiment;
 
 	if ( config_name === '' ) {
 		alert( 'Select A Configuration' );
@@ -169,8 +173,6 @@ function runExp( action ) {
 
 	$( '#respWait' ).attr( 'src', '../img/ajax-loader.gif' );
 
-	subscribe( config_name );
-
 	experiment = {
 		dimensions : dimensions,
 		methods : methods,
@@ -178,8 +180,28 @@ function runExp( action ) {
 		nexecs : nexec
 	}
 
-	$.post( '/services/experiment/'
-		+ action + '/' 
+	if ( sched_type !== '' ) {
+		if ( sched_part === '' ) {
+			sched_part = 'smp';
+		}
+		if ( walltime === '' ) {
+			walltime = '0';
+		}
+		if ( memory === '' ) {
+			memory = '0';
+		}
+		job_cmd = '_job';
+		experiment.sched_type = sched_type;
+		experiment.sched_part = sched_part;
+		experiment.nodes = getMax( 'experiment_setup', 'nthreads' );
+		experiment.walltime = walltime;
+		experiment.memory = memory;
+	}
+
+	subscribe( config_name );
+
+	$.post( '/services/experiment/run'
+		+ job_cmd + '/' 
 		+ config_name + '/' 
 		+ project_name, experiment, function( data ) {
 

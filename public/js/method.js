@@ -124,13 +124,13 @@ function getInstalledMethod( config_name, cb ) {
 	}
 }
 
-function actionOnMethodSocketIO( action, job ) {
+function actionOnMethodSocketIO( action ) {
 
 	var	config_name = $( '#configs' ).val(),
 		project_name = $( '#projects' ).val(),
 		method_name = $( '#methods' ).val(),
-		sched_type = '',//$( '#projects' ).val(),
-		sched_part = '',//$( '#methods' ).val(),
+		sched_type = $( '#sched_type' ).val(),
+		sched_part = $( '#sched_part' ).val(),
 		job_cmd = '';
 
 	if ( config_name === '' ) {
@@ -153,17 +153,14 @@ function actionOnMethodSocketIO( action, job ) {
 
 	$( '#respWait' ).attr( 'src', '../img/ajax-loader.gif' );
 
-	subscribe( config_name );
-
-	router.get( '/do_job/:sched_type/:sched_part/:action/:connection/:project/:method', function( req, res ) {	
-
-	if ( job !== '' ) {
-		job_cmd = sched_type + '/' + sched_part + '/';
+	if ( sched_type !== '' ) {
+		job_cmd = '_job/' + sched_type + '/' + sched_part;
 	}
 
+	subscribe( config_name );
+
 	$.get('/services/method/'
-		+ 'do' + job + '/' 
-		+ job_cmd
+		+ 'do' + job_cmd + '/' 
 		+ action + '/'
 		+ config_name + '/' 
 		+ project_name + '/' 

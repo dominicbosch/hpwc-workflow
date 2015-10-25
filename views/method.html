@@ -122,6 +122,31 @@ Project Name:
 				<table>
 					<tr>
 						<td style='text-align: left'>
+							Job Scheduler: 
+							<select id="sched_type" 
+							onchange="if (this.value==='') $('#sched_part').prop('disabled',true);
+							else $('#sched_part').prop('disabled',false);"> 
+								<option value="">None</option>
+								<option value="pbs">PBS</option>
+								<option value="sge">SGE</option>
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							Partition: 
+							<input id="sched_part" type="text" size="7" value="smp" disabled>
+						</td>
+					</tr>
+				</table>
+
+				</br>
+				<button class="action" onclick="actionOnMethodSocketIO('compile');">Compile</button>
+				<button class="action" onclick="actionOnMethodSocketIO('compile_run');">Compile&amp;Run</button>
+
+				<!-- <table>
+					<tr>
+						<td style='text-align: left'>
 							Action directly executed:
 						</td>
 						<td>
@@ -138,7 +163,7 @@ Project Name:
 							<button class="action" onclick="actionOnMethodSocketIO('compile_run', '_job');">Compile&amp;Run</button>
 						</td>
 					</tr>
-				</table>
+				</table> -->
 			</div>
 		</div>
 	</div>

@@ -574,7 +574,7 @@ exports.getRemoteList = function( req, res, connection, command, type, cb ) {
 
 		if( err ) cb( err );
 		else {
-			pos = data.indexOf( type + ':' );
+			pos = data.lastIndexOf( type + ':' );
 			if( pos !== -1 ) {
 				list = data.substring( pos + type.length + 1 ).trim().split( ' ' );
 			}
