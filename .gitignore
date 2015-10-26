@@ -1,8 +1,9 @@
 node_modules/
 logs/
-config/*
+config/
 manage/
 users/
+*.TemporaryItems
 .AppleData/
 *.log
 *.DS_Store
