@@ -4,5 +4,5 @@ manage/
 users/
 .AppleData/
 *.log
-*.DS_Storei
+*.DS_Store
 .ssh/
