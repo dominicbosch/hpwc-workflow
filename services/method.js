@@ -227,7 +227,7 @@ router.get( '/do/:action/:connection/:project/:method', function( req, res ) {
 	});
 });
 
-router.get( '/do_job/:sched_type/:sched_part/:action/:connection/:project/:method', function( req, res ) {	
+router.get( '/do_job/:action/:connection/:project/:method', function( req, res ) {	
 	var connection = req.params.connection,
 		oConn = req.session.pub.configurations[ connection ],
 		project = req.params.project,
@@ -235,14 +235,15 @@ router.get( '/do_job/:sched_type/:sched_part/:action/:connection/:project/:metho
 		action = req.params.action,
 		sched_type = req.params.sched_type,
 		sched_part = req.params.sched_part,
+		job = req.body,
 		command = 
 			'workflow job_' + action
-			+ ' ' + sched_type // scheduler type
-			+ ' ' + path.join( oConn.workspace, project, method ) + ' ' //path to method
+			+ ' "' + job.sched_type + '"'
+			+ ' ' + path.join( oConn.workspace, project, method ) //path to method
 			+ ' 0' //nodes
-			+ ' ' + sched_part //scheduler partion
-			+ ' 0' //walltime
-			+ ' 0' //memory
+			+ ' "' + job.sched_part + '"'
+			+ ' "' + job.walltime + '"'
+			+ ' "' + job.memory + '"'
 			+ ' -p ' + project 
 			+ ' -n ' + method;
 

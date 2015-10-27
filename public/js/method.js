@@ -131,7 +131,9 @@ function actionOnMethodSocketIO( action ) {
 		method_name = $( '#methods' ).val(),
 		sched_type = $( '#sched_type' ).val(),
 		sched_part = $( '#sched_part' ).val(),
-		job_cmd = '';
+		walltime = $( '#walltime' ).val(),
+		memory = $( '#memory' ).val(),
+		job_cmd = '', job;
 
 	if ( config_name === '' ) {
 		alert( 'Select A Configuration' );
@@ -154,17 +156,30 @@ function actionOnMethodSocketIO( action ) {
 	$( '#respWait' ).attr( 'src', '../img/ajax-loader.gif' );
 
 	if ( sched_type !== '' ) {
-		job_cmd = '_job/' + sched_type + '/' + sched_part;
+		if ( sched_part === '' ) {
+			sched_part = 'smp';
+		}
+		if ( walltime === '' ) {
+			walltime = '0';
+		}
+		if ( memory === '' ) {
+			memory = '0';
+		}
+		job_cmd = '_job';
+		job.sched_type = sched_type;
+		job.sched_part = sched_part;
+		job.walltime = walltime;
+		job.memory = memory;
 	}
 
 	subscribe( config_name );
 
-	$.get('/services/method/'
-		+ 'do' + job_cmd + '/' 
+	$.post('/services/method/do'
+		+ job_cmd + '/' 
 		+ action + '/'
 		+ config_name + '/' 
 		+ project_name + '/' 
-		+ method_name, function( data ) {
+		+ method_name, job function( data ) {
 
 		var msg = data;
 
