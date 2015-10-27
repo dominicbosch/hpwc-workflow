@@ -179,7 +179,7 @@ function actionOnMethodSocketIO( action ) {
 		+ action + '/'
 		+ config_name + '/' 
 		+ project_name + '/' 
-		+ method_name, job function( data ) {
+		+ method_name, job, function( data ) {
 
 		var msg = data;
 
