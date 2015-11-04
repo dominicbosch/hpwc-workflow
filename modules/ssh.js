@@ -169,8 +169,9 @@ exports.updateConfiguration = function( username, args, cb ) {
 
 };
 
-exports.deleteConfiguration = function( username, confName, cb ) {
-	var conf = persistence.getConfiguration( username, confName );
+exports.deleteConfiguration = function( username, confObj, cb ) {
+	var conf = persistence.getConfiguration( username, confObj.name );
+	var oConn, oUser, cmd;
 
 	if( !conf ) {
 		cb({
@@ -178,11 +179,97 @@ exports.deleteConfiguration = function( username, confName, cb ) {
 			message: 'Configuration not existing!'
 		});
 	} else {
-		exports.closeConnection( username, confName );
-		persistence.deleteConfiguration( username, confName );
-		cb( null );
-	}
+		//check if other configuration to same machine exists //not for now
 
+		//check if want to delete the related key
+		if ( confObj.deleteKey === true ) {
+			//connect to clear ssh keys
+			exports.connectToHost ( username, conf, function( err, msg ) {
+				if( !err ) {
+					logger.write( 'info', username, 'No error connecting, msg: ' + msg );
+					if ( oUserConnections[ username ] ) {
+						logger.write( 'info', username, 'In IF' );
+						oConn = oUserConnections[ username ][ confObj.name ];
+					}
+					oUser = persistence.getUser( username );
+
+					if( oConn ) { //if connection exists
+					
+						cmd = 
+							'if test -f $HOME/.ssh/authorized_keys; then '
+								+ 'if grep -v "' + oUser.publicKey + '" $HOME/.ssh/authorized_keys > $HOME/.ssh/tmp; then '
+									+ 'cat $HOME/.ssh/tmp > $HOME/.ssh/authorized_keys && rm $HOME/.ssh/tmp; '
+								+ 'else '
+									+ 'rm $HOME/.ssh/authorized_keys && rm $HOME/.ssh/tmp; '
+								+ 'fi; '
+							+ 'fi';
+						
+						//cmd = 'cat $HOME/.ssh/authorized_keys';
+						oConn.exec( cmd, function( err, stream ) {
+							var data = '';
+							if ( err ) {
+								logger.formattedWrite( 'error', username,
+												'Can\'t execute command: %s For deleting ssh connection key. %s',
+												cmd, err );
+								exports.closeConnection( username, confObj.name );
+								cb({
+									code: 0,
+									message: 'Can\'t execute command: ' + cmd + 'For deleting connection ssh key' + err
+								});
+							} else {
+								logger.write( 'debug', username, 'No error' );
+								stream.on( 'data', function( chunk ) {
+									logger.formattedWrite( 'trace', username,
+												'Command: %s, got data: %s', cmd, chunk );
+									data += chunk;
+								})
+								.on( 'end', function() {
+									var msg = 'Delete key command received: ';
+									if ( data !== "" ) {
+										msg += data;
+										logger.write( 'trace', username, msg );
+										exports.closeConnection( username, confObj.name );
+										cb({
+											code: 0,
+											message: msg
+										});
+									} else { //if ( data === '' ) or different
+										msg += "NO DATA as expected";
+										logger.write( 'trace', username, msg );
+										persistence.deleteConfiguration( username, confObj.name );
+										exports.closeConnection( username, confObj.name );
+										cb( null );
+									}
+								})
+								.stderr.on( 'data', function( data ) {
+									// Handles errors that happen on the other end of this connection
+									logger.write( 'error', username, data );
+									exports.closeConnection( username, confObj.name );
+									cb({
+										code: 2,
+										message: data
+									});
+								});
+							}
+						});
+					}
+				} else {
+					var msg = 'Error connecting to ' + confObj.name;
+					logger.write( 'error', username, msg );
+					cb({
+						code: 0,
+						message: msg
+					});
+				}
+			});
+		} else {
+			persistence.deleteConfiguration( username, confObj.name );
+			exports.closeConnection( username, confObj.name );
+			cb( null );
+		}
+
+		
+	}
 };
 
 exports.connectToHost = function( username, connObj, cb ) {
@@ -193,55 +280,66 @@ exports.connectToHost = function( username, connObj, cb ) {
 		oUserLogs[ username ] = {};
 	}
  
-	oConn = oUserConnections[ username ][ connObj.name ];
+ 	if ( connObj ) {
+		oConn = oUserConnections[ username ][ connObj.name ];
 
-	if ( !oConn ) {
-		var oUser = persistence.getUser( username );
-		oConn = new SSHConnection();
-		oConn.on( 'ready', function() {
+		if ( !oConn ) {
+			var oUser = persistence.getUser( username );
+			oConn = new SSHConnection();
+			oConn.on( 'ready', function() {
 
-			logger.write( 'debug', username,
-							'New SSH connection established to "' + connObj.name
-							+ '", #openConnections='+(++connCounter));
+				logger.write( 'debug', username,
+								'New SSH connection established to "' + connObj.name
+								+ '", #openConnections='+(++connCounter));
 
-			oUserConnections[ username ][ connObj.name ] = oConn;
+				oUserConnections[ username ][ connObj.name ] = oConn;
 
-			//create object to store log information
-			oUserLogs[ username ][ connObj.name ]= {};
+				//create object to store log information
+				oUserLogs[ username ][ connObj.name ]= {};
 
-			cb( null, 'New SSH connection established for user ' + username);
-			//console.log( 'UTIL: ' + util.inspect(oConn, {showHidden: false, depth: null}));
-		}).on( 'close', function() {
-			delete oUserConnections[ username ][ connObj.name ];
-			logger.write( 'debug', username,
-							'SSH connection closed from "' + connObj.name
-							+ '", #openConnections='+(--connCounter));
-		}).on( 'end', function() {
-			delete oUserConnections[ username ][ connObj.name ];
-			logger.write( 'debug', username,
-							'SSH connection ENDED from "' + connObj.name
-							+ '", #openConnections='+(connCounter));
-		}).on( 'error', function( e ) {
-			delete oUserConnections[ username ][ connObj.name ];
-			var msg = 'Error connecting (#'+(++connCounter)+') "' + connObj.username
-						+ '@' + connObj.url + ':' + connObj.port + '": ' + e.code;
+				cb( null, 'New SSH connection established for user ' + username);
+				//console.log( 'UTIL: ' + util.inspect(oConn, {showHidden: false, depth: null}));
+			}).on( 'close', function() {
+				delete oUserConnections[ username ][ connObj.name ];
+				logger.write( 'debug', username,
+								'SSH connection closed from "' + connObj.name
+								+ '", #openConnections='+(--connCounter));
+			}).on( 'end', function() {
+				delete oUserConnections[ username ][ connObj.name ];
+				logger.write( 'debug', username,
+								'SSH connection ENDED from "' + connObj.name
+								+ '", #openConnections='+(connCounter));
+			}).on( 'error', function( e ) {
+				delete oUserConnections[ username ][ connObj.name ];
+				var msg = 'Error connecting (#'+(++connCounter)+') "' + connObj.username
+							+ '@' + connObj.url + ':' + connObj.port + '": ' + e.code;
 
-			logger.write( 'error', username, msg );
+				logger.write( 'error', username, msg );
 
-			cb({
-				code: 0,
-				message: msg
+				cb({
+					code: 0,
+					message: msg
+				});
+			}).connect({
+				host: connObj.url,
+				port: connObj.port,
+				username: connObj.username,
+				privateKey: oUser.privateKey,
+				passphrase: oUser.password
 			});
-		}).connect({
-			host: connObj.url,
-			port: connObj.port,
-			username: connObj.username,
-			privateKey: oUser.privateKey,
-			passphrase: oUser.password
-		});
+		} else {
+			// TODO: why is this not returning an error?
+			cb( null, 'Connection already open for user ' + username);
+		}
 	} else {
-		// TODO: why is this not returning an error?
-		cb( null, 'Connection already open for user ' + username);
+		var msg = 'Connection Object not specified';
+
+		logger.write( 'error', username, msg );
+
+		cb({
+			code: 0,
+			message: msg
+		});
 	}
 };
 

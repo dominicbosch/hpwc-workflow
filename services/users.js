@@ -25,7 +25,7 @@ router.post( '/create', function( req, res ) {
 				logger.write( 'error', username, 'SSH-KEYGEN FAILED! ' + err );
 			else {
 				logger.write( 'debug', username, 'SSH-KEYGEN successful!' );
-				persistence.storeUser( username, req.body.password, out.key, out.pubKey );
+				persistence.storeUser( username, req.body.password, out.key, out.pubKey.replace(/\n/g, '') );
 				res.send( 'New User "' + username + '" registered!' );
 			}
 		});

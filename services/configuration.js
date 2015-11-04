@@ -61,7 +61,7 @@ router.post( '/delete', function( req, res ) {
 		res.status( 400 );
 		res.send( 'Missing Configuration Name!' );
 	} else {
-		ssh.deleteConfiguration( req.session.pub.username, oBody.name, function( err ) {
+		ssh.deleteConfiguration( req.session.pub.username, oBody, function( err ) {
 			if( !err ) {
 				delete req.session.pub.configurations[ oBody.name ];
 				res.send( 'Configuration "' + oBody.name + '" deletion successful!' );

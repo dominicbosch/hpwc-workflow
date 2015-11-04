@@ -105,7 +105,8 @@ var deleteConfiguration = function() {
 	result = confirm( 'Do you really want to delete this configuration?' );
 	if( result ) {
 		options = {
-			name: $( '#tab2 select' ).val()
+			name: $( '#tab2 select' ).val(),
+			deleteKey: $( '#clearKey' ).prop( 'checked' )
 		};
 		$.post( '/services/configuration/delete', options, function( answ ) {
 			setInfo( answ );
