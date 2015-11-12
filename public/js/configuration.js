@@ -110,6 +110,11 @@ var deleteConfiguration = function() {
 		};
 		$.post( '/services/configuration/delete', options, function( answ ) {
 			setInfo( answ );
+			if ( !answ.fail
+				&& ( oPub.selectedConn.name === options.name ) ) {
+				$( '#configs' ).val( "" );
+				updateConfigurationForm();
+			}
 			updateConfigurationsList();
 			fillSelectBox();
 			$( '#tab2 button' ).prop( 'disabled', false );

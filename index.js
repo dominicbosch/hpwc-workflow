@@ -89,13 +89,16 @@ module.exports = exports = function( args ) {
 			username = req.session.pub.username;
 
 			// We need to be sure that we do some garbage collecting after the user session expired
-			if( oUserSessions[ username ] )
+			if( oUserSessions[ username ] ) {
+				//every action is resetting the timeout
 				clearTimeout( oUserSessions[ username ] );
+			}
 
 			oUserSessions[ username ] = setTimeout( function() {
 				// since the session is still existing (user still on webpage in browser) we destroy it, right?
-				if( req.session.pub )
+				if( req.session.pub ) {
 					req.session.destroy();
+				}
 
 				logger.write( 'fatal', '', 'TODO: cleaning up session of user "' + username + '"!' );
 				// TODO CLEANUP
