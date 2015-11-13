@@ -7,6 +7,7 @@ oPub.updateFolder = true;
 function cleanMethodForm() {
 	$( '#edit_method input[name="method_type"]' ).val( '' );
 	$( '#src_files' ).empty();
+	$( '#folders' ).val('src');
 	$( '#edit_method textarea[name="comment"]' ).val( '' );
 }
 
@@ -27,6 +28,15 @@ function updateMethodForm( cb ) {
 		project_name = $( '#projects' ).val(),
 		method_name = $( '#methods' ).val();
 
+	if (method_name !== '') {
+		$.get( '/services/method/get/' 
+			+ config_name + '/' 
+			+ project_name + '/' 
+			+ method_name, function( method ) {
+			setMethodForm( method );
+		});
+	}
+/*
 	if (method_name === '') {
 		cleanMethodForm();
 	} else {
@@ -36,7 +46,7 @@ function updateMethodForm( cb ) {
 			+ method_name, function( method ) {
 			setMethodForm( method );
 		});
-	}
+	}*/
 }
 
 function createZip() {
@@ -86,6 +96,7 @@ function getAndSetMethods( config_name, project_name, method_val, cb ) {
 			}
 
 			if ( method_val ) {
+				cleanMethodForm();
 				$( '#methods' ).val( method_val );
 				updateMethodForm( );
 			}
@@ -316,6 +327,7 @@ $(document).ready(function() {
 			getAndSetMethods( config_name, project_name );
 			$( '.action' ).prop( 'disabled', true );
 			$( '.kill' ).prop( 'disabled', false );
+			//set spinning image while checking for old process to be finished
 			$( '#respWait' ).attr( 'src', '../img/ajax-loader.gif' );
 			getLogSocketIO( config_name, project_name ); 
 		}
@@ -352,9 +364,7 @@ $(document).ready(function() {
 	//get method
 	$("#methods").change( function() {
 		//setTextAndScroll( 'resp_textarea', '' );
-
-		$( '#src_files' ).empty();
-		$( '#folders' ).val('src');
+		cleanMethodForm();
 		updateMethodForm( );
 	});
 
@@ -364,6 +374,10 @@ $(document).ready(function() {
 
 	//when the project selected change, we read the modules implemented
 	$("#projects").change( function() {
+
+		//$( '#projWait' ).attr( 'src', '../img/ajax-loader.gif' );
+		//$(document.body).css({ 'cursor': 'wait' });
+		//$(document.body).css({ 'cursor': 'default' })
 
 		var config_name = $( '#configs' ).val(),
 			project_name = $(this).val();
@@ -396,21 +410,28 @@ $(document).ready(function() {
 				
 			});
 		} else {
+			
+			$( '#projWait' ).attr( 'src', '../img/ajax-loader.gif' );
+			$( '#projects' ).prop( 'disabled', true );
+			$( '#methods' ).prop( 'disabled', true );
+
 			//fill project form
 			$.get( '/services/project/get/' 
 				+ config_name + '/' 
 				+ project_name, function( project ) {
-				
-				getAndSetMethods( config_name, project_name, null);
+
+				getAndSetMethods( config_name, project_name, function() {
+					$( '#projects' ).prop( 'disabled', false );
+					$( '#methods' ).prop( 'disabled', false );
+					$( '#projWait' ).removeAttr( 'src' );
+				});
 				$( '.action' ).prop( 'disabled', true );
 				$( '.kill' ).prop( 'disabled', false );
+				//set spinning image while checking for old process to be finished
 				$( '#respWait' ).attr( 'src', '../img/ajax-loader.gif' );
-				getLogSocketIO( config_name, project_name ); 
+				getLogSocketIO( config_name, project_name );
 			});
 		}
 	});
 
 });
-
-
-
