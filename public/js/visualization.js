@@ -85,13 +85,14 @@ function updateProjectFormInViz( cb ) {
 			cleanProjectForm();
 		});
 	} else {
+		$( '#projects' ).prop( 'disabled', true );
 		//fill project form
 		$.get( '/services/project/get/' 
 			+ config_name + '/' 
 			+ project_name, function( project ) {
 
 			setProjectForm( project );
-
+			$( '#projects' ).prop( 'disabled', false );
 			//update experiments list
 			getAndSetExperiments( config_name, project_name );
 		});

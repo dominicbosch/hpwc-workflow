@@ -74,7 +74,7 @@ function updateProjectFormInExp( cb ) {
 			$("#experiment_setup [name='methods']").empty();
 
 			//clean output list
-			$("#experiments").html("<option value=''>Choose An Experiment</option>");
+			//$("#experiments").html("<option value=''>Choose An Experiment</option>");
 
 		});
 	} else {
@@ -88,19 +88,19 @@ function updateProjectFormInExp( cb ) {
 			setProjectForm( project );
 
 			//update methods list
-			getAndSetMethodsList( config_name, project_name );
+			getAndSetMethodsList( config_name, project_name, function() {
+				if ( typeof(cb) === 'function' ) 
+					cb();
+			});
 
 			//update experiment list
-			getAndSetExperiments( config_name, project_name );
-
-			if ( typeof(cb) === 'function' ) 
-				cb();
+			//getAndSetExperiments( config_name, project_name );
 		});
 	}
 }
 
 //OK
-function getAndSetMethodsList( config_name, project_val ) {
+function getAndSetMethodsList( config_name, project_val, cb ) {
 
 	if( ( config_name !== '' ) && ( project_val !== '' ) ) {
 		//read the projects for an open connection and set the values
@@ -116,12 +116,17 @@ function getAndSetMethodsList( config_name, project_val ) {
 			}
 			$("#experiment_setup [name='methods']").html(string_html);
 
+			if ( typeof(cb) === 'function' ) 
+				cb();
+
 		}).fail(function( xhr ) {
 			console.log( xhr.responseText );
 		});
 	} else {
 		//clean method list
 		$("#experiment_setup [name='methods']").empty();
+		if ( typeof(cb) === 'function' ) 
+			cb();
 	}
 }
 
@@ -170,7 +175,6 @@ function runExp( ) {
 
 	$( '.action' ).prop( 'disabled', true );
 	$( '.kill' ).prop( 'disabled', false );
-
 	$( '#respWait' ).attr( 'src', '../img/ajax-loader.gif' );
 
 	experiment = {
@@ -216,7 +220,6 @@ function runExp( ) {
 
 			//clean wait image
 			$( '#respWait' ).removeAttr( 'src' );
-
 			$( '.action' ).prop( 'disabled', false );
 			$( '.kill' ).prop( 'disabled', true );
 		}
@@ -250,11 +253,13 @@ $(document).ready(function() {
 	updateConfigurationsList( 
 		null,
 		function() {
-			updateProjectFormInExp();
 			$( '.action' ).prop( 'disabled', true );
-			$( '.kill' ).prop( 'disabled', false );
-			$( '#respWait' ).attr( 'src', '../img/ajax-loader.gif' );
-			getLogSocketIO( config_name, project_name ); 
+			updateProjectFormInExp( function() {
+				//set right before looking for a pending process
+				$( '.kill' ).prop( 'disabled', false );
+				$( '#respWait' ).attr( 'src', '../img/ajax-loader.gif' );
+				getLogSocketIO( config_name, project_name );
+			});
 		}
 	);
 
@@ -270,7 +275,13 @@ $(document).ready(function() {
 		$("#experiment_setup [name='methods']").empty();
 
 		//clean output list
-		$("#experiments").html("<option value=''>Choose An Experiment</option>");
+		//$("#experiments").html("<option value=''>Choose An Experiment</option>");
+		
+		//clean wait image
+		$( '#respWait' ).removeAttr( 'src' );
+		$( '.action' ).prop( 'disabled', true );
+		$( '.kill' ).prop( 'disabled', true );
+
 	});
 
 	//OK
@@ -293,16 +304,15 @@ $(document).ready(function() {
 
 		//clean wait image
 		$( '#respWait' ).removeAttr( 'src' );
-
-		$( '.action' ).prop( 'disabled', false );
+		$( '.action' ).prop( 'disabled', true );
 		$( '.kill' ).prop( 'disabled', true );
 	});
 
 	//get data
-	$("#experiments").change( function() {
+//	$("#experiments").change( function() {
 
 		//updateOutputForm( );
-	});
+//	});
 
 	//when the project selected change, we read the value of parameters (user change)
 	$("#projects").change( function() {
@@ -321,19 +331,17 @@ $(document).ready(function() {
 
 		//clean wait image
 		$( '#respWait' ).removeAttr( 'src' );
-
-		$( '.action' ).prop( 'disabled', false );
-
+		$( '.action' ).prop( 'disabled', true );
 		$( '.kill' ).prop( 'disabled', true );
 
 		//clean response area
 		setTextAndScroll( 'resp_textarea', '' );
 
 		//clean output list
-		$("#experiments").html("<option value=''>Choose An Experiment</option>");
+		//$("#experiments").html("<option value=''>Choose An Experiment</option>");
 
-		updateProjectFormInExp( function(){
-			$( '.action' ).prop( 'disabled', true );
+		updateProjectFormInExp( function() {
+			//set right before looking for a pending process
 			$( '.kill' ).prop( 'disabled', false );
 			$( '#respWait' ).attr( 'src', '../img/ajax-loader.gif' );
 			getLogSocketIO( config_name, project_name ); 

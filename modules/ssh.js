@@ -670,10 +670,12 @@ exports.getRemoteList = function( req, res, connection, command, type, cb ) {
 	execWorkCommSync( req, res, connection, command, function( err, data ) {
 		var pos, list = '';
 
-		if( err ) cb( err );
+		if ( err )
+			cb( err );
 		else {
 			pos = data.lastIndexOf( type + ':' );
-			if( pos !== -1 ) {
+			if ( ( pos !== -1 ) && 
+				 ( data.substring( pos + type.length + 2, pos + type.length + 3 ) !== "\n" ) ) {
 				list = data.substring( pos + type.length + 1 ).trim().split( ' ' );
 			}
 			logger.write( 'debug', req.session.pub.username, 'Get list from file "' + command + '": ' + list );

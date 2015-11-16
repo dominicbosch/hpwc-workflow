@@ -8,10 +8,12 @@ function getAllConfigurations( cb ) {
 	$.get( '/services/configuration/getAll', function( data ) {
 		oPub.configurations = data.configurations;
 		oPub.openConnections = data.openConnections;
-		if( typeof(cb) === 'function' ) cb( null, data );
+		if ( typeof(cb) === 'function' ) 
+			cb( null, data );
 	})
 	.fail( function( xhr ) {
-		if( typeof(cb) === 'function' ) cb({ code: 0, message: xhr.responseText });
+		if ( typeof(cb) === 'function' ) 
+			cb({ code: 0, message: xhr.responseText });
 	});
 };
 
@@ -19,7 +21,7 @@ function selectFirstOption( idSelect ) {
 	var selectBox = $( idSelect ),
 		firstOption = $( 'option:first-child', selectBox );
 
-	if( firstOption.length > 0 ) {
+	if ( firstOption.length > 0 ) {
 		firstOption.attr( 'selected', true );
 		selectBox.change();
 	}
@@ -29,15 +31,15 @@ function toggleSelectedConnection( el ) {
 	var button = $( el ),
 		config = $( '#configs' ).val();
 
-	if( config === '' ) {
+	if ( config === '' ) {
 		alert( 'Choose a Configuration first!' );
 		return;
 	}
 
 	button.prop( 'disabled', true );
-	if( button.text() === 'Connect' ) {
+	if ( button.text() === 'Connect' ) {
 		toggleConnection( true, config, function( err ) {
-			if( err ) {
+			if ( err ) {
 				alert( err.message );
 			} else {
 				button.text( 'Disconnect' );
@@ -46,7 +48,7 @@ function toggleSelectedConnection( el ) {
 		});
 	} else {
 		toggleConnection( false, config, function( err ) {
-			if( err ) {
+			if ( err ) {
 				alert( err.message );
 			} else {
 				button.text( 'Connect' );
@@ -62,7 +64,8 @@ function toggleConnection( doConnect, config, cb ) {
 		if ( oPub.updateProject ) {
 			getAndSetProjects( doConnect ? config : '' );
 		}
-		if( typeof(cb) === 'function' ) cb();
+		if ( typeof(cb) === 'function' ) 
+			cb();
 	})
 	.fail( function( xhr ) {
 		cb({ code: 0, message: xhr.responseText });
@@ -73,6 +76,9 @@ function updateConfigurationForm( cb ) {
 	var config_name = $( '#configs' ).val(),
 		button = $( '#connectButton' );
 
+	$( '#configs' ).prop( 'disabled', true );
+	button.attr( 'disabled', true );
+
 	if ( oPub.updateProject ) {
 		//clean project list
 		$( '#projects' ).html( '<option value="">Choose A Project</option>' );
@@ -80,12 +86,13 @@ function updateConfigurationForm( cb ) {
 	
 	if ( config_name === '' ) {
 
-		button.attr( 'disabled', true );
+		//button.attr( 'disabled', true );
 
 		//remove the connection from the session
 		$.get('/services/session/cleanConnection', function( data ) {
 			oPub.selectedConn.name = '';
 			$( '#conf_table td' ).text( '--' );
+			$( '#configs' ).prop( 'disabled', false );
 		});
 
 	} else {
@@ -102,10 +109,11 @@ function updateConfigurationForm( cb ) {
 					if ( typeof(cb) === 'function' ) 
 						cb( data.status ? data.configuration.name : '' );
 				}
-				button.removeAttr( 'disabled' );				
+				button.removeAttr( 'disabled' );
 			} else {
 				alert ("Configuration not found");
 			}
+			$( '#configs' ).prop( 'disabled', false );
 		});
 	}
 }
@@ -114,9 +122,13 @@ function updateConfigurationsList( cb, cb2 ) {
 
 	$( '#configs' ).html( '<option value="">Choose A Configuration</option>' );
 
+	$( '#configs' ).prop( 'disabled', true );
+	$( '#connectButton' ).attr( 'disabled', true );
+
 	//Get the possible configuration and check for the current configuration reading the project
 	getAllConfigurations(function( err, data ) {
-		if ( err ) alert( err.message );
+		if ( err ) 
+			alert( err.message );
 		else if ( data.configurations ) {
 			//put data inside "configs" element
 			for ( var config in data.configurations ) {
@@ -143,6 +155,8 @@ function updateConfigurationsList( cb, cb2 ) {
 				}
 			}
 		}
+		$( '#configs' ).prop( 'disabled', false );
+		$( '#connectButton' ).removeAttr( 'disabled' );
 	});
 }
 
@@ -281,9 +295,7 @@ function connectToSocket( sockeID ) {
 
 				//clean wait image
 				$( '#respWait' ).removeAttr( 'src' );
-	
 				$( '.action' ).prop( 'disabled', false );
-
 				$( '.kill' ).prop( 'disabled', true );
 			} else {
 				//ask again for the log
@@ -361,9 +373,7 @@ function getLogSocketIO( config_name, project_name ) {
 
 				//clean wait image
 				$( '#respWait' ).removeAttr( 'src' );
-
 				$( '.action' ).prop( 'disabled', false );
-
 				$( '.kill' ).prop( 'disabled', true );
 			}
 

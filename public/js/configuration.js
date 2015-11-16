@@ -129,7 +129,7 @@ var deleteConfiguration = function() {
 
 $(document).ready( updateConfigurationsList );
 
-$(document).ready(function() {
+$(document).ready( function() {
 	$( '#configs' ).change( updateConfigurationForm );
 });
 

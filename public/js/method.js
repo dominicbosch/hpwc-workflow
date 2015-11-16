@@ -333,7 +333,10 @@ $(document).ready(function() {
 		}
 	);
 
-	$( '#connectButton' ).on( 'click', cleanMethodForm );
+	$( '#connectButton' ).on( 'click', function() {
+		$( '#methods' ).html( '<option value="">Choose A Method</option>' );
+		cleanMethodForm();
+	});
 
 	$( '#configs' ).change( function() {
 
