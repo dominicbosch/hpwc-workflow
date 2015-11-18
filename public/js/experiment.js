@@ -173,7 +173,7 @@ function runExp( ) {
 		return; 
 	}
 
-	$( '.action' ).prop( 'disabled', true );
+	$( '.action[name=run]' ).prop( 'disabled', true );
 	$( '.kill' ).prop( 'disabled', false );
 	$( '#respWait' ).attr( 'src', '../img/ajax-loader.gif' );
 
@@ -220,7 +220,7 @@ function runExp( ) {
 
 			//clean wait image
 			$( '#respWait' ).removeAttr( 'src' );
-			$( '.action' ).prop( 'disabled', false );
+			$( '.action[name=run]' ).prop( 'disabled', false );
 			$( '.kill' ).prop( 'disabled', true );
 		}
 
@@ -253,7 +253,9 @@ $(document).ready(function() {
 	updateConfigurationsList( 
 		null,
 		function() {
-			$( '.action' ).prop( 'disabled', true );
+/* Done by default on loading of page (in layout.js)
+			$( '.action[name=run]' ).prop( 'disabled', true );
+*/
 			updateProjectFormInExp( function() {
 				//set right before looking for a pending process
 				$( '.kill' ).prop( 'disabled', false );
@@ -279,6 +281,7 @@ $(document).ready(function() {
 		
 		//clean wait image
 		$( '#respWait' ).removeAttr( 'src' );
+//		$( '.action[name=run]' ).prop( 'disabled', true );
 		$( '.action' ).prop( 'disabled', true );
 		$( '.kill' ).prop( 'disabled', true );
 
@@ -304,15 +307,21 @@ $(document).ready(function() {
 
 		//clean wait image
 		$( '#respWait' ).removeAttr( 'src' );
+//		$( '.action[name=run]' ).prop( 'disabled', true );
+
+/* done in the updateConfigurationForm
 		$( '.action' ).prop( 'disabled', true );
+*/
 		$( '.kill' ).prop( 'disabled', true );
 	});
 
 	//get data
-//	$("#experiments").change( function() {
 
-		//updateOutputForm( );
-//	});
+/* experiments list is not anymore in this page, we leave this for future
+	$("#experiments").change( function() {
+		updateOutputForm( );
+	});
+*/
 
 	//when the project selected change, we read the value of parameters (user change)
 	$("#projects").change( function() {
@@ -331,7 +340,7 @@ $(document).ready(function() {
 
 		//clean wait image
 		$( '#respWait' ).removeAttr( 'src' );
-		$( '.action' ).prop( 'disabled', true );
+		$( '.action[name=run]' ).prop( 'disabled', true );
 		$( '.kill' ).prop( 'disabled', true );
 
 		//clean response area
@@ -339,6 +348,13 @@ $(document).ready(function() {
 
 		//clean output list
 		//$("#experiments").html("<option value=''>Choose An Experiment</option>");
+
+//		$( '.action[name=run]' ).prop( 'disabled', true );
+//		updateProjectFormInExp( function() {
+			//set right before looking for a pending process
+//			$( '.kill' ).prop( 'disabled', false );
+//			$( '#respWait' ).attr( 'src', '../img/ajax-loader.gif' );
+//			getLogSocketIO( config_name, project_name );
 
 		updateProjectFormInExp( function() {
 			//set right before looking for a pending process

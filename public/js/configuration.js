@@ -129,12 +129,6 @@ var deleteConfiguration = function() {
 	} else $( '#tab2 button' ).prop( 'disabled', false );
 };
 
-//$(document).ready( updateConfigurationsList );
-
-/*$(document).ready( function() {
-	$( '#configs' ).change( updateConfigurationForm );
-});*/
-
 $(document).ready(function() {
 	
 	$( '#configs' ).change( function() {

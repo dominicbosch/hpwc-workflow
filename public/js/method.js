@@ -172,7 +172,7 @@ function actionOnMethodSocketIO( action ) {
 		return;
 	}
 
-	$( '.action[name=run]' ).prop( 'disabled', true );
+	$( '.action[name=project]' ).prop( 'disabled', true );
 	$( '.kill' ).prop( 'disabled', false );
 	$( '#respWait' ).attr( 'src', '../img/ajax-loader.gif' );
 
@@ -213,7 +213,7 @@ function actionOnMethodSocketIO( action ) {
 
 			//clean wait image
 			$( '#respWait' ).removeAttr( 'src' );
-			$( '.action[name=run]' ).prop( 'disabled', false );
+			$( '.action[name=project]' ).prop( 'disabled', false );
 			$( '.kill' ).prop( 'disabled', true );
 		}
 
@@ -334,7 +334,9 @@ $(document).ready(function() {
 		},
 		function() {
 			getAndSetMethods( config_name, project_name );
-			$( '.action[name=run]' ).prop( 'disabled', true );
+/* Done by default on loading of page (in layout.js)
+			$( '.action[name=project]' ).prop( 'disabled', true );
+*/
 			$( '.kill' ).prop( 'disabled', false );
 			//set spinning image while checking for old process to be finished
 			$( '#respWait' ).attr( 'src', '../img/ajax-loader.gif' );
@@ -343,8 +345,9 @@ $(document).ready(function() {
 	);
 
 	$( '#connectButton' ).on( 'click', function() {
+		//set method and update
 		$( '#methods' ).html( '<option value="">Choose A Method</option>' );
-		cleanMethodForm();
+		updateMethodForm();
 	});
 
 	$( '#configs' ).change( function() {
@@ -357,16 +360,12 @@ $(document).ready(function() {
 
 		//clean wait image
 		$( '#respWait' ).removeAttr( 'src' );
-		$( '.action[name=run]' ).prop( 'disabled', false );
+		$( '.action[name=project]' ).prop( 'disabled', false );
 		$( '.kill' ).prop( 'disabled', true );
 
-		//clean method list
+		//set method and update
 		$( '#methods' ).html( '<option value="">Choose A Method</option>' );
-
-		cleanMethodForm();
-
-		//clean method type
-		$( '#method_types' ).html( '<option value="">Choose A Method Type</option>' );
+		updateMethodForm();
 
 		updateConfigurationForm( getInstalledMethod );
 
@@ -404,7 +403,7 @@ $(document).ready(function() {
 
 		//clean wait image
 		$( '#respWait' ).removeAttr( 'src' );
-		$( '.action[name=run]' ).prop( 'disabled', false );
+		$( '.action[name=project]' ).prop( 'disabled', false );
 		$( '.kill' ).prop( 'disabled', true );
 
 		//clean response area
@@ -439,7 +438,7 @@ $(document).ready(function() {
 					$( '#projWait' ).removeAttr( 'src' );
 
 				});
-				$( '.action[name=run]' ).prop( 'disabled', true );
+				$( '.action[name=project]' ).prop( 'disabled', true );
 				$( '.kill' ).prop( 'disabled', false );
 				//set spinning image while checking for old process to be finished
 				$( '#respWait' ).attr( 'src', '../img/ajax-loader.gif' );

@@ -101,6 +101,8 @@ function updateConfigurationForm( cb ) {
 			$( '#configs' ).prop( 'disabled', false );
 			//de-activate action related to an extablished connection
 			$( '.action[name=config]' ).prop( 'disabled', true );
+			if ( typeof(cb) === 'function' ) 
+				cb( '' );
 		});
 
 	} else {
@@ -116,9 +118,11 @@ function updateConfigurationForm( cb ) {
 				$( '.action[name=config]' ).prop( 'disabled', !data.status );
 				if ( oPub.updateProject ) {
 					getAndSetProjects( data.status ? data.configuration.name : '' );
-					if ( typeof(cb) === 'function' ) 
-						cb( data.status ? data.configuration.name : '' );
+					/*if ( typeof(cb) === 'function' ) 
+						cb( data.status ? data.configuration.name : '' );*/
 				}
+				if ( typeof(cb) === 'function' ) 
+					cb( data.status ? data.configuration.name : '' );
 				button.removeAttr( 'disabled' );
 			} else {
 				alert ("Configuration not found");
@@ -312,7 +316,7 @@ function connectToSocket( sockeID ) {
 
 				//clean wait image
 				$( '#respWait' ).removeAttr( 'src' );
-				$( '.action[name=run]' ).prop( 'disabled', false );
+				$( '.action[name=project]' ).prop( 'disabled', false );
 				$( '.kill' ).prop( 'disabled', true );
 			} else {
 				//ask again for the log
@@ -390,7 +394,7 @@ function getLogSocketIO( config_name, project_name ) {
 
 				//clean wait image
 				$( '#respWait' ).removeAttr( 'src' );
-				$( '.action[name=run]' ).prop( 'disabled', false );
+				$( '.action[name=project]' ).prop( 'disabled', false );
 				$( '.kill' ).prop( 'disabled', true );
 			}
 

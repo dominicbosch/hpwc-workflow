@@ -104,8 +104,6 @@ $(document).ready(function() {
 		updateConfigurationForm();
 	});
 
-//	$( '#configs' ).change( updateConfigurationForm );
-
 	$( '#connectButton' ).on( 'click', cleanProjectForm );
 
 	//when the project selected change, we read the value of parameters (user change)
