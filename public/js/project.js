@@ -5,6 +5,8 @@ oPub.updateProject = true;
 function cleanProjectForm() {
 	$( '#project_details input' ).val( '' );
 	$( '#project_details textarea' ).val( '' );
+	//de-activate action related to a project
+	$( '.action[name=project]' ).prop( 'disabled', true );
 }
 
 function setProjectForm( project ) {
@@ -12,6 +14,8 @@ function setProjectForm( project ) {
 	$( '#project_details input[name="par_val"]' ).val(project.parameters.default);
 	$( '#project_details input[name="nthreads"]' ).val(project.threads);
 	$( '#project_details textarea[name="comment"]' ).val(project.comment);
+	//activate action related to a project
+	$( '.action[name=project]' ).prop( 'disabled', false );
 }
 
 function updateProjectForm( cb ) {
@@ -97,16 +101,17 @@ $(document).ready(function() {
 	$( '#configs' ).change( function() {
 		setTextAndScroll( 'resp_textarea', '' );
 		cleanProjectForm();
+		updateConfigurationForm();
 	});
 
-	$( '#configs' ).change( updateConfigurationForm );
+//	$( '#configs' ).change( updateConfigurationForm );
 
 	$( '#connectButton' ).on( 'click', cleanProjectForm );
 
 	//when the project selected change, we read the value of parameters (user change)
 	$( '#projects' ).change( function() {
 		setTextAndScroll( 'resp_textarea', '' );
-		updateProjectForm( );
+		updateProjectForm();
 	});
 
 });

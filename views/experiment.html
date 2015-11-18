@@ -139,7 +139,7 @@
 						<input class="scheduler" id="memory" type="text" size="7" value="0" disabled>
 					</td>
 					<td style="width:50%; text-align:center" >
-						<button class="action" disabled onclick="runExp();" >Run Experiment</button>
+						<button class="action" onclick="runExp();" >Run Experiment</button>
 					</td>
 				</tr>
 			</table>
@@ -163,8 +163,8 @@
 	<textarea id="resp_textarea" class="scrollarea"  readonly style="max-height:150px; height:150px"></textarea>
 	<div class="centered-text">
 		</br>
-		<button class="action" disabled onclick="setTextAndScroll( 'resp_textarea', '' );">Clean</button>
-		<button class="kill" disabled onclick="kill_process();">Kill process</button>
+		<button class="action" onclick="setTextAndScroll( 'resp_textarea', '' );">Clean</button>
+		<button class="kill" onclick="kill_process();">Kill process</button>
 	</div>
 </div>
 {% endblock %}

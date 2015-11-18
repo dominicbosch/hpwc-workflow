@@ -36,13 +36,15 @@ function toggleSelectedConnection( el ) {
 		return;
 	}
 
-	button.prop( 'disabled', true );
+	//button.prop( 'disabled', true ); //done by default
 	if ( button.text() === 'Connect' ) {
 		toggleConnection( true, config, function( err ) {
 			if ( err ) {
 				alert( err.message );
 			} else {
 				button.text( 'Disconnect' );
+				//activate action related to an extablished connection
+				$( '.action[name=config]' ).prop( 'disabled', false );
 			}
 			button.removeAttr( 'disabled' );
 		});
@@ -52,6 +54,8 @@ function toggleSelectedConnection( el ) {
 				alert( err.message );
 			} else {
 				button.text( 'Connect' );
+				//de-activate action related to an extablished connection
+				$( '.action[name=config]' ).prop( 'disabled', true );
 			}
 			button.removeAttr( 'disabled' );
 		});
@@ -82,6 +86,8 @@ function updateConfigurationForm( cb ) {
 	if ( oPub.updateProject ) {
 		//clean project list
 		$( '#projects' ).html( '<option value="">Choose A Project</option>' );
+		//de-activate action related to a project
+		$( '.action[name=project]' ).prop( 'disabled', true );
 	}
 	
 	if ( config_name === '' ) {
@@ -93,6 +99,8 @@ function updateConfigurationForm( cb ) {
 			oPub.selectedConn.name = '';
 			$( '#conf_table td' ).text( '--' );
 			$( '#configs' ).prop( 'disabled', false );
+			//de-activate action related to an extablished connection
+			$( '.action[name=config]' ).prop( 'disabled', true );
 		});
 
 	} else {
@@ -104,6 +112,8 @@ function updateConfigurationForm( cb ) {
 				oPub.selectedConn.name = config_name;
 				setConnectionForm( data.configuration );
 				button.text( data.status ? 'Disconnect' : 'Connect' );
+				//change action related to the connection
+				$( '.action[name=config]' ).prop( 'disabled', !data.status );
 				if ( oPub.updateProject ) {
 					getAndSetProjects( data.status ? data.configuration.name : '' );
 					if ( typeof(cb) === 'function' ) 
@@ -136,13 +146,13 @@ function updateConfigurationsList( cb, cb2 ) {
 			}
 
 			//Current configuration not empty
-			if( oPub.selectedConn.name !== '' ) {
+			if ( oPub.selectedConn.name && ( oPub.selectedConn.name !== '' ) ) {
 
 				//set current configuration, change event is not raised because the configuration details are read from the session
 				$( '#configs' ).val( oPub.selectedConn.name );
-
 				$( '#connectButton' ).text( oPub.selectedConn.status ? 'Disconnect' : 'Connect' );
-
+				//change action related to the connection
+				$( '.action[name=config]' ).prop( 'disabled', !oPub.selectedConn.status );
 				if ( ( oPub.selectedConn.status ) && ( oPub.updateProject ) ) {
 					//retrieve project list if old connection is set and connected
 					var config_name = oPub.selectedConn.name, 
@@ -153,10 +163,10 @@ function updateConfigurationsList( cb, cb2 ) {
 					if ( typeof(cb) === 'function' ) 
 						cb();
 				}
+				$( '#connectButton' ).removeAttr( 'disabled' );
 			}
 		}
 		$( '#configs' ).prop( 'disabled', false );
-		$( '#connectButton' ).removeAttr( 'disabled' );
 	});
 }
 
@@ -172,8 +182,13 @@ function getAndSetProjects( config_name, project_name, cb ) {
 
 			if ( project_name ) {
 				$( '#projects' ).val( project_name );
+				//activate action related to a project
+				$( '.action[name=project]' ).prop( 'disabled', false );
 				if ( typeof(cb) === 'function' ) 
 					cb();
+			} else {
+				//de-activate action related to a project
+				$( '.action[name=project]' ).prop( 'disabled', true );
 			}
 		}).fail(function( xhr ) {
 			console.log( xhr.responseText );
@@ -181,6 +196,8 @@ function getAndSetProjects( config_name, project_name, cb ) {
 	} else {
 		//clean project list
 		$( '#projects' ).html( '<option value="">Choose A Project</option>' );
+		//de-activate action related to a project
+		$( '.action[name=project]' ).prop( 'disabled', true );
 	}
 }
 
@@ -295,7 +312,7 @@ function connectToSocket( sockeID ) {
 
 				//clean wait image
 				$( '#respWait' ).removeAttr( 'src' );
-				$( '.action' ).prop( 'disabled', false );
+				$( '.action[name=run]' ).prop( 'disabled', false );
 				$( '.kill' ).prop( 'disabled', true );
 			} else {
 				//ask again for the log
@@ -373,7 +390,7 @@ function getLogSocketIO( config_name, project_name ) {
 
 				//clean wait image
 				$( '#respWait' ).removeAttr( 'src' );
-				$( '.action' ).prop( 'disabled', false );
+				$( '.action[name=run]' ).prop( 'disabled', false );
 				$( '.kill' ).prop( 'disabled', true );
 			}
 
@@ -400,3 +417,8 @@ function unsubscribe( room ) {
 	socket.emit( 'unsubscribe', { room : room });
 
 }
+
+$(document).ready( function() {
+	$( '.action' ).prop( 'disabled', true );
+	$( '.kill' ).prop( 'disabled', true );
+});

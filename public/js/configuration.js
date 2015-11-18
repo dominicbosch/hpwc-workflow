@@ -50,7 +50,9 @@ var initConfiguration = function() {
 var fillSelectBox = function() {
 	var selBox = $( '#tab2 select' ).html( '<option value="">Choose Configuration</option>' );
 	getAllConfigurations(function( err, data ) {
-		if( !err ) for( var el in data.configurations ) selBox.append( $( '<option>' ).text( el ) );
+		if( !err ) 
+			for( var el in data.configurations ) 
+				selBox.append( $( '<option>' ).text( el ) );
 	});
 };
 
@@ -127,14 +129,20 @@ var deleteConfiguration = function() {
 	} else $( '#tab2 button' ).prop( 'disabled', false );
 };
 
-$(document).ready( updateConfigurationsList );
+//$(document).ready( updateConfigurationsList );
 
-$(document).ready( function() {
+/*$(document).ready( function() {
 	$( '#configs' ).change( updateConfigurationForm );
-});
+});*/
 
 $(document).ready(function() {
 	
+	$( '#configs' ).change( function() {
+		updateConfigurationForm();
+	});
+
+	updateConfigurationsList();
+
 	fillSelectBox();
 	// We also update the select box on every tab click on this page:
 	$( '.tab-links a' ).click( function() {

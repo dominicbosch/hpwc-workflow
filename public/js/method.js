@@ -9,6 +9,8 @@ function cleanMethodForm() {
 	$( '#src_files' ).empty();
 	$( '#folders' ).val('src');
 	$( '#edit_method textarea[name="comment"]' ).val( '' );
+	//de-activate action related to a method
+	$( '.action[name=method]' ).prop( 'disabled', true );
 }
 
 function setMethodForm( method ) {
@@ -20,7 +22,9 @@ function setMethodForm( method ) {
 	$( '#edit_method textarea[name="comment"]' )
 		.val( method.comment ).prop( 'scrollTop', function () {
 			return $( this ).prop( 'scrollHeight' );
-		});;
+		});
+	//activate action related to a method
+	$( '.action[name=method]' ).prop( 'disabled', false );
 }
 
 function updateMethodForm( cb ) {
@@ -28,12 +32,19 @@ function updateMethodForm( cb ) {
 		project_name = $( '#projects' ).val(),
 		method_name = $( '#methods' ).val();
 
-	if (method_name !== '') {
+	if ( method_name === '' ) {
+		cleanMethodForm();
+	} else {
 		$.get( '/services/method/get/' 
 			+ config_name + '/' 
 			+ project_name + '/' 
 			+ method_name, function( method ) {
+
 			setMethodForm( method );
+		})
+		.fail( function( xhr ) {
+			cleanMethodForm();
+			addTextAndScroll( 'info_textarea', xhr.responseText );
 		});
 	}
 /*
@@ -161,9 +172,8 @@ function actionOnMethodSocketIO( action ) {
 		return;
 	}
 
-	$( '.action' ).prop( 'disabled', true );
+	$( '.action[name=run]' ).prop( 'disabled', true );
 	$( '.kill' ).prop( 'disabled', false );
-
 	$( '#respWait' ).attr( 'src', '../img/ajax-loader.gif' );
 
 	if ( sched_type !== '' ) {
@@ -203,8 +213,7 @@ function actionOnMethodSocketIO( action ) {
 
 			//clean wait image
 			$( '#respWait' ).removeAttr( 'src' );
-
-			$( '.action' ).prop( 'disabled', false );
+			$( '.action[name=run]' ).prop( 'disabled', false );
 			$( '.kill' ).prop( 'disabled', true );
 		}
 
@@ -322,10 +331,10 @@ $(document).ready(function() {
 	updateConfigurationsList( 
 		function() {
 			getInstalledMethod( config_name );
-		}, 
+		},
 		function() {
 			getAndSetMethods( config_name, project_name );
-			$( '.action' ).prop( 'disabled', true );
+			$( '.action[name=run]' ).prop( 'disabled', true );
 			$( '.kill' ).prop( 'disabled', false );
 			//set spinning image while checking for old process to be finished
 			$( '#respWait' ).attr( 'src', '../img/ajax-loader.gif' );
@@ -348,10 +357,9 @@ $(document).ready(function() {
 
 		//clean wait image
 		$( '#respWait' ).removeAttr( 'src' );
-
-		$( '.action' ).prop( 'disabled', false );
+		$( '.action[name=run]' ).prop( 'disabled', false );
 		$( '.kill' ).prop( 'disabled', true );
-		
+
 		//clean method list
 		$( '#methods' ).html( '<option value="">Choose A Method</option>' );
 
@@ -367,7 +375,7 @@ $(document).ready(function() {
 	//get method
 	$("#methods").change( function() {
 		//setTextAndScroll( 'resp_textarea', '' );
-		cleanMethodForm();
+	//	cleanMethodForm();
 		updateMethodForm( );
 	});
 
@@ -396,9 +404,7 @@ $(document).ready(function() {
 
 		//clean wait image
 		$( '#respWait' ).removeAttr( 'src' );
-
-		$( '.action' ).prop( 'disabled', false );
-
+		$( '.action[name=run]' ).prop( 'disabled', false );
 		$( '.kill' ).prop( 'disabled', true );
 
 		//clean response area
@@ -410,7 +416,8 @@ $(document).ready(function() {
 
 		if ( project_name === '' ) {
 			$.get('/services/session/cleanProject', function( data ) {
-				
+				//de-activate action related to a project
+				$( '.action[name=project]' ).prop( 'disabled', true );
 			});
 		} else {
 			
@@ -424,11 +431,15 @@ $(document).ready(function() {
 				+ project_name, function( project ) {
 
 				getAndSetMethods( config_name, project_name, function() {
+					//activate action related to a project
+					$( '.action[name=project]' ).prop( 'disabled', false );
+
 					$( '#projects' ).prop( 'disabled', false );
 					$( '#methods' ).prop( 'disabled', false );
 					$( '#projWait' ).removeAttr( 'src' );
+
 				});
-				$( '.action' ).prop( 'disabled', true );
+				$( '.action[name=run]' ).prop( 'disabled', true );
 				$( '.kill' ).prop( 'disabled', false );
 				//set spinning image while checking for old process to be finished
 				$( '#respWait' ).attr( 'src', '../img/ajax-loader.gif' );

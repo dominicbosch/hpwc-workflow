@@ -46,12 +46,12 @@ router.get( '/get/:connection/:project/:method', function( req, res ) {
 					res.send( method );
 				} else if( err.code !== 1 ) {
 					res.status( 400 );
-					res.send( err.message );
+					res.send( err );
 				}
 			});
 		} else if( err.code !== 1 ) {
 			res.status( 400 );
-			res.send( err.message );
+			res.send( err );
 		}
 	});
 });
@@ -211,7 +211,7 @@ router.get( '/:action/:connection/:project/:method', function( req, res ) {
 });
 */
 
-router.get( '/do/:action/:connection/:project/:method', function( req, res ) {	
+router.post( '/do/:action/:connection/:project/:method', function( req, res ) {	
 	var connection = req.params.connection,
 		project = req.params.project,
 		method = req.params.method,
@@ -227,7 +227,7 @@ router.get( '/do/:action/:connection/:project/:method', function( req, res ) {
 	});
 });
 
-router.get( '/do_job/:action/:connection/:project/:method', function( req, res ) {	
+router.post( '/do_job/:action/:connection/:project/:method', function( req, res ) {	
 	var connection = req.params.connection,
 		oConn = req.session.pub.configurations[ connection ],
 		project = req.params.project,

@@ -51,11 +51,11 @@ section > div.right {
 	padding-left: 20px;
 	margin-left: -1px;
 	border-left: 1px solid #666;
-	width: 35%;
+	width: 37%;
 }
 
 section > div.right > div {
-	max-width: 320px;
+	max-width: 100%; /*320px;*/
 	text-align: center;
 }
 

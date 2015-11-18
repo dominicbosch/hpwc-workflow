@@ -52,7 +52,7 @@ Project Name:
 			</table>
 			<div class="centered-text">
 				</br>
-				<button onclick="manage_method('create');">Create Method</button>
+				<button class="action" name="project" onclick="manage_method('create');">Create Method</button>
 			</div>
 		</div>
 
@@ -66,9 +66,9 @@ Project Name:
 						</select>
 					</td>
 					<td>
-						<button onclick="manage_method('edit');">Edit Method</button>
+						<button class="action" name="method" onclick="manage_method('edit');">Edit Method</button>
 						<br/>
-						<button onclick="manage_method('delete');">Delete Method</button>
+						<button class="action" name="method" onclick="manage_method('delete');">Delete Method</button>
 					</td>
 				</tr>
 				<tr>
@@ -146,8 +146,8 @@ Project Name:
 				</table>
 
 				</br>
-				<button class="action" onclick="actionOnMethodSocketIO('compile');">Compile</button>
-				<button class="action" onclick="actionOnMethodSocketIO('compile_run');">Compile&amp;Run</button>
+				<button class="action" name="run" onclick="actionOnMethodSocketIO('compile');">Compile</button>
+				<button class="action" name="run" onclick="actionOnMethodSocketIO('compile_run');">Compile&amp;Run</button>
 
 				<!-- <table>
 					<tr>
