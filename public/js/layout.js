@@ -36,6 +36,9 @@ function toggleSelectedConnection( el ) {
 		return;
 	}
 
+	//clean response area
+	setTextAndScroll( 'resp_textarea', '' );
+
 	//button.prop( 'disabled', true ); //done by default
 	if ( button.text() === 'Connect' ) {
 		toggleConnection( true, config, function( err ) {
@@ -55,7 +58,11 @@ function toggleSelectedConnection( el ) {
 			} else {
 				button.text( 'Connect' );
 				//de-activate action related to an extablished connection
-				$( '.action[name=config]' ).prop( 'disabled', true );
+				//$( '.action[name=config]' ).prop( 'disabled', true );
+				//clean wait image
+				$( '#respWait' ).removeAttr( 'src' );
+				$( '.kill' ).prop( 'disabled', true );
+				$( '.action' ).prop( 'disabled', true ); //should be faster
 			}
 			button.removeAttr( 'disabled' );
 		});
@@ -68,6 +75,9 @@ function toggleConnection( doConnect, config, cb ) {
 		if ( oPub.updateProject ) {
 			getAndSetProjects( doConnect ? config : '' );
 		}
+		if ( oPub.updateMethodInstalled ) {
+			getInstalledMethod( doConnect ? config : '' );
+		}
 		if ( typeof(cb) === 'function' ) 
 			cb();
 	})
@@ -76,6 +86,7 @@ function toggleConnection( doConnect, config, cb ) {
 	});
 }
 
+//called when the selected connection changes
 function updateConfigurationForm( cb ) {
 	var config_name = $( '#configs' ).val(),
 		button = $( '#connectButton' );
@@ -83,12 +94,12 @@ function updateConfigurationForm( cb ) {
 	$( '#configs' ).prop( 'disabled', true );
 	button.attr( 'disabled', true );
 
-	if ( oPub.updateProject ) {
+/*	if ( oPub.updateProject ) {
 		//clean project list
 		$( '#projects' ).html( '<option value="">Choose A Project</option>' );
 		//de-activate action related to a project
 		$( '.action[name=project]' ).prop( 'disabled', true );
-	}
+	}*/
 	
 	if ( config_name === '' ) {
 
@@ -99,8 +110,13 @@ function updateConfigurationForm( cb ) {
 			oPub.selectedConn.name = '';
 			$( '#conf_table td' ).text( '--' );
 			$( '#configs' ).prop( 'disabled', false );
+			if ( oPub.updateProject ) {
+				//clean project list
+				$( '#projects' ).html( '<option value="">Choose A Project</option>' );
+			}
 			//de-activate action related to an extablished connection
-			$( '.action[name=config]' ).prop( 'disabled', true );
+			//$( '.action[name=config]' ).prop( 'disabled', true );
+			$( '.action' ).prop( 'disabled', true );
 			if ( typeof(cb) === 'function' ) 
 				cb( '' );
 		});
@@ -115,14 +131,22 @@ function updateConfigurationForm( cb ) {
 				setConnectionForm( data.configuration );
 				button.text( data.status ? 'Disconnect' : 'Connect' );
 				//change action related to the connection
-				$( '.action[name=config]' ).prop( 'disabled', !data.status );
+				//$( '.action[name=config]' ).prop( 'disabled', !data.status );
+				if ( data.status ) {
+					$( '.action[name=config]' ).prop( 'disabled', false );
+				} else {
+					$( '.action' ).prop( 'disabled', true );
+				}
+				
 				if ( oPub.updateProject ) {
 					getAndSetProjects( data.status ? data.configuration.name : '' );
 					/*if ( typeof(cb) === 'function' ) 
 						cb( data.status ? data.configuration.name : '' );*/
 				}
+
 				if ( typeof(cb) === 'function' ) 
 					cb( data.status ? data.configuration.name : '' );
+
 				button.removeAttr( 'disabled' );
 			} else {
 				alert ("Configuration not found");
@@ -134,21 +158,30 @@ function updateConfigurationForm( cb ) {
 
 function updateConfigurationsList( cb, cb2 ) {
 
-	$( '#configs' ).html( '<option value="">Choose A Configuration</option>' );
+	var tempConfigsHTMLObj = $( '<select>' );
+	tempConfigsHTMLObj.html( $( '<option>' ).attr( 'value', '' ).text( 'Choose A Configuration' ) );
+
+	//$( '#configs' ).html( '<option value="">Choose A Configuration</option>' );
 
 	$( '#configs' ).prop( 'disabled', true );
 	$( '#connectButton' ).attr( 'disabled', true );
 
 	//Get the possible configuration and check for the current configuration reading the project
-	getAllConfigurations(function( err, data ) {
-		if ( err ) 
+	getAllConfigurations( function( err, data ) {
+		if ( err ) {
+			$( '#configs' ).html( tempConfigsHTMLObj.html() );
 			alert( err.message );
-		else if ( data.configurations ) {
+		} else if ( data.configurations ) {
 			//put data inside "configs" element
-			for ( var config in data.configurations ) {
+			/*for ( var config in data.configurations ) {
 				$( '#configs' ).append( $( '<option>' ).attr( 'value', config ).text( config ) );
+			}*/
+			//put data inside "temporary" HTMLObj
+			for ( var config in data.configurations ) {
+				tempConfigsHTMLObj.append( $( '<option>' ).attr( 'value', config ).text( config ) );
 			}
 
+			$( '#configs' ).html( tempConfigsHTMLObj.html() );
 			//Current configuration not empty
 			if ( oPub.selectedConn.name && ( oPub.selectedConn.name !== '' ) ) {
 
@@ -176,14 +209,22 @@ function updateConfigurationsList( cb, cb2 ) {
 
 function getAndSetProjects( config_name, project_name, cb ) {
 
+	var tempProjectsHTMLObj = $( '<select>' );
+	tempProjectsHTMLObj.html( $( '<option>' ).attr( 'value', '' ).text( 'Choose A Project' ) );
+
 	if( config_name !== '' ) {
 		//read the projects for an open connection and set the values
-		$.get( '/services/project/getAll/' + config_name, function( projects ) {
+		$.get( '/services/project/getAll/' 
+			+ config_name, function( projects ) {
+
+			/*for ( var i in projects ) {
+				$( '#projects' ).append($( '<option>' ).attr( 'value', projects[i] ).text( projects[i] ) );
+			}*/
 
 			for ( var i in projects ) {
-				$( '#projects' ).append($( '<option>' ).attr( 'value', projects[i] ).text( projects[i] ) );
+				tempProjectsHTMLObj.append($( '<option>' ).attr( 'value', projects[i] ).text( projects[i] ) );
 			}
-
+			$( '#projects' ).html( tempProjectsHTMLObj.html() );
 			if ( project_name ) {
 				$( '#projects' ).val( project_name );
 				//activate action related to a project
@@ -199,9 +240,35 @@ function getAndSetProjects( config_name, project_name, cb ) {
 		});
 	} else {
 		//clean project list
-		$( '#projects' ).html( '<option value="">Choose A Project</option>' );
+		$( '#projects' ).html( tempProjectsHTMLObj.html() );
 		//de-activate action related to a project
 		$( '.action[name=project]' ).prop( 'disabled', true );
+	}
+}
+
+function getInstalledMethod( config_name, cb ) {
+
+	var tempMethodsInstHTMLObj = $( '<select>' );
+	tempMethodsInstHTMLObj.html( $( '<option>' ).attr( 'value', '' ).text( 'Choose A Method Type' ) );
+
+	if( config_name !== '' ) {
+		
+		$.get('/services/method/getInstalled/'
+			+ config_name, function( methods ) {
+
+			for ( var i in methods ) {
+				tempMethodsInstHTMLObj.append($( '<option>' ).attr( 'value', methods[i] ).text( methods[i] ) );
+			}
+			$( '#method_types' ).html( tempMethodsInstHTMLObj.html() );
+		}).fail(function( xhr ) {
+			console.log( xhr.responseText );
+		});
+
+		if ( typeof(cb) === 'function' ) 
+			cb( config_name );
+	} else {
+		//clean method types list
+		$( '#method_types' ).html( tempMethodsInstHTMLObj.html() );
 	}
 }
 
@@ -423,6 +490,17 @@ function unsubscribe( room ) {
 }
 
 $(document).ready( function() {
-	$( '.action' ).prop( 'disabled', true );
-	$( '.kill' ).prop( 'disabled', true );
+	/*
+	when configuration changes, the project selected is cleaned
+	so we clean all the information related to the project
+	directly here everytime configs changes
+	*/
+	$( '#configs' ).change( function() {
+
+		//clean wait image
+		$( '#respWait' ).removeAttr( 'src' );
+		$( '.kill' ).prop( 'disabled', true );
+		//clean response area
+		setTextAndScroll( 'resp_textarea', '' );
+	});
 });

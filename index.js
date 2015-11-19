@@ -147,6 +147,7 @@ module.exports = exports = function( args ) {
 		var view = 'index';		
 		if( isValidRequest( req ) )
 			view = req.params[ 0 ];
+		//pass req.session.pub to Swig engine
 		res.render( view, req.session.pub );
 	});
 	

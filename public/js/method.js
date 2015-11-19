@@ -1,6 +1,7 @@
 "use strict";
 
 oPub.updateProject = true;
+oPub.updateMethodInstalled = true;
 //to change also in layout.html and layout.js
 oPub.updateFolder = true;
 
@@ -107,42 +108,19 @@ function getAndSetMethods( config_name, project_name, method_val, cb ) {
 			}
 
 			if ( method_val ) {
-				cleanMethodForm();
 				$( '#methods' ).val( method_val );
 				updateMethodForm( );
 			}
+
+			if ( typeof(cb) === 'function' ) 
+				cb( );
+
 		}).fail(function( xhr ) {
 			console.log( xhr.responseText );
 		});
-
-		if ( typeof(cb) === 'function' ) 
-			cb( );
-
 	} else {
 		//clean method list
 		$( '#methods' ).html( '<option value="">Choose A Method</option>' );
-	}
-}
-
-function getInstalledMethod( config_name, cb ) {
-
-	//clean method list
-	$( '#method_types' ).html( '<option value="">Choose A Method Type</option>' );
-
-	if( config_name !== '' ) {
-		
-		$.get('/services/method/getInstalled/'
-			+ config_name, function( methods ) {
-
-			for ( var i in methods ) {
-				$( '#method_types' ).append($( '<option>' ).attr( 'value', methods[i] ).text( methods[i] ) );
-			}
-		}).fail(function( xhr ) {
-			console.log( xhr.responseText );
-		});
-
-		if ( typeof(cb) === 'function' ) 
-			cb( config_name );
 	}
 }
 
@@ -333,10 +311,7 @@ $(document).ready(function() {
 			getInstalledMethod( config_name );
 		},
 		function() {
-			getAndSetMethods( config_name, project_name );
-/* Done by default on loading of page (in layout.js)
-			$( '.action[name=project]' ).prop( 'disabled', true );
-*/
+			getAndSetMethods( config_name, project_name, null );
 			$( '.kill' ).prop( 'disabled', false );
 			//set spinning image while checking for old process to be finished
 			$( '#respWait' ).attr( 'src', '../img/ajax-loader.gif' );
@@ -352,16 +327,9 @@ $(document).ready(function() {
 
 	$( '#configs' ).change( function() {
 
-		var config_name = $( '#configs' ).val();
-
 		//unsubscribe
 		unsubscribe( '' );
 		count = 0;
-
-		//clean wait image
-		$( '#respWait' ).removeAttr( 'src' );
-		$( '.action[name=project]' ).prop( 'disabled', false );
-		$( '.kill' ).prop( 'disabled', true );
 
 		//set method and update
 		$( '#methods' ).html( '<option value="">Choose A Method</option>' );
@@ -373,8 +341,7 @@ $(document).ready(function() {
 
 	//get method
 	$("#methods").change( function() {
-		//setTextAndScroll( 'resp_textarea', '' );
-	//	cleanMethodForm();
+		//cleanMethodForm();
 		updateMethodForm( );
 	});
 
@@ -403,15 +370,14 @@ $(document).ready(function() {
 
 		//clean wait image
 		$( '#respWait' ).removeAttr( 'src' );
-		$( '.action[name=project]' ).prop( 'disabled', false );
 		$( '.kill' ).prop( 'disabled', true );
 
 		//clean response area
 		setTextAndScroll( 'resp_textarea', '' );
 
+		//set method and update
 		$( '#methods' ).html( '<option value="">Choose A Method</option>' );
-
-		cleanMethodForm();
+		updateMethodForm();
 
 		if ( project_name === '' ) {
 			$.get('/services/session/cleanProject', function( data ) {
@@ -419,7 +385,9 @@ $(document).ready(function() {
 				$( '.action[name=project]' ).prop( 'disabled', true );
 			});
 		} else {
-			
+			//activate action related to a project
+		//	$( '.action[name=project]' ).prop( 'disabled', false );
+
 			$( '#projWait' ).attr( 'src', '../img/ajax-loader.gif' );
 			$( '#projects' ).prop( 'disabled', true );
 			$( '#methods' ).prop( 'disabled', true );
@@ -429,14 +397,13 @@ $(document).ready(function() {
 				+ config_name + '/' 
 				+ project_name, function( project ) {
 
-				getAndSetMethods( config_name, project_name, function() {
+				getAndSetMethods( config_name, project_name, null, function() {
 					//activate action related to a project
-					$( '.action[name=project]' ).prop( 'disabled', false );
+				//	$( '.action[name=project]' ).prop( 'disabled', false );
 
+					$( '#projWait' ).removeAttr( 'src' );
 					$( '#projects' ).prop( 'disabled', false );
 					$( '#methods' ).prop( 'disabled', false );
-					$( '#projWait' ).removeAttr( 'src' );
-
 				});
 				$( '.action[name=project]' ).prop( 'disabled', true );
 				$( '.kill' ).prop( 'disabled', false );

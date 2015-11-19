@@ -20,7 +20,13 @@
 <h1>Method Configuration</h1>
 Project Name: 
 <select id="projects" name="project_name">
+{% if selectedConnection.selectedProject %}
+	<option value="{{ selectedConnection.selectedProject }}">
+		{{ selectedConnection.selectedProject }}
+	</option>
+{% else %}
 	<option value="">Choose A Project</option>
+{% endif %}
 </select>
 <img id="projWait" />
 <div class="tabs">
@@ -52,7 +58,7 @@ Project Name:
 			</table>
 			<div class="centered-text">
 				</br>
-				<button class="action" name="project" onclick="manage_method('create');">Create Method</button>
+				<button class="action" name="project" onclick="manage_method('create');" disabled>Create Method</button>
 			</div>
 		</div>
 
@@ -66,9 +72,9 @@ Project Name:
 						</select>
 					</td>
 					<td>
-						<button class="action" name="method" onclick="manage_method('edit');">Edit Method</button>
+						<button class="action" name="method" onclick="manage_method('edit');" disabled>Edit Method</button>
 						<br/>
-						<button class="action" name="method" onclick="manage_method('delete');">Delete Method</button>
+						<button class="action" name="method" onclick="manage_method('delete');" disabled>Delete Method</button>
 					</td>
 				</tr>
 				<tr>
@@ -82,12 +88,12 @@ Project Name:
 					<td></td>
 					<td>
 						Folder :
-						<select id="folders" name="folder_name">
+						<select id="folders" class="action" name="method" name="folder_name" disabled>
 							<option value="src">sources</option>
 							<option value="out">outputs</option>
-							<option value="out">jobs</option>
+							<option value="jobs">jobs</option>
 						</select>
-						<button id="create_zip" onclick="createZip()">Create Zip</button>
+						<button id="create_zip" class="action" name="method" onclick="createZip()" disabled>Create Zip</button>
 					</td>
 					<td></td>
 				</tr>
@@ -102,7 +108,7 @@ Project Name:
 						<button id="edit_code" onclick="getRemoteSrc( event )">New File</button>
 						<br/>
 						-->
-						<button id="edit_code" onclick="getRemoteSrc( event )">Edit File</button>
+						<button id="edit_code" class="action" name="method" onclick="getRemoteSrc( event )" disabled>Edit File</button>
 						<!--
 						<br/>
 						<button id="edit_code" onclick="getRemoteSrc( event )">Delete File</button>
@@ -146,8 +152,8 @@ Project Name:
 				</table>
 
 				</br>
-				<button class="action" name="project" onclick="actionOnMethodSocketIO('compile');">Compile</button>
-				<button class="action" name="run" onclick="actionOnMethodSocketIO('compile_run');">Compile&amp;Run</button>
+				<button class="action" name="project" onclick="actionOnMethodSocketIO('compile');" disabled>Compile</button>
+				<button class="action" name="project" onclick="actionOnMethodSocketIO('compile_run');" disabled>Compile&amp;Run</button>
 
 				<!-- <table>
 					<tr>
@@ -189,8 +195,8 @@ Project Name:
 	<textarea id="resp_textarea" class="scrollarea" readonly style="max-height:150px; height:150px"></textarea>
 	<div class="centered-text">
 		</br>
-		<button class="action" onclick="setTextAndScroll( 'resp_textarea', '' );">Clean</button>
-		<button class="kill" onclick="kill_process();">Kill process</button>
+		<button onclick="setTextAndScroll( 'resp_textarea', '' );">Clean</button>
+		<button class="kill" onclick="kill_process();" disabled>Kill process</button>
 	</div>
 </div>
 <div id="shadow" style="display: none;"></div>

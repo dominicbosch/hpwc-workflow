@@ -23,7 +23,7 @@
 		<select id="experiments" name="experiment_name">
 			<option value="">Choose An Experiment</option>
 		</select>
-		<button onclick="deleteExperiment()">Delete Experiment</button>
+		<button class="action" name="project" onclick="deleteExperiment()" disabled>Delete Experiment</button>
 	</div>
 	<table id="exp_details">
 		<tr>
@@ -75,7 +75,7 @@
 		</tr>
 	</table>
 	<div style="padding: 20px 0;" class="centered-text">
-		<button onclick="showGraph()">Show Graph</button>
+		<button class="action" name="project" onclick="showGraph()" disabled>Show Graph</button>
 	</div>
 </div>
 {% endblock %}
@@ -85,7 +85,13 @@
 	<div id="project_title">
 		<label for="projects">Current project settings: </label>
 		<select id="projects" name="project_name">
+		{% if selectedConnection.selectedProject %}
+			<option value="{{ selectedConnection.selectedProject }}">
+				{{ selectedConnection.selectedProject }}
+			</option>
+		{% else %}
 			<option value="">Choose A Project</option>
+		{% endif %}
 		</select>
 	</div>
 	<table id="project_details">

@@ -24,7 +24,13 @@
 					<td>Project name: </td>
 					<td>
 						<select id="projects" name="project_name">
+						{% if selectedConnection.selectedProject %}
+							<option value="{{ selectedConnection.selectedProject }}">
+								{{ selectedConnection.selectedProject }}
+							</option>
+						{% else %}
 							<option value="">Choose A Project</option>
+						{% endif %}
 						</select>
 					</td>
 				</tr>
@@ -139,7 +145,7 @@
 						<input class="scheduler" id="memory" type="text" size="7" value="0" disabled>
 					</td>
 					<td style="width:50%; text-align:center" >
-						<button class="action" name="project" onclick="runExp();" >Run Experiment</button>
+						<button class="action" name="project" onclick="runExp();" disabled>Run Experiment</button>
 					</td>
 				</tr>
 			</table>
@@ -163,8 +169,8 @@
 	<textarea id="resp_textarea" class="scrollarea"  readonly style="max-height:150px; height:150px"></textarea>
 	<div class="centered-text">
 		</br>
-		<button class="action" onclick="setTextAndScroll( 'resp_textarea', '' );">Clean</button>
-		<button class="kill" onclick="kill_process();">Kill process</button>
+		<button onclick="setTextAndScroll( 'resp_textarea', '' );">Clean</button>
+		<button class="kill" onclick="kill_process();" disabled>Kill process</button>
 	</div>
 </div>
 {% endblock %}

@@ -256,12 +256,20 @@ $(document).ready(function() {
 /* Done by default on loading of page (in layout.js)
 			$( '.action[name=run]' ).prop( 'disabled', true );
 */
-			updateProjectFormInExp( function() {
+/*			updateProjectFormInExp( function() {
 				//set right before looking for a pending process
 				$( '.kill' ).prop( 'disabled', false );
+				//set spinning image while checking for old process to be finished
 				$( '#respWait' ).attr( 'src', '../img/ajax-loader.gif' );
 				getLogSocketIO( config_name, project_name );
-			});
+			});*/
+			updateProjectFormInExp();
+			//start getting the log related to the project while updating it
+			//set right before looking for a pending process
+			$( '.kill' ).prop( 'disabled', false );
+			//set spinning image while checking for old process to be finished
+			$( '#respWait' ).attr( 'src', '../img/ajax-loader.gif' );
+			getLogSocketIO( config_name, project_name );
 		}
 	);
 
@@ -278,18 +286,15 @@ $(document).ready(function() {
 
 		//clean output list
 		//$("#experiments").html("<option value=''>Choose An Experiment</option>");
-		
-		//clean wait image
-		$( '#respWait' ).removeAttr( 'src' );
-//		$( '.action[name=run]' ).prop( 'disabled', true );
-		$( '.action' ).prop( 'disabled', true );
-		$( '.kill' ).prop( 'disabled', true );
-
 	});
 
 	//OK
 	//create handler for changing of configuraton
 	$("#configs").change( function() {
+
+		//unsubscribe
+		unsubscribe( '' );
+		count = 0;
 
 		//clean project list
 		$( '#projects' ).html( '<option value="">Choose A Project</option>' );
@@ -300,19 +305,6 @@ $(document).ready(function() {
 
 		//update the right part of the page and read the project list
 		updateConfigurationForm();
-
-		//unsubscribe
-		unsubscribe( '' );
-		count = 0;
-
-		//clean wait image
-		$( '#respWait' ).removeAttr( 'src' );
-//		$( '.action[name=run]' ).prop( 'disabled', true );
-
-/* done in the updateConfigurationForm
-		$( '.action' ).prop( 'disabled', true );
-*/
-		$( '.kill' ).prop( 'disabled', true );
 	});
 
 	//get data
@@ -340,7 +332,7 @@ $(document).ready(function() {
 
 		//clean wait image
 		$( '#respWait' ).removeAttr( 'src' );
-		$( '.action[name=run]' ).prop( 'disabled', true );
+		$( '.action[name=project]' ).prop( 'disabled', true );
 		$( '.kill' ).prop( 'disabled', true );
 
 		//clean response area
@@ -349,7 +341,7 @@ $(document).ready(function() {
 		//clean output list
 		//$("#experiments").html("<option value=''>Choose An Experiment</option>");
 
-//		$( '.action[name=run]' ).prop( 'disabled', true );
+//		$( '.action[name=project]' ).prop( 'disabled', true );
 //		updateProjectFormInExp( function() {
 			//set right before looking for a pending process
 //			$( '.kill' ).prop( 'disabled', false );
