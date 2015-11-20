@@ -10,8 +10,10 @@ function showGraph() {
 		metric = $( 'input[name="metric_name"]' ).val(),
 		experiment;
 
-	if ( experiment_name === '' )
+	if ( experiment_name === '' ) {
+		alert( 'Select An Experiment' );
 		return;
+	}
 
 //	if ( metric === '' )
 //		metric = 'GFlop/s';
@@ -83,6 +85,9 @@ function updateProjectFormInViz( cb ) {
 	if ( project_name === '' ) {
 		$.get( '/services/session/cleanProject', function( data ) {
 			cleanProjectForm();
+			$( '#experiments' ).prop( 'disabled', true );
+			//de-activate action related to an experiment
+			$( '.action[name=experiment]' ).prop( 'disabled', true );
 		});
 	} else {
 		$( '#projects' ).prop( 'disabled', true );
@@ -157,6 +162,8 @@ function updateOutputForm( cb ) {
 
 	if ( experiment_name === '' ) {
 		cleanOutputForm();
+		//de-activate action related to an experiment
+		$( '.action[name=experiment]' ).prop( 'disabled', true );
 	} else {
 		//getDescriptor
 		$.get( '/services/experiment/get/' 
@@ -165,6 +172,8 @@ function updateOutputForm( cb ) {
 			+ experiment_name, function( experiment ) {
 
 			setOutputForm( experiment );
+			//activate action related to an experiment
+			$( '.action[name=experiment]' ).prop( 'disabled', false );
 		});
 	}
 }
@@ -197,6 +206,22 @@ $(document).ready(function() {
 		updateProjectFormInViz
 	);
 
+	$( '#connectButton' ).on( 'click', cleanOutputForm );
+
+	$( '#connectButton' ).on( 'click', function() {
+		cleanProjectForm();
+		//clean output list
+		$("#experiments").html("<option value=''>Choose An Experiment</option>");
+		$( '#experiments' ).prop( 'disabled', true );
+		//de-activate action related to an experiment
+		$( '.action[name=experiment]' ).prop( 'disabled', true );
+	});
+
+	$( '#connectButton' ).on( 'click', function() {
+		$( '#out_image' ).removeAttr( 'src' );
+		$( '#out_image' ).removeAttr( 'style' );
+	});
+
 	//create handler for changing of configuraton
 	$("#configs").change( function() {
 
@@ -206,14 +231,17 @@ $(document).ready(function() {
 
 		cleanOutputForm();
 		
-		//clean output list
-		$("#experiments").html("<option value=''>Choose An Experiment</option>");
-
 		//clean information related to the project
 		cleanProjectForm();
 
+		//clean output list
+		$("#experiments").html("<option value=''>Choose An Experiment</option>");
+		$( '#experiments' ).prop( 'disabled', true );
+		//de-activate action related to an experiment
+		$( '.action[name=experiment]' ).prop( 'disabled', true );
+
 		//update the right part of the page and the project list
-		updateConfigurationForm( );
+		updateConfigurationForm();
 	});
 
 	//get outputs
@@ -223,7 +251,7 @@ $(document).ready(function() {
 		$( '#out_image' ).removeAttr( 'src' );
 		$( '#out_image' ).removeAttr( 'style' );
 
-		updateOutputForm( );
+		updateOutputForm();
 	});
 
 	//when the project selected change, we read the value of parameters (user change)
@@ -233,12 +261,11 @@ $(document).ready(function() {
 		$( '#out_image' ).removeAttr( 'src' );
 		$( '#out_image' ).removeAttr( 'style' );
 
-		//clean output list
-		$("#experiments").html("<option value=''>Choose An Experiment</option>");
-
 		cleanOutputForm();
 
-		updateProjectFormInViz( );
+		//clean output list
+		$("#experiments").html("<option value=''>Choose An Experiment</option>");
+		updateProjectFormInViz();
 	});
 
 	$( '.fixed' ).on( 'change', function() {
@@ -259,14 +286,5 @@ $(document).ready(function() {
 				alert("At least one property has to be checked");
 			}
 		}
-	});
-
-	$( '#connectButton' ).on( 'click', cleanOutputForm );
-
-	$( '#connectButton' ).on( 'click', cleanProjectForm );
-
-	$( '#connectButton' ).on( 'click', function() {
-		$( '#out_image' ).removeAttr( 'src' );
-		$( '#out_image' ).removeAttr( 'style' );
 	});
 });

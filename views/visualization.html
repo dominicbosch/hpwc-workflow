@@ -8,7 +8,7 @@
 
 
 <!-- CSS -->
-<link rel="stylesheet" type="text/css" href="../css/visualization.css" />
+<!--<link rel="stylesheet" type="text/css" href="../css/visualization.css" />-->
 
 {% endblock %}
 
@@ -20,10 +20,10 @@
 <div id="output_preview">
 	<div>
 		<label for="experiments">Current experiment</label>
-		<select id="experiments" name="experiment_name">
+		<select id="experiments" disabled>
 			<option value="">Choose An Experiment</option>
 		</select>
-		<button class="action" name="project" onclick="deleteExperiment()" disabled>Delete Experiment</button>
+		<button class="action" name="experiment" onclick="deleteExperiment()" disabled>Delete Experiment</button>
 	</div>
 	<table id="exp_details">
 		<tr>
@@ -75,7 +75,7 @@
 		</tr>
 	</table>
 	<div style="padding: 20px 0;" class="centered-text">
-		<button class="action" name="project" onclick="showGraph()" disabled>Show Graph</button>
+		<button class="action" name="experiment" onclick="showGraph()" disabled>Show Graph</button>
 	</div>
 </div>
 {% endblock %}

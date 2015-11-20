@@ -213,6 +213,10 @@ function getAndSetProjects( config_name, project_name, cb ) {
 	tempProjectsHTMLObj.html( $( '<option>' ).attr( 'value', '' ).text( 'Choose A Project' ) );
 
 	if( config_name !== '' ) {
+
+		var projectToSelect = '';
+		$( '#projects' ).prop( 'disabled', true );
+		
 		//read the projects for an open connection and set the values
 		$.get( '/services/project/getAll/' 
 			+ config_name, function( projects ) {
@@ -224,9 +228,18 @@ function getAndSetProjects( config_name, project_name, cb ) {
 			for ( var i in projects ) {
 				tempProjectsHTMLObj.append($( '<option>' ).attr( 'value', projects[i] ).text( projects[i] ) );
 			}
-			$( '#projects' ).html( tempProjectsHTMLObj.html() );
+			
+		/*	for ( var i in projects ) {
+				tempProjectsHTMLObj.append( $( '<option>' )
+											.attr( 'value', projects[i] )
+											.attr( 'selected', project_name ? true : false )
+											.text( projects[i] ) 
+				);
+			}*/
+
 			if ( project_name ) {
-				$( '#projects' ).val( project_name );
+				//$( '#projects' ).val( project_name );
+				projectToSelect = project_name;
 				//activate action related to a project
 				$( '.action[name=project]' ).prop( 'disabled', false );
 				if ( typeof(cb) === 'function' ) 
@@ -237,6 +250,10 @@ function getAndSetProjects( config_name, project_name, cb ) {
 			}
 		}).fail(function( xhr ) {
 			console.log( xhr.responseText );
+		}).always(function() {
+			$( '#projects' ).html( tempProjectsHTMLObj.html() );
+			$( '#projects' ).val( projectToSelect );
+			$( '#projects' ).prop( 'disabled', false );
 		});
 	} else {
 		//clean project list
@@ -252,6 +269,8 @@ function getInstalledMethod( config_name, cb ) {
 	tempMethodsInstHTMLObj.html( $( '<option>' ).attr( 'value', '' ).text( 'Choose A Method Type' ) );
 
 	if( config_name !== '' ) {
+
+		$( '#method_types' ).prop( 'disabled', true );
 		
 		$.get('/services/method/getInstalled/'
 			+ config_name, function( methods ) {
@@ -259,11 +278,13 @@ function getInstalledMethod( config_name, cb ) {
 			for ( var i in methods ) {
 				tempMethodsInstHTMLObj.append($( '<option>' ).attr( 'value', methods[i] ).text( methods[i] ) );
 			}
-			$( '#method_types' ).html( tempMethodsInstHTMLObj.html() );
+			
 		}).fail(function( xhr ) {
 			console.log( xhr.responseText );
+		}).always(function() {
+			$( '#method_types' ).html( tempMethodsInstHTMLObj.html() );
+			$( '#method_types' ).prop( 'disabled', false );
 		});
-
 		if ( typeof(cb) === 'function' ) 
 			cb( config_name );
 	} else {

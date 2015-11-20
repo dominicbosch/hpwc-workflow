@@ -33,8 +33,14 @@ function getMax( tab_id, td_name ) {
 
 function getAndSetExperiments( config_name, project_val, cb ) {
 
+	var tempExpsHTMLObj = $( '<select>' );
+	tempExpsHTMLObj.html( $( '<option>' ).attr( 'value', '' ).text( 'Choose An Experiment' ) );
+
+
 	if( ( config_name !== '' ) && ( project_val !== '' ) ) {
 		
+		$( '#experiments' ).prop( 'disabled', true );
+
 		$.get( '/services/experiment/getAll/' 
 			+ config_name + '/'
 			+ project_val, function( experiments ) {
@@ -51,17 +57,21 @@ function getAndSetExperiments( config_name, project_val, cb ) {
 				output = day + '/' + month + '/' 
 						+ year + ' at ' + hour + ':' 
 						+ minute + ':' + second;
-				$( '#experiments' ).append($( '<option>' ).attr( 'value', experiments[i] ).text( output ) );
+				tempExpsHTMLObj.append($( '<option>' ).attr( 'value', experiments[i] ).text( output ) );
 			}
+			$( '#experiments' ).html( tempExpsHTMLObj.html() );
 		}).fail(function( xhr ) {
 			console.log( xhr.responseText );
+		}).always(function() {
+		//	$( '#experiments' ).html( tempExpsHTMLObj.html() );
+			$( '#experiments' ).prop( 'disabled', false );
 		});
 
 		if ( typeof(cb) === 'function' ) 
 			cb( );
 
-	} else {
+	} /*else {
 		//clean experiments list
 		$( '#experiments' ).html( '<option value="">Choose An Experiment</option>' );
-	}
+	}*/
 }

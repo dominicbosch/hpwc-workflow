@@ -65,7 +65,8 @@ function updateProjectFormInExp( cb ) {
 	if ( project_name === '' ) {
 		$.get( '/services/session/cleanProject', function( data ) {
 
-			oPub.selectedConn.projectName = '';
+
+//			oPub.selectedConn.projectName = ''; //maybe not needed
 
 			//clean information related to the project
 			cleanProjectForm();
@@ -83,7 +84,7 @@ function updateProjectFormInExp( cb ) {
 			+ config_name + '/' 
 			+ project_name, function( project ) {
 
-			oPub.selectedConn.projectName = project_name;
+		//	oPub.selectedConn.projectName = project_name; //maybe not needed
 
 			setProjectForm( project );
 
