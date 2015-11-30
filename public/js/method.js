@@ -311,7 +311,12 @@ $(document).ready(function() {
 			getInstalledMethod( config_name );
 		},
 		function() {
-			getAndSetMethods( config_name, project_name, null );
+			$( '#projWait' ).attr( 'src', '../img/ajax-loader.gif' );
+			$( '#methods' ).prop( 'disabled', true );
+			getAndSetMethods( config_name, project_name, function() {
+				$( '#projWait' ).removeAttr( 'src' );
+				$( '#methods' ).prop( 'disabled', false );
+			});
 			$( '.kill' ).prop( 'disabled', false );
 			//set spinning image while checking for old process to be finished
 			$( '#respWait' ).attr( 'src', '../img/ajax-loader.gif' );
@@ -323,6 +328,7 @@ $(document).ready(function() {
 		//set method and update
 		$( '#methods' ).html( '<option value="">Choose A Method</option>' );
 		updateMethodForm();
+		$( '#methods' ).prop( 'disabled', true );
 	});
 
 	$( '#configs' ).change( function() {
@@ -334,7 +340,8 @@ $(document).ready(function() {
 		//set method and update
 		$( '#methods' ).html( '<option value="">Choose A Method</option>' );
 		updateMethodForm();
-
+		$( '#methods' ).prop( 'disabled', true );
+		
 		updateConfigurationForm( getInstalledMethod );
 
 	});
