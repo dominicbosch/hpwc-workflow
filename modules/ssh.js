@@ -34,7 +34,7 @@ exports.isConnOpen = function( username, connName ) {
 };
 
 exports.createConfiguration = function( username, args, force, cb ) {
-	var cmd, oUser, oConn = new SSHConnection();
+	var cmd, oUser, oConn = new SSHConnection(), errorHappened = false;
 
 	if( !force && persistence.getConfiguration( username, args.name ) ) {
 		cb({
@@ -63,7 +63,7 @@ exports.createConfiguration = function( username, args, force, cb ) {
 				} else {
 					stream.on( 'data', function( chunk ) {
 						logger.write( 'trace', username,
-									'Command "' + cmd + '" got data: ' + chunk );
+									'Command "' + cmd + '" got data: ' + chunk.toString() );
 						data += chunk;
 					})
 					.on( 'end', function() {
@@ -86,7 +86,7 @@ exports.createConfiguration = function( username, args, force, cb ) {
 								} else {
 									stream.on( 'data', function( chunk ) {
 										logger.write( 'trace', username,
-													'Command "' + cmd + '" got data: ' + chunk );
+													'Command "' + cmd + '" got data: ' + chunk.toString() );
 										data += chunk;
 									})
 									.on( 'end', function() {
@@ -116,10 +116,7 @@ exports.createConfiguration = function( username, args, force, cb ) {
 					.stderr.on( 'data', function( data ) {
 						// Handles errors that happen on the other end of this connection
 						logger.write( 'error', username, data );
-						cb({
-							code: 2,
-							message: data
-						});
+						//errorHappened = true;
 					});
 				}
 			});
