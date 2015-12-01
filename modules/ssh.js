@@ -131,14 +131,18 @@ exports.createConfiguration = function( username, args, force, cb ) {
 				code: 0,
 				message: msg
 			});
+		}).on( 'keyboard-interactive', function( name, instructions, instructionsLang, prompts, finish ) {
+			//logger.write( 'debug', username, util.inspect(prompts, {showHidden: false, depth: null}) );
+			finish([ args.password ]);
 		}).connect({
-			host: args.url,
-			port: parseInt( args.port ) || 22,
-			username: args.username,
-			password: args.password,
-			debug: function( stream ) {
+			host: args.url
+			, port: parseInt( args.port ) || 22
+			, tryKeyboard: true
+			, username: args.username
+			, password: args.password
+		/*	, debug: function( stream ) {
 				logger.write( 'debug', username, stream );
-			}
+			}*/
 		});
 	}
 };
