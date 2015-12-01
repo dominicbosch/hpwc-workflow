@@ -135,7 +135,8 @@ exports.createConfiguration = function( username, args, force, cb ) {
 			host: args.url,
 			port: parseInt( args.port ) || 22,
 			username: args.username,
-			password: args.password
+			password: args.password,
+			debug: console.log
 		});
 	}
 };
