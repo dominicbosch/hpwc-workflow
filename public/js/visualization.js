@@ -97,9 +97,31 @@ function updateProjectFormInViz( cb ) {
 			+ project_name, function( project ) {
 
 			setProjectForm( project );
-			$( '#projects' ).prop( 'disabled', false );
+
+			//$( '#projects' ).prop( 'disabled', false );
+
 			//update experiments list
 			getAndSetExperiments( config_name, project_name );
+		}).fail( function( xhr ) {
+			//clean image
+			$( '#out_image' ).removeAttr( 'src' );
+			$( '#out_image' ).removeAttr( 'style' );
+
+			cleanOutputForm();
+		
+			//clean information related to the project
+			$( '#projects' ).val( '' );
+			cleanProjectForm();
+
+			//clean output list
+			$("#experiments").html("<option value=''>Choose An Experiment</option>");
+			$( '#experiments' ).prop( 'disabled', true );
+			//de-activate action related to an experiment
+			$( '.action[name=experiment]' ).prop( 'disabled', true );
+
+			setTextAndScroll( 'info_textarea', xhr.responseText );
+		}).always( function() {
+			$( '#projects' ).prop( 'disabled', false );
 		});
 	}
 }

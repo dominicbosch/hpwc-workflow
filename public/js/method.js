@@ -400,7 +400,7 @@ $(document).ready(function() {
 			$( '#methods' ).prop( 'disabled', true );
 
 			//fill project form
-			$.get( '/services/project/get/' 
+/*			$.get( '/services/project/get/' 
 				+ config_name + '/' 
 				+ project_name, function( project ) {
 
@@ -417,6 +417,44 @@ $(document).ready(function() {
 				//set spinning image while checking for old process to be finished
 				$( '#respWait' ).attr( 'src', '../img/ajax-loader.gif' );
 				getLogSocketIO( config_name, project_name );
+			});*/
+			$.get( '/services/project/get/' 
+				+ config_name + '/' + project_name
+			).done( function( data ) {
+
+				var project = data;
+
+				getAndSetMethods( config_name, project_name, null, function() {
+					$( '#projWait' ).removeAttr( 'src' );
+					$( '#projects' ).prop( 'disabled', false );
+					$( '#methods' ).prop( 'disabled', false );
+				});
+				$( '.action[name=project]' ).prop( 'disabled', true );
+				$( '.kill' ).prop( 'disabled', false );
+
+				//set spinning image while checking for old process to be finished
+				$( '#respWait' ).attr( 'src', '../img/ajax-loader.gif' );
+				getLogSocketIO( config_name, project_name );
+
+			}).fail( function( xhr ) {
+				//set project to empty entry
+				$( '#projects' ).val( '' );
+
+				//remove image for reply waiting
+				$( '#projWait' ).removeAttr( 'src' );
+
+				//enable the project selection
+				$( '#projects' ).prop( 'disabled', false );
+
+				//disable action related to the project
+				$( '.action[name=project]' ).prop( 'disabled', true );
+
+				//set method and update
+				$( '#methods' ).html( '<option value="">Choose A Method</option>' );
+				updateMethodForm();
+				$( '#methods' ).prop( 'disabled', true );
+
+				setTextAndScroll( 'info_textarea', xhr.responseText );
 			});
 		}
 	});

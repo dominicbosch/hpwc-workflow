@@ -31,6 +31,9 @@ function updateProjectForm( cb ) {
 			+ config_name + '/' 
 			+ project_name, function( project ) {
 			setProjectForm( project );
+		}).fail( function( xhr ) {
+			cleanProjectForm();
+			setTextAndScroll( 'info_textarea', xhr.responseText );
 		});
 	}
 }
@@ -65,7 +68,7 @@ function manage_project( action ) {
 		project.comment = $( '#'+id+' textarea[name="comment"]' ).val();
 	}
 
-	$.post( '/services/project/manage/' 
+/*	$.post( '/services/project/manage/' 
 		+ config_name, project, function( data ) {
 
 		setTextAndScroll( 'resp_textarea', data );
@@ -88,6 +91,33 @@ function manage_project( action ) {
 		//update project list
 		getAndSetProjects( $( '#configs' ).val(), project_val, updateProjectForm);
 
+	});*/
+	$.post( '/services/project/manage/' + config_name, 
+		project 
+	).done( function( data ) {
+
+		setTextAndScroll( 'resp_textarea', data );
+
+		//clean project list
+		$( '#projects' ).html( '<option value="">Choose A Project</option>' );
+		$( '#projects' ).val( '' );
+
+		var	project_val = project.name;
+
+		if( project.action === 'delete' ) {
+			updateProjectForm();
+			project_val = null;
+		} else if ( project.action === 'create' ) {
+			//clean creation form
+			$( '#new_project input' ).val( '' );
+			$( '#new_project textarea' ).val( '' );
+		}
+
+		//update project list
+		getAndSetProjects( $( '#configs' ).val(), project_val, updateProjectForm);
+
+	}).fail( function( xhr ) {
+		setTextAndScroll( 'resp_textarea', xhr.responseText );
 	});
 }
 

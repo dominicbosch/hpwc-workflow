@@ -156,7 +156,7 @@ function updateConfigurationForm( cb ) {
 	}
 }
 
-function updateConfigurationsList( cb, cb2 ) {
+function updateConfigurationsList( cb, cb2, cb3 ) {
 
 	var tempConfigsHTMLObj = $( '<select>' );
 	tempConfigsHTMLObj.html( $( '<option>' ).attr( 'value', '' ).text( 'Choose A Configuration' ) );
@@ -185,6 +185,37 @@ function updateConfigurationsList( cb, cb2 ) {
 			//Current configuration not empty
 			if ( oPub.selectedConn.name && ( oPub.selectedConn.name !== '' ) ) {
 
+			/*//set current configuration, change event is not raised because the configuration details are read from the session
+				//reloadconfiguration if was selected
+				$.get( '/services/configuration/get/' 
+					+ oPub.selectedConn.name
+				).done( function( data ) {
+					if ( data.configuration ) {
+						setConnectionForm( data.configuration );
+						$( '#configs' ).val( oPub.selectedConn.name );
+
+						$( '#connectButton' ).text( oPub.selectedConn.status ? 'Disconnect' : 'Connect' );
+				
+						//change action related to the connection
+						$( '.action[name=config]' ).prop( 'disabled', !oPub.selectedConn.status );
+						if ( ( oPub.selectedConn.status ) && ( oPub.updateProject ) ) {
+							//retrieve project list if old connection is set and connected
+							var config_name = oPub.selectedConn.name, 
+								project_name = oPub.selectedConn.projectName;
+
+							getAndSetProjects( config_name, project_name, cb2 );
+
+							if ( typeof(cb) === 'function' ) 
+								cb();
+						}
+						$( '#connectButton' ).removeAttr( 'disabled' );
+					};
+				}).fail( function( xhr ) {
+					setTextAndScroll( 'info_textarea', xhr.responseText );
+					$( '#conf_table td' ).text( '--' );
+					$( '#configs' ).val( '' );
+				});*/
+
 				//set current configuration, change event is not raised because the configuration details are read from the session
 				$( '#configs' ).val( oPub.selectedConn.name );
 				$( '#connectButton' ).text( oPub.selectedConn.status ? 'Disconnect' : 'Connect' );
@@ -204,6 +235,9 @@ function updateConfigurationsList( cb, cb2 ) {
 			}
 		}
 		$( '#configs' ).prop( 'disabled', false );
+
+		if ( typeof(cb3) === 'function' ) 
+			cb3();
 	});
 }
 
@@ -249,6 +283,7 @@ function getAndSetProjects( config_name, project_name, cb ) {
 				$( '.action[name=project]' ).prop( 'disabled', true );
 			}
 		}).fail(function( xhr ) {
+			setTextAndScroll( 'info_textarea', xhr.responseText );
 			console.log( xhr.responseText );
 		}).always(function() {
 			$( '#projects' ).html( tempProjectsHTMLObj.html() );

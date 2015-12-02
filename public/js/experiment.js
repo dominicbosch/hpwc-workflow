@@ -78,9 +78,12 @@ function updateProjectFormInExp( cb ) {
 			//$("#experiments").html("<option value=''>Choose An Experiment</option>");
 
 		});
+/*		}).fail( function( xhr ) {
+			setTextAndScroll( 'info_textarea', xhr.responseText );
+		});*/
 	} else {
 		//fill project form
-		$.get( '/services/project/get/' 
+		/*$.get( '/services/project/get/' 
 			+ config_name + '/' 
 			+ project_name, function( project ) {
 
@@ -96,6 +99,30 @@ function updateProjectFormInExp( cb ) {
 
 			//update experiment list
 			//getAndSetExperiments( config_name, project_name );
+		});*/
+		$.get( '/services/project/get/' 
+			+ config_name + '/' + project_name
+		).done( function( data ) {
+
+			var project = data;
+
+			setProjectForm( project );
+
+			//update methods list
+			getAndSetMethodsList( config_name, project_name, function() {
+				if ( typeof(cb) === 'function' ) 
+					cb();
+			});
+
+			//update experiment list
+			//getAndSetExperiments( config_name, project_name );
+		}).fail( function( xhr ) {
+			
+			cleanProjectForm();
+			//clean method list
+			$("#experiment_setup [name='methods']").empty();
+
+			setTextAndScroll( 'info_textarea', xhr.responseText );
 		});
 	}
 }

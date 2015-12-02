@@ -83,9 +83,14 @@ var saveConfiguration = function() {
 		var result = confirm( 'Do you really want to update this configuration?' );
 		if( result ) {
 			oValues.name = $( '#tab2 select' ).val();
-			$.post( '/services/configuration/update', oValues, function( answ ) {
+			$.post( '/services/configuration/update', 
+				oValues
+			).done( function( answ ) {
 				setInfo( answ );
 				updateConfigurationsList();
+				//console.log( oValues );
+				//if update succesfully, directly update values
+				setConnectionForm( oValues );
 				$( '#tab2 button' ).prop( 'disabled', false );
 			})
 			.fail( function( xhr ) {
@@ -114,7 +119,7 @@ var deleteConfiguration = function() {
 			setInfo( answ );
 			if ( !answ.fail
 				&& ( oPub.selectedConn.name === options.name ) ) {
-				$( '#configs' ).val( "" );
+				$( '#configs' ).val( '' );
 				updateConfigurationForm();
 			}
 			updateConfigurationsList();
@@ -135,9 +140,12 @@ $(document).ready(function() {
 		updateConfigurationForm();
 	});
 
-	updateConfigurationsList();
+	updateConfigurationsList( null, null, function () {
+		$( '#tab2 select' ).html( $( '#configs' ).html() );
+	});
 
-	fillSelectBox();
+	//fillSelectBox();
+	
 	// We also update the select box on every tab click on this page:
 	$( '.tab-links a' ).click( function() {
 		fillSelectBox();
