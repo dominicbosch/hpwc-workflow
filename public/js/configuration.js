@@ -50,9 +50,12 @@ var initConfiguration = function() {
 var fillSelectBox = function() {
 	var selBox = $( '#tab2 select' ).html( '<option value="">Choose Configuration</option>' );
 	getAllConfigurations(function( err, data ) {
-		if( !err ) 
+		if ( !err ) {
 			for( var el in data.configurations ) 
 				selBox.append( $( '<option>' ).text( el ) );
+		} else {
+			setInfo( err.message, true );
+		}
 	});
 };
 

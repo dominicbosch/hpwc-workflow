@@ -96,7 +96,7 @@ function manage_project( action ) {
 		project 
 	).done( function( data ) {
 
-		setTextAndScroll( 'resp_textarea', data );
+		setTextAndScroll( 'info_textarea', data );
 
 		//clean project list
 		$( '#projects' ).html( '<option value="">Choose A Project</option>' );
@@ -117,7 +117,7 @@ function manage_project( action ) {
 		getAndSetProjects( $( '#configs' ).val(), project_val, updateProjectForm);
 
 	}).fail( function( xhr ) {
-		setTextAndScroll( 'resp_textarea', xhr.responseText );
+		setTextAndScroll( 'info_textarea', xhr.responseText );
 	});
 }
 
@@ -129,7 +129,7 @@ $(document).ready(function() {
 	);
 
 	$( '#configs' ).change( function() {
-		setTextAndScroll( 'resp_textarea', '' );
+		setTextAndScroll( 'info_textarea', '' );
 		cleanProjectForm();
 		updateConfigurationForm();
 	});
@@ -138,7 +138,7 @@ $(document).ready(function() {
 
 	//when the project selected change, we read the value of parameters (user change)
 	$( '#projects' ).change( function() {
-		setTextAndScroll( 'resp_textarea', '' );
+		setTextAndScroll( 'info_textarea', '' );
 		updateProjectForm();
 	});
 
