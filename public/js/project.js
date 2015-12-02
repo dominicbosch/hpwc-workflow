@@ -51,6 +51,11 @@ function manage_project( action ) {
 		return;
 	}
 
+	//disable project select and all input field
+	$( '#projects' ).prop( 'disabled', true );
+	$( '.tab-content input' ).prop( 'disabled', true );
+	$( '.tab-content textarea' ).prop( 'disabled', true );
+
 	if ( action === 'delete' ) {
 		project.name = $( '#projects' ).val();
 	} else {
@@ -99,25 +104,34 @@ function manage_project( action ) {
 		setTextAndScroll( 'info_textarea', data );
 
 		//clean project list
-		$( '#projects' ).html( '<option value="">Choose A Project</option>' );
-		$( '#projects' ).val( '' );
+	//	$( '#projects' ).html( '<option value="">Choose A Project</option>' );
+	//	$( '#projects' ).val( '' );
 
 		var	project_val = project.name;
 
 		if( project.action === 'delete' ) {
+			$( '#projects' ).val( '' );
 			updateProjectForm();
-			project_val = null;
+			//update project list
+			getAndSetProjects( $( '#configs' ).val(), '' );
+		} else if ( project.action === 'edit' ) {
+			//update project list and set again the same val
+			getAndSetProjects( $( '#configs' ).val(), project_val );
 		} else if ( project.action === 'create' ) {
 			//clean creation form
 			$( '#new_project input' ).val( '' );
 			$( '#new_project textarea' ).val( '' );
+			//update project list and set new project
+			getAndSetProjects( $( '#configs' ).val(), project_val, updateProjectForm );
 		}
-
-		//update project list
-		getAndSetProjects( $( '#configs' ).val(), project_val, updateProjectForm);
 
 	}).fail( function( xhr ) {
 		setTextAndScroll( 'info_textarea', xhr.responseText );
+	}).always( function () {
+		//disable project select and all input field
+		$( '#projects' ).prop( 'disabled', false );
+		$( '.tab-content input' ).prop( 'disabled', false );
+		$( '.tab-content textarea' ).prop( 'disabled', false );
 	});
 }
 

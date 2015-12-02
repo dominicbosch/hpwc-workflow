@@ -276,8 +276,7 @@ function getAndSetProjects( config_name, project_name, cb ) {
 				projectToSelect = project_name;
 				//activate action related to a project
 				$( '.action[name=project]' ).prop( 'disabled', false );
-				if ( typeof(cb) === 'function' ) 
-					cb();
+				
 			} else {
 				//de-activate action related to a project
 				$( '.action[name=project]' ).prop( 'disabled', true );
@@ -288,6 +287,8 @@ function getAndSetProjects( config_name, project_name, cb ) {
 		}).always(function() {
 			$( '#projects' ).html( tempProjectsHTMLObj.html() );
 			$( '#projects' ).val( projectToSelect );
+			if ( typeof(cb) === 'function' ) 
+					cb();
 			$( '#projects' ).prop( 'disabled', false );
 		});
 	} else {
