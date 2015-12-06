@@ -351,6 +351,7 @@ $(document).ready(function() {
 	//get method
 	$("#methods").change( function() {
 		//cleanMethodForm();
+		$( '#folders' ).val( 'src' );
 		updateMethodForm( );
 	});
 
