@@ -134,7 +134,7 @@ function actionOnMethodSocketIO( action ) {
 		sched_part = $( '#sched_part' ).val(),
 		walltime = $( '#walltime' ).val(),
 		memory = $( '#memory' ).val(),
-		job_cmd = '', job;
+		job_cmd = '', job = {};
 
 	if ( config_name === '' ) {
 		alert( 'Select A Configuration' );
