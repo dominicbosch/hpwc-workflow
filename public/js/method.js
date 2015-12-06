@@ -17,6 +17,7 @@ function cleanMethodForm() {
 function setMethodForm( method ) {
 	$( '#edit_method input[name="method_type"]' ).val( method.type );
 	var srcList = method.srcList;
+	$( '#src_files' ).empty();
 	for ( var i in srcList ) {
 		$( '#src_files' ).append($( '<option>' ).attr( 'value', srcList[i] ).text( srcList[i] ) );
 	}
@@ -311,6 +312,7 @@ $(document).ready(function() {
 			getInstalledMethod( config_name );
 		},
 		function() {
+			//set loader image and disable methods list while reading remote list
 			$( '#projWait' ).attr( 'src', '../img/ajax-loader.gif' );
 			$( '#methods' ).prop( 'disabled', true );
 			getAndSetMethods( config_name, project_name, function() {
@@ -320,7 +322,7 @@ $(document).ready(function() {
 			$( '.kill' ).prop( 'disabled', false );
 			//set spinning image while checking for old process to be finished
 			$( '#respWait' ).attr( 'src', '../img/ajax-loader.gif' );
-			getLogSocketIO( config_name, project_name ); 
+			getLogSocketIO( config_name, project_name );
 		}
 	);
 
