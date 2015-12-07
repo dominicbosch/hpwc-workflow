@@ -171,7 +171,7 @@ function actionOnMethodSocketIO( action ) {
 		job.sched_part = sched_part;
 		job.walltime = walltime;
 		job.memory = memory;
-		job.sched_queue = sched_queue;
+		//job.sched_queue = sched_queue;
 	}
 
 	subscribe( config_name );
