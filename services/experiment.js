@@ -78,7 +78,8 @@ router.post( '/run_job/:connection/:project', function( req, res ) {
 
 	if ( req.session.pub ) {
 		oConn = req.session.pub.configurations[ confName ];
-
+		//adapt dimensions list for job command
+		experiment.dimensions = experiment.dimensions.replace( /"/g, '\\"');
 		arrCommand = [
 			'workflow', 'job_run_exp',
 			'"' + experiment.sched_type + '"',
