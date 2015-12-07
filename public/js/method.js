@@ -132,6 +132,7 @@ function actionOnMethodSocketIO( action ) {
 		method_name = $( '#methods' ).val(),
 		sched_type = $( '#sched_type' ).val(),
 		sched_part = $( '#sched_part' ).val(),
+		sched_queue = $( '#sched_queue' ).val(),
 		walltime = $( '#walltime' ).val(),
 		memory = $( '#memory' ).val(),
 		job_cmd = '', job = {};
@@ -170,6 +171,7 @@ function actionOnMethodSocketIO( action ) {
 		job.sched_part = sched_part;
 		job.walltime = walltime;
 		job.memory = memory;
+		job.sched_queue = sched_queue;
 	}
 
 	subscribe( config_name );

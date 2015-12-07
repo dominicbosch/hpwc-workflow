@@ -244,6 +244,7 @@ router.post( '/do_job/:action/:connection/:project/:method', function( req, res 
 			+ ' "' + job.sched_part + '"'
 			+ ' "' + job.walltime + '"'
 			+ ' "' + job.memory + '"'
+			+ ' "' + job.sched_queue + '"'
 			+ ' -p ' + project 
 			+ ' -n ' + method;
 
