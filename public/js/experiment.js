@@ -3,8 +3,8 @@
 oPub.updateProject = true;
 
 //OK
-function addToList( name ) {
-	var string = '', 
+function addToList( name, ordered ) {
+	var string = '', inserted = false,
 		value = $( '#' + name ).val().trim();
 
 	if ( value !== '' ) {
@@ -13,7 +13,22 @@ function addToList( name ) {
 			alert("Value already in the list, just check it!");
 		} else {
 			string = createListItem( value, true, false );
-			$( '#experiment_setup [name="' + name + '"]' ).append( string );
+			if ( ordered ) {
+				$( '#experiment_setup [name="' + name + '"] input' ).each( function() {
+					//if the new value is less than the one in the list then insert it!
+					if ( parseInt(value) < parseInt($(this).val()) ) {
+						$(string).insertBefore($(this).parent());
+						//set inserted to true
+						inserted = true;
+						//exit the "each" loop
+						return false;
+					}
+				});
+			}
+			//if not inserted put at the end
+			if ( !inserted) {
+				$( '#experiment_setup [name="' + name + '"]' ).append( string );
+			}
 		}
 	} else {
 		alert( 'First select a value' );
