@@ -494,8 +494,9 @@ executeCommand = function( req, res, connection, command, project, cb ) {
 							message: e.toString()
 						});
 					}).stderr.on( 'data', function( data ) {
-						errorHappened = true;
-						processData( data );
+						logger.write( 'error', username, "stderr Happend" );
+						//errorHappened = true;
+						//processData( data );
 					});
 
 					// // TODO: Since we do not handle these cases we can delete all event listeners here below
