@@ -1,4 +1,12 @@
 node_modules/
 users/
-*.log
+logs/
+config/
+manage/
+users/
 persistence_handlers/auth.json
+*.TemporaryItems
+.AppleData/
+*.log
+*.DS_Store
+.ssh/
