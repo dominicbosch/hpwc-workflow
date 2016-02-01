@@ -3,17 +3,18 @@
 {% block title %}Method{% endblock %}
 
 {% block head %}
-<script type="text/javascript" src="/js/tab.js"></script>
-<script type="text/javascript" src="/js/method.js"></script>
-<script type="text/javascript" src="/js/editor.js"></script>
-<script type="text/javascript" src="/js/lib/socket.io-1.3.4.js"></script>
-<script type="text/javascript" src="/js/lib/src-noconflict/ace.js" charset="utf-8"></script>
-
+<script type="text/javascript" src="../js/tab.js"></script>
+<script type="text/javascript" src="../js/method.js"></script>
+<script type="text/javascript" src="../js/editor.js"></script>
+<script type="text/javascript" src="../js/socket.io/socket.io-1.3.4.js"></script>
+<script type="text/javascript" src="../js/ace/src-noconflict/ace.js" charset="utf-8"></script>
+<script type="text/javascript" src="../js/jstree/dist/jstree.min.js"></script>
 
 <!-- CSS -->
-<link rel="stylesheet" type="text/css" href="/css/tab.css" />
-<link rel="stylesheet" type="text/css" href="/css/method.css" />
-
+<link rel="stylesheet" type="text/css" href="../css/tab.css" />
+<link rel="stylesheet" type="text/css" href="../css/method.css" />
+<link rel="stylesheet" type="text/css" href="../css/editor.css" />
+<link rel="stylesheet" type="text/css" href="../css/jstree/dist/themes/default/style.min.css" />
 {% endblock %}
 
 {% block content_left %}
@@ -147,6 +148,9 @@ Project Name:
 							</br>
 							Memory: 
 							<input class="scheduler" id="memory" type="text" size="7" value="0" disabled>
+<!-- 							</br>
+							Queue: 
+							<input class="scheduler" id="sched_queue" type="text" size="7" disabled> -->
 						</td>
 					</tr>
 				</table>
@@ -205,16 +209,74 @@ Project Name:
 		<div class="edit-content">
 			<a class="close">x</a>
 			<h3>Source code Editor</h3>
-			<div id="src_editor"></div>
-			<script>
-			    var editor = ace.edit("src_editor");
-				editor.setTheme("ace/theme/twilight");
-				editor.getSession().setMode("ace/mode/c_cpp");
-				//editor.getSession().setValue(value);
-			</script>
+			<div class="div-container-flex">
+				<div class="left-col">
+					<div class="editor-header">
+						<label id="remoteHost" style="padding-left: 5px;">Workspace</label>
+					</div>
+					<div id="jstree-workspace" class="div-jstree editor-body"></div>
+				</div>
+				<div class="div-flex-fill">
+					<div id="src_title" class="editor-header"></div>
+					<div id="src_editor" class="editor-body"></div>
+					<script>
+						var editor = ace.edit("src_editor");
+						editor.setTheme("ace/theme/twilight");
+						editor.getSession().setMode("ace/mode/c_cpp");
+						//editor.getSession().setValue(value);
+					</script>
+				</div>
+			</div>
 			</br>
 			<input type="button" onclick="setSrc()" value="Save code">
 		</div>
 	</div>
 </div>
+<!-- up right down left -->
+<!-- <div class="overlay" style="display: none;">
+	<div class="edit-wrapper">
+		<div class="edit-content">
+			<a class="close">x</a>
+			<h3>Source code Editor</h3>
+			<div style="width: 100%; display: table;">
+				<div style="display:table-row;
+							background-color:rgb(245, 245, 245);
+							border-color: black;
+							border-style: solid;
+							border-width: 1px 0 1px 1px;"> 
+					<div style="width:200px;
+								display:table-cell;
+								border-right: 2px solid black;">
+					</div>
+					<div id="src_title" style="display:table-cell;
+												border-right: 1px solid black;">
+					</div>
+				</div>
+				<div style="display: table-row">
+					<div id="jstree-workspace" style="width:200px;
+													text-align:left;
+													display:table-cell;
+													overflow-x:scroll;
+													background-color:rgb(245, 245, 245);
+													border-color: rgb(245, 245, 245) black;
+													border-style: solid;
+													border-width: 1px 2px 0 0;">
+					</div>
+					<div id="src_editor" style="display:table-cell;"></div>
+					<script>
+						var editor = ace.edit("src_editor");
+						editor.setTheme("ace/theme/twilight");
+						editor.getSession().setMode("ace/mode/c_cpp");
+						//editor.getSession().setValue(value);
+					</script>
+				</div>
+			</div>
+			</br>
+			<input type="button" onclick="setSrc()" value="Save code">
+		</div>
+	</div>
+</div> -->
+{% endblock %}
+{% block bottom %}
+<!-- <div id="jstree-workspace" style="text-align: left;"></div> -->
 {% endblock %}

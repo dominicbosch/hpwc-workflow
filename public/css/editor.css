@@ -1,0 +1,100 @@
+/*
+*	EDIT BOX
+*/
+#shadow {
+	background-color: rgba(0,0,0,.25);
+	position: fixed;
+	display: flex;
+	left: 0;
+	top: 0;
+	bottom: 0;
+	width: 100%;
+	justify-content: center;
+}
+
+div.overlay {
+	position: absolute;
+	left: 0;
+	top: 5%;
+	display: flex;
+	justify-content: center;
+	height: 600px;
+	width: 100%;
+}
+
+div.overlay > div.edit-wrapper {
+	background-color: rgba(0,0,0,.25);
+	border-radius: 2px;
+	padding: 6px;
+	width: 70%;
+}
+	
+div.overlay > div.edit-wrapper > div.edit-content {
+	background-color: rgb(255,255,255);
+	border-radius: 2px;
+	padding: 14px;	
+	position: relative;
+}
+
+a.close {
+	background-color: rgb(204,204,204);
+	/*border-radius: 50%;*/
+	color: rgb(255,255,255);
+	display: block;
+	font-family: 'Varela Round', sans-serif;
+	font-size: .8em;
+	padding: .2em .5em;
+	position: absolute;
+	top: 1.25rem;
+	transition: all 400ms ease;
+	right: 1.25rem;
+}
+	
+a.close:hover {
+	background-color: #1bc5b3;
+	cursor: pointer;
+}
+
+#src_editor {
+	position: relative;
+	/*height: 96%;*/
+	text-align: left;
+	font-size: 0.8em;
+}
+
+.left-col {
+	width: 200px;
+	text-align: left;
+	border-right: 2px solid black;
+}
+
+.editor-header {
+	height: 4%;
+
+}
+
+.editor-header > label {
+	vertical-align: sub;
+}
+
+.editor-body {
+	height: 96%;
+}
+
+.div-container-flex {
+	height: 600px;
+	display: flex;
+	background-color: rgb(245, 245, 245);
+	border-color: black;
+	border-style: solid;
+	border-width: 1px;
+}
+
+.div-flex-fill {
+	flex-grow: 1;
+}
+
+.div-jstree {
+	overflow-x: scroll;
+}
+

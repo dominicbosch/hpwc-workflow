@@ -691,7 +691,8 @@ exports.getRemoteList = function( req, res, connection, command, type, cb ) {
 
 exports.getAndSendRemoteList = function( req, res, connection, command, type ) {
 	exports.getRemoteList( req, res, connection, command, type, function( err, list ) {
-		if( !err ) res.send( list );
+		if( !err ) 
+			res.send( list );
 		else if( err.code !== 1 ) {
 			res.status( 400 );
 			res.send( err.message );
