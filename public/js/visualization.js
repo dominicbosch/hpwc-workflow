@@ -31,7 +31,8 @@ function showGraph() {
 		+ project_name + '/' 
 		+ experiment_name, experiment, function( encImage ) {
 		
-		$( '#out_image' ).attr( 'src', 'data:image/png; base64, ' + encImage );
+		//$( '#out_image' ).attr( 'src', 'data:image/png; base64, ' + encImage );
+		$( '#out_image' ).html( encImage );
 		$( '#out_image' ).attr( 'style', 'border:2px solid; padding: 10px;' );
 
 	}).fail(function( xhr ) {
@@ -104,7 +105,8 @@ function updateProjectFormInViz( cb ) {
 			getAndSetExperiments( config_name, project_name );
 		}).fail( function( xhr ) {
 			//clean image
-			$( '#out_image' ).removeAttr( 'src' );
+			//$( '#out_image' ).removeAttr( 'src' );
+			$( '#out_image' ).html( '' );
 			$( '#out_image' ).removeAttr( 'style' );
 
 			cleanOutputForm();
@@ -240,7 +242,8 @@ $(document).ready(function() {
 	});
 
 	$( '#connectButton' ).on( 'click', function() {
-		$( '#out_image' ).removeAttr( 'src' );
+		//$( '#out_image' ).removeAttr( 'src' );
+		$( '#out_image' ).html( '' );
 		$( '#out_image' ).removeAttr( 'style' );
 	});
 
@@ -248,7 +251,8 @@ $(document).ready(function() {
 	$("#configs").change( function() {
 
 		//clean image
-		$( '#out_image' ).removeAttr( 'src' );
+		//$( '#out_image' ).removeAttr( 'src' );
+		$( '#out_image' ).html( '' );
 		$( '#out_image' ).removeAttr( 'style' );
 
 		cleanOutputForm();
@@ -270,7 +274,8 @@ $(document).ready(function() {
 	$("#experiments").change( function() {
 
 		//clean image
-		$( '#out_image' ).removeAttr( 'src' );
+		//$( '#out_image' ).removeAttr( 'src' );
+		$( '#out_image' ).html( '' );
 		$( '#out_image' ).removeAttr( 'style' );
 
 		updateOutputForm();
@@ -280,7 +285,8 @@ $(document).ready(function() {
 	$("#projects").change( function() {
 
 		//clean image
-		$( '#out_image' ).removeAttr( 'src' );
+		//$( '#out_image' ).removeAttr( 'src' );
+		$( '#out_image' ).html( '' );
 		$( '#out_image' ).removeAttr( 'style' );
 
 		cleanOutputForm();

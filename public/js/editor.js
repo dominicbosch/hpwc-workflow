@@ -828,11 +828,11 @@ function getRemoteSrc( event ) {
 		alert( 'First select a folder' );
 		return;
 	}
-	var t1 = performance.now();
-	console.log('Took', (t1 - t0).toFixed(4), 'milliseconds' );
-	setUpFileTree( project_name, method_name, folder_name );
-	t0 = performance.now();
-	console.log('Took2', (t0 - t1).toFixed(4), 'milliseconds' );
+//	var t1 = performance.now();
+//	console.log('Took', (t1 - t0).toFixed(4), 'milliseconds' );
+//	setUpFileTree( project_name, method_name, folder_name );
+//	t0 = performance.now();
+//	console.log('Took2', (t0 - t1).toFixed(4), 'milliseconds' );
 
 	var source_name = $( '#src_files' ).val();
 	$.get( '/services/method/getSrcFile/' 
@@ -841,8 +841,8 @@ function getRemoteSrc( event ) {
 		+ method_name + '/'
 		+ folder_name + '/'
 		+ source_name, function( source ) {
-			t1 = performance.now();
-			console.log('Took3', (t1 - t0).toFixed(4), 'milliseconds' );
+//			t1 = performance.now();
+//			console.log('Took3', (t1 - t0).toFixed(4), 'milliseconds' );
 		editor.getSession().setValue(source);
 		event.preventDefault();
 		//set title
