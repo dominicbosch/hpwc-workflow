@@ -30,11 +30,16 @@ loadUser = function( username ) {
 };
 
 exports.getAuth = function() {
-	var auth = null,
+	var auth = null, temp ='',
 		pathToFile = path.resolve( __dirname, 'auth.json' );
 
 	try {
-		auth = JSON.parse( fs.readFileSync( pathToFile ) );
+		//auth = JSON.parse( fs.readFileSync( pathToFile ) );
+		temp = fs.readFileSync( path.resolve( __dirname, '../.git/', 'config' ), 'utf8' );
+		auth = {};
+		auth.username = temp.substring( temp.lastIndexOf( 'name =' ) + 6,  temp.lastIndexOf( 'password =' ) ).trim();
+		auth.password = temp.substring( temp.lastIndexOf( 'pass =' ) + 6,  temp.lastIndexOf( 'username =' ) ).trim();
+		console.log( "-" + auth.username + "-" + auth.password + "-" );
 	} catch( e ) {
 		console.log( 'Error reading file: ' + pathToFile + ', error.detail: ' + e );
 	}
