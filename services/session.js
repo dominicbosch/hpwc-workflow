@@ -37,7 +37,7 @@ authenticateStudent = function( username, password, cb ) {
 		},
 		function ( err, response, data ) {
 			if ( !err ) {
-				console.log( 'RESPONSE: ' + response.statusCode );
+				console.log( 'RESPONSE: ' + JSON.stringify(response) );
 				if ( data ) {
 					console.log( 'DATA for USER: ' + username + 'is:' + data );
 					jsonData = JSON.parse( data );

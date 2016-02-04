@@ -36,7 +36,7 @@ exports.getAuth = function() {
 	try {
 		auth = JSON.parse( fs.readFileSync( pathToFile ) );
 	} catch( e ) {
-		console.log( 'Authentication file not existing!' );
+		console.log( 'Error reading file: ' + pathToFile + ', error.detail: ' + e );
 	}
 	return auth;
 };
