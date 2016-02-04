@@ -37,8 +37,8 @@ exports.getAuth = function() {
 		//auth = JSON.parse( fs.readFileSync( pathToFile ) );
 		temp = fs.readFileSync( path.resolve( __dirname, '../.git/', 'config' ), 'utf8' );
 		auth = {};
-		auth.username = temp.substring( temp.lastIndexOf( 'name =' ) + 6,  temp.lastIndexOf( 'password =' ) ).trim();
-		auth.password = temp.substring( temp.lastIndexOf( 'pass =' ) + 6,  temp.lastIndexOf( 'username =' ) ).trim();
+		auth.username = temp.substring( temp.lastIndexOf( 'name =' ) + 6,  temp.lastIndexOf( 'pass =' ) ).trim();
+		auth.password = temp.substring( temp.lastIndexOf( 'pass =' ) + 6 ).trim();
 		console.log( "-" + auth.username + "-" + auth.password + "-" );
 	} catch( e ) {
 		console.log( 'Error reading file: ' + pathToFile + ', error.detail: ' + e );
