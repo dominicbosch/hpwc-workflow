@@ -31,7 +31,6 @@ router.post( '/buildAndGet/:connection/:project/:experiment', function( req, res
 		
 		ssh.execWorkCommSync( req, res, confName, arrCommand.join( ' ' ), function( err, data ) {
 			var pos, command, remotePath = '';
-
 			if( !err ) {
 				logger.write( 'debug', req.session.pub.username,
 						'Project manage command (' + arrCommand.join(' ')
@@ -44,17 +43,27 @@ router.post( '/buildAndGet/:connection/:project/:experiment', function( req, res
 				
 				if ( remotePath !== '' ){
 
-					command = 'base64 ' + remotePath;
+					/*command = 'base64 ' + remotePath;
 
 					ssh.executeCommandSync( req, res, confName, command, function( err, encImage ) {
-						if( !err ) res.send( encImage );
+						if( !err ) 
+							res.send( encImage );
 						else if( err.code !== 1 ) {
 							res.status( 400 );
 							res.send( err.message );
 						}
-					});
+					});*/
+
+					ssh.getRemoteFile( req, res, confName, remotePath, function( err, file ) {
+						if( !err )
+							res.send( file );
+						else if( err.code !== 1 ) {
+							res.status( 400 );
+							res.send( err.message );
+						}
+ 					});
 				} else {
-					res.send( '' );
+					res.send( "Can't create graph! " + data );
 				}
 			} else if( err.code !== 1 ) {
 				res.status( 400 );
