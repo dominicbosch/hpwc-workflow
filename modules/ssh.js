@@ -373,7 +373,7 @@ executeCommand = function( req, res, connection, command, project, cb ) {
 						+ command;
 			}
 			//end here
-			oConn.exec( command, { env: { 'ASD': 'ASD' }, pty: true }, function( err, stream ) {
+			oConn.exec( command, function( err, stream ) {
 				if ( err ) {
 					// We do not take any further actions if an error ocurred here
 					logger.write( 'error', username,
