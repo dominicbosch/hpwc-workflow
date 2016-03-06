@@ -285,23 +285,29 @@ router.get( '/getSrcFile/:connection/:project/:method/:folder/:source_name', fun
 });
 
 // SET single file
-router.post( '/setSrcFile/:connection/:project/:method/:source_name', function( req, res ) {
+router.post( '/setSrcFile/:connection/:project/:method/:folder_name/:source_name', function( req, res ) {
 	var connection = req.params.connection,
 		project = req.params.project,
-		method = req.params.method, 
+		method = req.params.method,
+		folder_name = req.params.folder_name,
 		source_name = req.params.source_name,
 		oConn = req.session.pub.configurations[ connection ],
-		filename  = path.join( oConn.workspace, project, method, 'src', source_name ),
+		filename  = path.join( oConn.workspace, project, method, folder_name, source_name ),
 		file = req.body;
 
-	ssh.setRemoteFile( req, res, connection, filename, file.content, function( err, data ) {
-		if( !err ) {
-			res.send( data );
-		} else {
-			logger.write( 'error', req.session.pub.username, 'ERRCODE: ' + err.code + ' MSG: ' + err.message );
-			res.send( err );
-		}
-	});
+	if ( folder_name === 'src' ) {
+		ssh.setRemoteFile( req, res, connection, filename, file.content, function( err, data ) {
+			if( !err ) {
+				res.send( data );
+			} else {
+				logger.write( 'error', req.session.pub.username, 'ERRCODE: ' + err.code + ' MSG: ' + err.message );
+				res.send( err );
+			}
+		});
+	} else {
+		logger.write( 'error', req.session.pub.username, 'Cannot set file not in src folder' );
+		res.send( { "code": 0, "message": "Cannot set file not in src folder" } );
+	}
 });
 
 // Manage method. 

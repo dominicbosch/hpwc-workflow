@@ -127,6 +127,12 @@ function setSrc() {
 		return;
 	}
 
+	var folder_name = $( '#folders' ).val();
+	if ( folder_name ==! 'src' ) {
+		alert( 'Cannot write file not in src folder' );
+		return;
+	}
+
 	var source_name = $( '#src_files' ).val();
 
 	var content = editor.getSession().getValue();
@@ -141,8 +147,9 @@ function setSrc() {
 
 	$.post( '/services/method/setSrcFile/' 
 		+ config_name + '/' 
-		+ project_name + '/' 
+		+ project_name + '/'
 		+ method_name + '/'
+		+ folder_name + '/'
 		+ source_name, file, function( ) {
 	//	editor.getSession().setValue(source);
 	//	event.preventDefault();
